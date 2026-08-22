@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 require('dotenv').config();
 
@@ -26,6 +25,7 @@ if (isPgRequested) {
     end: () => pgPool.end(),
   };
 } else {
+  const sqlite3 = require('sqlite3').verbose();
   const dbPath = path.join(__dirname, '..', '..', 'society_tracker.db');
   const sqliteDb = new sqlite3.Database(dbPath);
 
