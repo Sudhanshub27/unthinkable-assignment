@@ -20,6 +20,12 @@ export default function ComplaintDetailModal({
   const [submitting, setSubmitting] = useState(false);
   const [photoError, setPhotoError] = useState(false);
 
+  const [showReopenConfirm, setShowReopenConfirm] = useState(false);
+  const [reopenReason, setReopenReason] = useState('');
+  const [reopening, setReopening] = useState(false);
+
+  const isResolved = complaint?.status === 'Resolved';
+
   useEffect(() => {
     if (complaint) {
       setStatus(complaint.status || 'Open');
@@ -27,6 +33,9 @@ export default function ComplaintDetailModal({
       setIsOverdueFlag(Boolean(complaint.is_overdue));
       setNote('');
       setPhotoError(false);
+      setShowReopenConfirm(false);
+      setReopenReason('');
+      setReopening(false);
     }
   }, [complaint]);
 
@@ -64,6 +73,26 @@ export default function ComplaintDetailModal({
       // Error handled by parent toast context
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleConfirmReopen() {
+    if (!onUpdateStatus) return;
+    setReopening(true);
+    try {
+      await onUpdateStatus(complaint.id, {
+        status: 'Open',
+        priority,
+        is_overdue: isOverdueFlag,
+        note: reopenReason.trim() || 'Complaint reopened by admin',
+      });
+      setReopenReason('');
+      setShowReopenConfirm(false);
+      onClose();
+    } catch (err) {
+      // Error handled by parent toast context
+    } finally {
+      setReopening(false);
     }
   }
 
@@ -189,20 +218,93 @@ export default function ComplaintDetailModal({
                   <h3 className="triage-panel-title">Triage Operations</h3>
 
                   <div className="form-group">
-                    <label htmlFor="triage-status" className="form-label">
-                      Status
+                    <label htmlFor="triage-status" className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>Status</span>
+                      {isResolved && (
+                        <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <SVGIcon name="lock" size={12} /> Locked (Resolved)
+                        </span>
+                      )}
                     </label>
                     <select
                       id="triage-status"
                       className="form-control"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
+                      disabled={isResolved}
                     >
-                      <option value="Open">Open</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Resolved">Resolved</option>
+                      {isResolved ? (
+                        <option value="Resolved">Resolved (Locked)</option>
+                      ) : (
+                        <>
+                          <option value="Open">Open</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Resolved">Resolved</option>
+                        </>
+                      )}
                     </select>
                   </div>
+
+                  {isResolved && (
+                    <div className="reopen-section">
+                      {!showReopenConfirm ? (
+                        <button
+                          type="button"
+                          className="btn btn-outline-warning btn-block flex-center"
+                          onClick={() => setShowReopenConfirm(true)}
+                          style={{ marginBottom: '1rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                        >
+                          <SVGIcon name="rotate-ccw" size={15} />
+                          Reopen Complaint
+                        </button>
+                      ) : (
+                        <div
+                          className="reopen-confirm-card"
+                          style={{
+                            marginBottom: '1rem',
+                            padding: '12px',
+                            border: '1px solid #f59e0b',
+                            borderRadius: '8px',
+                            background: 'rgba(245, 158, 11, 0.05)',
+                          }}
+                        >
+                          <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#d97706', marginBottom: '8px' }}>
+                            Confirm Reopening Complaint?
+                          </p>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Reason for reopening (optional)..."
+                            value={reopenReason}
+                            onChange={(e) => setReopenReason(e.target.value)}
+                            style={{ marginBottom: '8px', fontSize: '0.85rem' }}
+                          />
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              type="button"
+                              className="btn btn-warning btn-sm"
+                              style={{ flex: 1 }}
+                              disabled={reopening}
+                              onClick={handleConfirmReopen}
+                            >
+                              {reopening ? 'Reopening...' : 'Confirm Reopen'}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              disabled={reopening}
+                              onClick={() => {
+                                setShowReopenConfirm(false);
+                                setReopenReason('');
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="form-group">
                     <label htmlFor="triage-priority" className="form-label">

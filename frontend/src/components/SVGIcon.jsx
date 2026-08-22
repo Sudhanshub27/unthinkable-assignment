@@ -161,6 +161,20 @@ export default function SVGIcon({ name, size = 18, className = '', color = 'curr
           <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
       );
+    case 'rotate-ccw':
+      return (
+        <svg {...iconProps}>
+          <polyline points="1 4 1 10 7 10" />
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+        </svg>
+      );
+    case 'lock':
+      return (
+        <svg {...iconProps}>
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      );
     default:
       return (
         <svg {...iconProps}>

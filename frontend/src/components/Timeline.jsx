@@ -11,6 +11,8 @@ export default function Timeline({ history }) {
         return 'clipboard';
       case 'status_change':
         return 'clock';
+      case 'reopened':
+        return 'rotate-ccw';
       case 'priority_change':
         return 'alert-triangle';
       case 'overdue_flag':
@@ -36,6 +38,8 @@ export default function Timeline({ history }) {
                 <span className="timeline-action">
                   {h.change_type === 'created'
                     ? 'Complaint Created'
+                    : h.change_type === 'reopened'
+                    ? `Complaint Reopened (${h.old_value || 'Resolved'} → ${h.new_value})`
                     : h.change_type === 'status_change'
                     ? `Status updated: ${h.old_value || 'None'} → ${h.new_value}`
                     : h.change_type === 'priority_change'

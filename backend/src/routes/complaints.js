@@ -233,10 +233,11 @@ router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
     let noteAttachedToEvent = false;
 
     if (statusChanged) {
+      const changeType = oldStatus === 'Resolved' ? 'reopened' : 'status_change';
       await client.query(
         `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value, note)
-         VALUES ($1, $2, $3, 'status_change', $4, $5, $6)`,
-        [req.params.id, req.user.id, req.user.role, oldStatus, newStatus, hasNote ? noteText : null]
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [req.params.id, req.user.id, req.user.role, changeType, oldStatus, newStatus, hasNote ? noteText : null]
       );
       noteAttachedToEvent = true;
     }

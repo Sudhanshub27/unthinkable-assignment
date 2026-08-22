@@ -24,11 +24,10 @@ history ordered by time. Using a transaction for the write means the current-sta
 audit trail can never drift apart, even under concurrent admin updates (the row is locked with
 `FOR UPDATE` during a status change to prevent two admins racing on the same complaint).
 
-Once a complaint's status is set to `Resolved`, `resolved_at` is stamped and the complaint is
-treated as closed in the UI (no further status transitions are exposed to residents, though an
-admin can still technically reopen it by changing status again — this is intentional, since
-real-world resolutions sometimes need to be reopened, and that reopening is itself just another
-recorded history entry).
+Once a complaint's status is set to `Resolved`, `resolved_at` is stamped and the inline status dropdown
+in the admin triage panel is locked into a read-only state. Reopening a resolved complaint requires an admin
+to perform an explicit, two-step "Reopen Complaint" action with optional reason entry. Reopening fires a
+dedicated transition that changes status back to `Open` and records a specific `reopened` history event in the audit trail.
 
 ## Overdue Detection
 
