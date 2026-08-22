@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import SVGIcon from './SVGIcon';
 import Timeline from './Timeline';
 import { StatusBadge, PriorityBadge, OverdueBadge } from './Badges';
-import { formatFlatNumber, getCategoryIconName, formatDateTime } from '../utils/formatters';
+import { formatFlatNumber, getCategoryIconName, formatDateTime, getPhotoUrl } from '../utils/formatters';
 
 export default function ComplaintDetailModal({
   isOpen,
@@ -96,12 +96,7 @@ export default function ComplaintDetailModal({
     }
   }
 
-  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  const photoFullUrl = complaint.photo_url
-    ? complaint.photo_url.startsWith('http')
-      ? complaint.photo_url
-      : `${backendUrl}${complaint.photo_url}`
-    : null;
+  const photoFullUrl = getPhotoUrl(complaint.photo_url);
 
   return (
     <div className="modal-backdrop" onClick={onClose}>

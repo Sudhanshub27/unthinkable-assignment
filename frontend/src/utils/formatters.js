@@ -41,3 +41,13 @@ export function formatDateTime(dateString) {
     minute: '2-digit',
   });
 }
+
+export function getPhotoUrl(photoUrl) {
+  if (!photoUrl) return null;
+  if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) return photoUrl;
+
+  const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const baseUrl = rawApiUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  const cleanPath = photoUrl.startsWith('/') ? photoUrl : `/${photoUrl}`;
+  return `${baseUrl}${cleanPath}`;
+}

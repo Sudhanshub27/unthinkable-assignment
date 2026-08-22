@@ -37,7 +37,7 @@ app.use(express.json());
 
 // Serve uploaded media with security headers
 app.use(
-  '/uploads',
+  ['/uploads', '/api/uploads'],
   (req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
