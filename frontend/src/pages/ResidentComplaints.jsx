@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
-import { StatusBadge, PriorityBadge, OverdueBadge } from '../components/Badges';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { StatusBadge, PriorityBadge, OverdueBadge, ImportantBadge } from '../components/Badges';
+import PhotoUpload from '../components/PhotoUpload';
+import Timeline from '../components/Timeline';
+import Modal from '../components/Modal';
+import EmptyState from '../components/EmptyState';
 
 const CATEGORIES = [
   { name: 'Plumbing', icon: '🔧' },
@@ -13,59 +19,82 @@ const CATEGORIES = [
 ];
 
 export default function ResidentComplaints() {
-  const [complaints, setComplaints] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState(null);
+  const { user } = useAuth();
+  const { addToast } = useToast();
 
+  const [complaints, setComplaints] = useState([]);
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [complaintHistory, setComplaintHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Form State
+  const [showFormModal, setShowFormModal] = useState(false);
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [formError, setFormError] = useState('');
 
+  // Filters State
+  const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
 
-  async function loadComplaints() {
+  // Lightbox
+  const [lightboxPhoto, setLightboxPhoto] = useState(null);
+
+  async function loadData() {
     setLoading(true);
     try {
-      const res = await client.get('/complaints/mine');
-      setComplaints(res.data);
+      const [compRes, noticeRes] = await Promise.all([
+        client.get('/complaints/mine'),
+        client.get('/notices'),
+      ]);
+      setComplaints(compRes.data);
+      setNotices(noticeRes.data);
     } catch (err) {
       console.error(err);
+      addToast('Failed to load resident data.', 'error');
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadComplaints();
+    loadData();
   }, []);
 
-  function handlePhotoChange(e) {
-    const file = e.target.files[0];
-    if (file) {
-      setPhoto(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    } else {
-      setPhoto(null);
-      setPhotoPreview(null);
+  async function openComplaintDetail(c) {
+    setSelectedComplaint(c);
+    setLoadingHistory(true);
+    try {
+      const res = await client.get(`/complaints/${c.id}`);
+      setSelectedComplaint(res.data.complaint);
+      setComplaintHistory(res.data.history || []);
+    } catch (err) {
+      console.error(err);
+      addToast('Failed to fetch complaint timeline history.', 'error');
+    } finally {
+      setLoadingHistory(false);
     }
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
+    setFormError('');
+
     if (!category) {
-      setError('Please select an issue category.');
+      setFormError('Please select a valid issue category.');
       return;
     }
     if (!description.trim()) {
-      setError('Please provide a detailed description of the maintenance issue.');
+      setFormError('Please provide a detailed description of the maintenance issue.');
       return;
     }
+
     setSubmitting(true);
     try {
       const formData = new FormData();
@@ -73,53 +102,253 @@ export default function ResidentComplaints() {
       formData.append('description', description);
       if (photo) formData.append('photo', photo);
 
-      await client.post('/complaints', formData, {
+      const res = await client.post('/complaints', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+
+      addToast(`Complaint #${res.data.id} raised successfully!`, 'success');
 
       setCategory('');
       setDescription('');
       setPhoto(null);
       setPhotoPreview(null);
-      await loadComplaints();
+      setShowFormModal(false);
+      await loadData();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to submit complaint');
+      setFormError(err.response?.data?.error || 'Failed to submit complaint');
+      addToast('Failed to raise complaint. Please try again.', 'error');
     } finally {
       setSubmitting(false);
     }
   }
-
-  const getCategoryIcon = (catName) => {
-    const found = CATEGORIES.find((c) => c.name === catName);
-    return found ? found.icon : '📦';
-  };
-
-  const filteredComplaints = complaints.filter((c) => {
-    if (filterCategory && c.category !== filterCategory) return false;
-    if (filterStatus && c.status !== filterStatus) return false;
-    return true;
-  });
 
   const getBackendOrigin = () => {
     const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
     return envUrl.replace(/\/api\/?$/, '');
   };
 
+  const getCategoryIcon = (catName) => {
+    const found = CATEGORIES.find((c) => c.name === catName);
+    return found ? found.icon : '📦';
+  };
+
+  const getAgeDays = (createdAt) => {
+    const diffTime = Math.abs(new Date() - new Date(createdAt));
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  // Metrics
+  const totalCount = complaints.length;
+  const openCount = complaints.filter((c) => c.status === 'Open').length;
+  const progressCount = complaints.filter((c) => c.status === 'In Progress').length;
+  const resolvedCount = complaints.filter((c) => c.status === 'Resolved').length;
+
+  const importantNotices = notices.filter((n) => n.is_important);
+
+  const filteredComplaints = complaints.filter((c) => {
+    if (filterCategory && c.category !== filterCategory) return false;
+    if (filterStatus && c.status !== filterStatus) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchDesc = c.description?.toLowerCase().includes(q);
+      const matchCat = c.category?.toLowerCase().includes(q);
+      const matchId = c.id?.toString().includes(q);
+      if (!matchDesc && !matchCat && !matchId) return false;
+    }
+    return true;
+  });
+
   return (
-    <div className="container">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Resident Portal</h1>
-          <p className="page-subtitle">Raise new complaints and track status history in real time.</p>
+    <div className="page-container">
+      {/* Greeting & Action Header */}
+      <div className="resident-welcome-card">
+        <div className="welcome-left">
+          <h2 className="welcome-greeting">
+            Welcome back, <span className="highlight-name">{user.name}</span> 👋
+          </h2>
+          <p className="welcome-sub">
+            Resident of <span className="highlight-flat">Flat {user.flat_number || 'A-301'}</span> • Maintain your society seamlessly
+          </p>
+        </div>
+        <button
+          className="btn btn-primary btn-lg shadow-sm"
+          onClick={() => setShowFormModal(true)}
+        >
+          ➕ Raise New Complaint
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="kpi-grid">
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-indigo">📋</div>
+          <div className="kpi-data">
+            <div className="kpi-label">Total Raised</div>
+            <div className="kpi-value">{totalCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-red">🔴</div>
+          <div className="kpi-data">
+            <div className="kpi-label">Pending / Open</div>
+            <div className="kpi-value">{openCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-amber">⏳</div>
+          <div className="kpi-data">
+            <div className="kpi-label">In Progress</div>
+            <div className="kpi-value">{progressCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-emerald">🟢</div>
+          <div className="kpi-data">
+            <div className="kpi-label">Resolved</div>
+            <div className="kpi-value">{resolvedCount}</div>
+          </div>
         </div>
       </div>
 
-      <div className="card">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 16 }}>Raise a Maintenance Complaint</h2>
-        <form onSubmit={handleSubmit}>
+      {/* Important Notices Banner */}
+      {importantNotices.length > 0 && (
+        <div className="important-notices-banner">
+          <div className="banner-header">
+            <span className="banner-title-text">📌 Important Community Announcements</span>
+          </div>
+          <div className="banner-notice-list">
+            {importantNotices.slice(0, 2).map((n) => (
+              <div key={n.id} className="banner-notice-item">
+                <div className="banner-notice-head">
+                  <span className="banner-notice-title">{n.title}</span>
+                  <span className="banner-notice-date">
+                    {new Date(n.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className="banner-notice-body">{n.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Complaints List Section */}
+      <div className="content-card">
+        <div className="card-header-row">
+          <div>
+            <h3 className="card-title">My Maintenance Requests</h3>
+            <p className="card-subtitle">Track real-time status and audit timeline of your requests</p>
+          </div>
+
+          <div className="filter-controls-group">
+            <input
+              type="text"
+              className="form-control search-input"
+              placeholder="🔍 Search complaints..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+
+            <select
+              className="form-control filter-select"
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              {CATEGORIES.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.icon} {c.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="form-control filter-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="loading-container">
+            <div className="loading-spinner" />
+            <p>Loading complaints...</p>
+          </div>
+        ) : filteredComplaints.length === 0 ? (
+          <EmptyState
+            icon="🛠️"
+            title="No complaints found"
+            description={
+              searchQuery || filterCategory || filterStatus
+                ? 'No maintenance complaints match your current search filters.'
+                : "You haven't logged any maintenance complaints yet."
+            }
+            actionText="+ Raise Your First Complaint"
+            onAction={() => setShowFormModal(true)}
+          />
+        ) : (
+          <div className="complaint-cards-grid">
+            {filteredComplaints.map((c) => (
+              <div
+                key={c.id}
+                className={`complaint-card ${c.is_overdue ? 'overdue-card-border' : ''}`}
+                onClick={() => openComplaintDetail(c)}
+              >
+                <div className="complaint-card-header">
+                  <div className="category-tag">
+                    <span className="cat-icon">{getCategoryIcon(c.category)}</span>
+                    <span className="cat-name">{c.category}</span>
+                    <span className="complaint-id-pill">#{c.id}</span>
+                  </div>
+                  <div className="badges-group">
+                    {c.is_overdue && <OverdueBadge ageDays={getAgeDays(c.created_at)} />}
+                    <StatusBadge status={c.status} />
+                  </div>
+                </div>
+
+                <p className="complaint-card-desc">{c.description}</p>
+
+                <div className="complaint-card-footer">
+                  <div className="meta-left">
+                    <PriorityBadge priority={c.priority} />
+                    <span className="meta-date">
+                      📅 {new Date(c.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <button className="btn btn-ghost btn-xs">View Timeline ➔</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Raise Complaint Modal */}
+      <Modal
+        isOpen={showFormModal}
+        onClose={() => setShowFormModal(false)}
+        title="➕ Raise Maintenance Complaint"
+        maxWidth="620px"
+      >
+        <form onSubmit={handleSubmit} className="modal-form">
+          {formError && <div className="alert alert-danger">{formError}</div>}
+
           <div className="form-group">
-            <label>Issue Category</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <label className="form-label">Issue Category <span className="req">*</span></label>
+            <select
+              className="form-control"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
               <option value="" disabled>
                 -- Select Issue Category --
               </option>
@@ -132,138 +361,155 @@ export default function ResidentComplaints() {
           </div>
 
           <div className="form-group">
-            <label>Detailed Description</label>
+            <label className="form-label">Detailed Description <span className="req">*</span></label>
             <textarea
+              className="form-control"
+              rows={4}
+              placeholder="Describe the issue in detail (e.g. Water leak under kitchen sink since morning...)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the issue, location in society, and any relevant details..."
             />
           </div>
 
           <div className="form-group">
-            <label>Attach Photo (Optional)</label>
-            <input type="file" accept="image/*" onChange={handlePhotoChange} />
-            {photoPreview && (
-              <div style={{ marginTop: 10 }}>
-                <img
-                  src={photoPreview}
-                  alt="Preview"
-                  style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid #334155' }}
-                />
-              </div>
-            )}
+            <label className="form-label">Attach Supporting Photo (Optional)</label>
+            <PhotoUpload
+              file={photo}
+              preview={photoPreview}
+              onChange={(f, p) => {
+                setPhoto(f);
+                setPhotoPreview(p);
+              }}
+              onRemove={() => {
+                setPhoto(null);
+                setPhotoPreview(null);
+              }}
+              error={formError}
+              setError={setFormError}
+            />
           </div>
 
-          {error && <div className="error-text">{error}</div>}
-
-          <button className="primary" type="submit" disabled={submitting}>
-            {submitting ? 'Submitting Issue...' : 'Submit Complaint'}
-          </button>
-        </form>
-      </div>
-
-      <div style={{ marginTop: 36, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-        <h2 style={{ fontSize: '1.35rem', fontWeight: 700 }}>My Complaint Records</h2>
-
-        <div className="filters" style={{ margin: 0, padding: '8px 12px' }}>
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-            <option value="">All Categories</option>
-            {CATEGORIES.map((c) => (
-              <option key={c.name} value={c.name}>
-                {c.icon} {c.name}
-              </option>
-            ))}
-          </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="">All Statuses</option>
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-          </select>
-        </div>
-      </div>
-
-      {loading && <p style={{ color: 'var(--text-muted)' }}>Loading your complaints...</p>}
-
-      {!loading && filteredComplaints.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-icon">📂</div>
-          <p>No complaints found matching your selection.</p>
-        </div>
-      )}
-
-      {filteredComplaints.map((c) => (
-        <div className="card complaint-card" key={c.id}>
-          <div className="complaint-header">
-            <div>
-              <div className="complaint-meta">
-                <span className="complaint-id">#{c.id}</span>
-                <span className="complaint-category">
-                  {getCategoryIcon(c.category)} {c.category}
-                </span>
-                <StatusBadge status={c.status} />
-                <PriorityBadge priority={c.priority} />
-                {c.is_overdue && <OverdueBadge />}
-              </div>
-              <div className="complaint-description">{c.description}</div>
-            </div>
-
-            {c.photo_url && (
-              <img
-                className="complaint-photo-thumb"
-                src={`${getBackendOrigin()}${c.photo_url}`}
-                alt="complaint photo"
-                onClick={() => setSelectedPhoto(`${getBackendOrigin()}${c.photo_url}`)}
-              />
-            )}
-          </div>
-
-          <div className="complaint-footer">
-            <div className="complaint-date">
-              Raised on {new Date(c.created_at).toLocaleString()}
-              {c.resolved_at && ` • Resolved on ${new Date(c.resolved_at).toLocaleString()}`}
-            </div>
-
+          <div className="modal-actions">
             <button
-              className="secondary"
-              onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowFormModal(false)}
+              disabled={submitting}
             >
-              {expandedId === c.id ? 'Hide Audit History' : '📜 View Status Timeline'}
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Complaint'}
             </button>
           </div>
+        </form>
+      </Modal>
 
-          {expandedId === c.id && (
-            <div className="timeline">
-              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                Complete Status History ({c.history.length} event{c.history.length === 1 ? '' : 's'})
-              </h4>
-              {c.history.map((h) => (
-                <div className="timeline-item" key={h.id}>
-                  <div className="timeline-dot" />
-                  <div className="timeline-content">
-                    <div className="timeline-type">
-                      {h.change_type.replace('_', ' ')}
-                      {h.old_value && h.new_value && `: ${h.old_value} ➔ ${h.new_value}`}
-                    </div>
-                    {h.note && <div className="timeline-note">Note: {h.note}</div>}
-                    <div className="timeline-meta">
-                      {new Date(h.created_at).toLocaleString()} by {h.actor_name || 'System'} ({h.actor_role})
+      {/* Complaint Detail & History Modal */}
+      {selectedComplaint && (
+        <Modal
+          isOpen={!!selectedComplaint}
+          onClose={() => setSelectedComplaint(null)}
+          title={`Complaint #${selectedComplaint.id} Details`}
+          maxWidth="820px"
+        >
+          <div className="complaint-detail-two-col">
+            <div className="detail-left-col">
+              <div className="detail-section">
+                <div className="detail-category-header">
+                  <span className="cat-icon-lg">{getCategoryIcon(selectedComplaint.category)}</span>
+                  <div>
+                    <h3 className="detail-cat-name">{selectedComplaint.category} Issue</h3>
+                    <div className="detail-meta-line">
+                      Raised on {new Date(selectedComplaint.created_at).toLocaleString()}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+              </div>
 
-      {selectedPhoto && (
-        <div className="modal-overlay" onClick={() => setSelectedPhoto(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedPhoto(null)}>
-              ✖
+              <div className="detail-section">
+                <h4 className="section-subtitle">Issue Description</h4>
+                <p className="detail-description-text">{selectedComplaint.description}</p>
+              </div>
+
+              {selectedComplaint.photo_url && (
+                <div className="detail-section">
+                  <h4 className="section-subtitle">Attached Photo</h4>
+                  <div
+                    className="detail-photo-wrapper"
+                    onClick={() =>
+                      setLightboxPhoto(`${getBackendOrigin()}${selectedComplaint.photo_url}`)
+                    }
+                  >
+                    <img
+                      src={`${getBackendOrigin()}${selectedComplaint.photo_url}`}
+                      alt="Complaint Attachment"
+                      className="detail-photo-img"
+                    />
+                    <div className="photo-hover-overlay">🔍 Click to enlarge</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="detail-right-col">
+              <div className="detail-info-card">
+                <h4 className="info-card-heading">Operational Status</h4>
+
+                <div className="info-row">
+                  <span className="info-label">Status</span>
+                  <StatusBadge status={selectedComplaint.status} />
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Priority</span>
+                  <PriorityBadge priority={selectedComplaint.priority} />
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Overdue</span>
+                  {selectedComplaint.is_overdue ? (
+                    <OverdueBadge ageDays={getAgeDays(selectedComplaint.created_at)} />
+                  ) : (
+                    <span className="badge badge-status-resolved">On Schedule</span>
+                  )}
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Resident</span>
+                  <span className="info-val">{user.name}</span>
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Flat Number</span>
+                  <span className="info-val">Flat {user.flat_number || 'A-301'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr className="divider" />
+
+          {/* Audit History Timeline */}
+          {loadingHistory ? (
+            <div className="loading-container">
+              <div className="loading-spinner" />
+              <p>Fetching history timeline...</p>
+            </div>
+          ) : (
+            <Timeline history={complaintHistory} />
+          )}
+        </Modal>
+      )}
+
+      {/* Lightbox Overlay */}
+      {lightboxPhoto && (
+        <div className="lightbox-backdrop" onClick={() => setLightboxPhoto(null)}>
+          <div className="lightbox-content">
+            <img src={lightboxPhoto} alt="Full screen preview" />
+            <button className="lightbox-close" onClick={() => setLightboxPhoto(null)}>
+              ✕
             </button>
-            <img className="modal-img" src={selectedPhoto} alt="Full view" />
           </div>
         </div>
       )}

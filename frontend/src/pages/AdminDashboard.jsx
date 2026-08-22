@@ -1,157 +1,245 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
+import { useToast } from '../context/ToastContext';
+import EmptyState from '../components/EmptyState';
 
 export default function AdminDashboard() {
-  const [data, setData] = useState(null);
-  const [thresholdInput, setThresholdInput] = useState('');
-  const [savingThreshold, setSavingThreshold] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const { addToast } = useToast();
 
-  async function load() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [overdueThreshold, setOverdueThreshold] = useState(3);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  async function loadDashboardData() {
+    setLoading(true);
     try {
-      const res = await client.get('/dashboard');
-      setData(res.data);
-      setThresholdInput(res.data.overdueThresholdDays);
+      const dashRes = await client.get('/dashboard');
+      setStats(dashRes.data);
+      if (dashRes.data && dashRes.data.overdueThresholdDays) {
+        setOverdueThreshold(Number(dashRes.data.overdueThresholdDays));
+      }
     } catch (err) {
       console.error(err);
+      addToast('Failed to load dashboard analytics.', 'error');
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    load();
+    loadDashboardData();
   }, []);
 
-  async function saveThreshold(e) {
+  async function handleSaveSettings(e) {
     e.preventDefault();
-    setSavingThreshold(true);
-    setSaveSuccess(false);
+    setSavingSettings(true);
     try {
-      await client.put('/settings/overdue-threshold', { days: Number(thresholdInput) });
-      await load();
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      await client.put('/settings/overdue-threshold', {
+        days: Number(overdueThreshold),
+      });
+      addToast('Overdue threshold settings updated successfully!', 'success');
+      await loadDashboardData();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update threshold');
+      console.error(err);
+      addToast('Failed to update threshold settings.', 'error');
     } finally {
-      setSavingThreshold(false);
+      setSavingSettings(false);
     }
   }
 
-  if (!data) {
+  if (loading) {
     return (
-      <div className="container">
-        <p style={{ color: 'var(--text-muted)' }}>Loading analytics dashboard...</p>
+      <div className="loading-container">
+        <div className="loading-spinner" />
+        <p>Loading analytics console...</p>
       </div>
     );
   }
 
-  const getStatusCount = (statusName) => {
-    const found = data.byStatus.find((s) => s.status === statusName);
-    return found ? found.count : 0;
+  const { totalComplaints = 0, byCategory = [], byStatus = [], overdueCount = 0 } = stats || {};
+  const total = Number(totalComplaints || 0);
+
+  const getStatusCount = (stName) => {
+    const found = byStatus.find((s) => s.status === stName);
+    return found ? Number(found.count) : 0;
   };
 
   const openCount = getStatusCount('Open');
-  const inProgressCount = getStatusCount('In Progress');
+  const progressCount = getStatusCount('In Progress');
   const resolvedCount = getStatusCount('Resolved');
 
   return (
-    <div className="container">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Analytics & Settings</h1>
-          <p className="page-subtitle">High-level metrics, category breakdown, and threshold controls.</p>
+    <div className="page-container">
+      {/* Top Operational KPI Grid */}
+      <div className="kpi-grid">
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-indigo">📊</div>
+          <div className="kpi-data">
+            <div className="kpi-label">Total Logged</div>
+            <div className="kpi-value">{total}</div>
+          </div>
+        </div>
+
+        <div className={`kpi-card ${overdueCount > 0 ? 'kpi-card-alert' : ''}`}>
+          <div className="kpi-icon kpi-icon-red">⚠️</div>
+          <div className="kpi-data">
+            <div className="kpi-label">Overdue Alerts</div>
+            <div className="kpi-value text-danger">{overdueCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-amber">🔴</div>
+          <div className="kpi-data">
+            <div className="kpi-label">Open Issues</div>
+            <div className="kpi-value">{openCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-blue">⏳</div>
+          <div className="kpi-data">
+            <div className="kpi-label">In Progress</div>
+            <div className="kpi-value">{progressCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon kpi-icon-emerald">🟢</div>
+          <div className="kpi-data">
+            <div className="kpi-label">Resolved</div>
+            <div className="kpi-value">{resolvedCount}</div>
+          </div>
         </div>
       </div>
 
-      <div className="dashboard-grid">
-        <div className="stat-card">
-          <div className="stat-number">{data.totalComplaints}</div>
-          <div className="stat-label">Total Complaints</div>
+      {/* Main Grid: Breakdown Charts & Threshold Config */}
+      <div className="dashboard-two-col-grid">
+        {/* Category Breakdown Card */}
+        <div className="content-card">
+          <h3 className="card-title">Complaints by Category</h3>
+          <p className="card-subtitle">Distribution breakdown across maintenance categories</p>
+
+          {byCategory.length === 0 ? (
+            <EmptyState icon="📊" title="No category data recorded" />
+          ) : (
+            <div className="progress-bars-list">
+              {byCategory.map((cat) => {
+                const count = Number(cat.count);
+                const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+                return (
+                  <div key={cat.category} className="progress-item">
+                    <div className="progress-label-row">
+                      <span className="progress-cat-name">{cat.category}</span>
+                      <span className="progress-cat-count font-bold">
+                        {count} ({percent}%)
+                      </span>
+                    </div>
+                    <div className="progress-track">
+                      <div className="progress-fill fill-indigo" style={{ width: `${percent}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="stat-card overdue">
-          <div className="stat-number" style={{ color: '#f87171' }}>
-            {data.overdueCount}
+        {/* Status Distribution & Threshold Config */}
+        <div className="dashboard-right-stack">
+          {/* Status Breakdown Card */}
+          <div className="content-card">
+            <h3 className="card-title">Status Breakdown</h3>
+            <p className="card-subtitle">Current workflow stage distribution</p>
+
+            <div className="progress-bars-list">
+              {byStatus.map((st) => {
+                const count = Number(st.count);
+                const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+                const fillClass =
+                  st.status === 'Resolved'
+                    ? 'fill-emerald'
+                    : st.status === 'In Progress'
+                    ? 'fill-blue'
+                    : 'fill-red';
+                return (
+                  <div key={st.status} className="progress-item">
+                    <div className="progress-label-row">
+                      <span className="progress-cat-name">{st.status}</span>
+                      <span className="progress-cat-count font-bold">
+                        {count} ({percent}%)
+                      </span>
+                    </div>
+                    <div className="progress-track">
+                      <div className={`progress-fill ${fillClass}`} style={{ width: `${percent}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="stat-label">Overdue Complaints</div>
-        </div>
 
-        <div className="stat-card">
-          <div className="stat-number" style={{ color: '#fca5a5' }}>
-            {openCount}
-          </div>
-          <div className="stat-label">Open</div>
-        </div>
+          {/* Overdue Threshold Settings Card */}
+          <div className="content-card settings-card">
+            <h3 className="card-title">⚙️ Overdue System Threshold</h3>
+            <p className="card-subtitle">
+              Configure how many days a complaint can remain unresolved before automated overdue alerts trigger.
+            </p>
 
-        <div className="stat-card">
-          <div className="stat-number" style={{ color: '#fcd34d' }}>
-            {inProgressCount}
-          </div>
-          <div className="stat-label">In Progress</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-number" style={{ color: '#6ee7b7' }}>
-            {resolvedCount}
-          </div>
-          <div className="stat-label">Resolved</div>
-        </div>
-      </div>
-
-      <div className="card" style={{ marginTop: 24 }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: 16 }}>Breakdown by Category</h3>
-        {data.byCategory.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No category data available yet.</p>}
-        {data.byCategory.map((c) => {
-          const percentage = data.totalComplaints > 0 ? Math.round((c.count / data.totalComplaints) * 100) : 0;
-          return (
-            <div key={c.category} style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: '0.9rem' }}>
-                <span style={{ fontWeight: 600 }}>{c.category}</span>
-                <span style={{ color: 'var(--text-muted)' }}>
-                  {c.count} complaint{c.count === 1 ? '' : 's'} ({percentage}%)
-                </span>
-              </div>
-              <div style={{ height: 8, background: 'rgba(255, 255, 255, 0.08)', borderRadius: 4, overflow: 'hidden' }}>
-                <div
-                  style={{
-                    height: '100%',
-                    width: `${percentage}%`,
-                    background: 'linear-gradient(90deg, #4f46e5, #10b981)',
-                    borderRadius: 4,
-                  }}
+            <form onSubmit={handleSaveSettings} className="settings-form-row">
+              <div className="form-group flex-1" style={{ marginBottom: 0 }}>
+                <label className="form-label">Threshold (Days)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  min="1"
+                  max="30"
+                  value={overdueThreshold}
+                  onChange={(e) => setOverdueThreshold(e.target.value)}
+                  required
                 />
               </div>
-            </div>
-          );
-        })}
+
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{ alignSelf: 'flex-end' }}
+                disabled={savingSettings}
+              >
+                {savingSettings ? 'Saving...' : 'Save Settings'}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
 
-      <div className="card" style={{ marginTop: 24 }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: 8 }}>Overdue Threshold Configuration</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 16 }}>
-          Complaints remaining in <strong>Open</strong> or <strong>In Progress</strong> state longer than this threshold are automatically flagged as overdue and prioritized at the top of the queue.
-        </p>
+      {/* Recent Activity Log */}
+      <div className="content-card" style={{ marginTop: 24 }}>
+        <h3 className="card-title">Recent Operational Activity</h3>
+        <p className="card-subtitle">Real-time audit stream of status changes and notice broadcasts</p>
 
-        <form onSubmit={saveThreshold} style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          <input
-            type="number"
-            min="1"
-            max="365"
-            style={{ width: 120 }}
-            value={thresholdInput}
-            onChange={(e) => setThresholdInput(e.target.value)}
-          />
-          <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>days</span>
-
-          <button className="primary" type="submit" disabled={savingThreshold}>
-            {savingThreshold ? 'Saving Settings...' : 'Save Configuration'}
-          </button>
-        </form>
-
-        {saveSuccess && (
-          <p style={{ color: '#6ee7b7', fontSize: '0.88rem', marginTop: 10, fontWeight: 600 }}>
-            ✅ Overdue threshold updated successfully!
-          </p>
+        {recentActivity.length === 0 ? (
+          <EmptyState icon="📜" title="No recent activity logged" />
+        ) : (
+          <div className="activity-list">
+            {recentActivity.map((act, idx) => (
+              <div key={idx} className="activity-item">
+                <div className="activity-icon">🔄</div>
+                <div className="activity-body">
+                  <div className="activity-desc">
+                    <span className="font-bold">{act.actor_name || 'System'}</span> ({act.actor_role}){' '}
+                    {act.change_type === 'created'
+                      ? 'created complaint'
+                      : `updated status to ${act.new_value}`}
+                  </div>
+                  <div className="activity-time">
+                    {new Date(act.created_at).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

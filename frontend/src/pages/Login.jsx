@@ -1,80 +1,121 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function Login() {
-  const { login } = useAuth();
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  const { login } = useAuth();
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+
+  async function performLogin(loginEmail, loginPassword) {
     setError('');
     setLoading(true);
+
     try {
-      const user = await login(email, password);
-      navigate(user.role === 'admin' ? '/admin' : '/');
+      const user = await login(loginEmail, loginPassword);
+      addToast(`Welcome back, ${user.name}!`, 'success');
+
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid email or password');
+      console.error(err);
+      const errMsg =
+        err.response?.data?.error ||
+        'Invalid email or password. Please check your credentials.';
+      setError(errMsg);
+      addToast('Sign in failed.', 'error');
     } finally {
       setLoading(false);
     }
   }
 
-  function fillAdminCredentials() {
-    setEmail('admin@society.com');
-    setPassword('Admin@123');
+  function handleSubmit(e) {
+    e.preventDefault();
+    performLogin(email, password);
+  }
+
+  function handleQuickFill(targetEmail, targetPassword) {
+    setEmail(targetEmail);
+    setPassword(targetPassword);
+    performLogin(targetEmail, targetPassword);
   }
 
   return (
-    <div className="container" style={{ maxWidth: 440, marginTop: 40 }}>
-      <div className="card">
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div className="brand-icon" style={{ width: 48, height: 48, fontSize: '1.6rem', margin: '0 auto 12px auto' }}>
-            🏢
-          </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Welcome Back</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: 4 }}>
-            Log in to manage or track society complaints
-          </p>
+    <div className="auth-card-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-brand-icon">🏢</div>
+          <h2 className="auth-title">Sign in to Society Notebook</h2>
+          <p className="auth-subtitle">Apartment & Maintenance Management Platform</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>Email Address</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="resident@society.com" required />
+            <label className="form-label">Email Address</label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="e.g. resident@society.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className="form-group">
-            <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="form-control"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
 
-          {error && <div className="error-text">{error}</div>}
-
-          <button className="primary" type="submit" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Authenticating...' : 'Sign In'}
+          <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+            {loading ? 'Authenticating...' : 'Sign In ➔'}
           </button>
         </form>
 
-        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--bg-card-border)', textAlign: 'center' }}>
-          <button
-            className="secondary"
-            onClick={fillAdminCredentials}
-            style={{ width: '100%', marginBottom: 14, fontSize: '0.82rem' }}
-          >
-            ⚡ Quick Fill Admin Demo Credentials (admin@society.com)
-          </button>
+        <div className="auth-demo-divider">
+          <span>1-CLICK DEMO ACCOUNTS</span>
+        </div>
 
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-            Resident without an account?{' '}
-            <Link to="/register" style={{ color: '#818cf8', fontWeight: 600 }}>
-              Register Here
-            </Link>
-          </p>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm flex-1"
+            onClick={() => handleQuickFill('admin@society.com', 'Admin@123')}
+          >
+            👑 Admin Demo
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm flex-1"
+            onClick={() => handleQuickFill('resident@society.com', 'Resident@123')}
+          >
+            🏠 Resident Demo
+          </button>
+        </div>
+
+        <div className="auth-footer">
+          Don't have a resident account?{' '}
+          <Link to="/register" className="auth-link">
+            Register Here
+          </Link>
         </div>
       </div>
     </div>
