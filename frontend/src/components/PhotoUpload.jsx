@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import SVGIcon from './SVGIcon';
 
 export default function PhotoUpload({ file, preview, onChange, onRemove, error, setError }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -77,7 +78,9 @@ export default function PhotoUpload({ file, preview, onChange, onRemove, error, 
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
-          <div className="dropzone-icon">📷</div>
+          <div className="dropzone-icon">
+            <SVGIcon name="image" size={32} color="#64748B" />
+          </div>
           <div className="dropzone-text">
             <span className="dropzone-link">Click to upload photo</span> or drag & drop file here
           </div>

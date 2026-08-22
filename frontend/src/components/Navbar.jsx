@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SVGIcon from './SVGIcon';
 
 export default function Navbar({ onToggleSidebar }) {
   const { user } = useAuth();
@@ -9,15 +10,21 @@ export default function Navbar({ onToggleSidebar }) {
 
   const getPageTitle = () => {
     switch (location.pathname) {
+      case '/dashboard':
+        return { title: 'Resident Overview', sub: 'Active complaints summary, quick actions, and community notices' };
       case '/complaints':
       case '/':
-        return { title: 'Resident Portal', sub: 'Raise maintenance issues and track status history' };
+        return { title: 'My Maintenance Complaints', sub: 'Track status, view timeline history, and submit new requests' };
       case '/admin':
         return { title: 'Complaints Operations Queue', sub: 'Triage, assign priorities, and resolve resident complaints' };
       case '/admin/dashboard':
-        return { title: 'Executive Analytics Console', sub: 'Society maintenance performance, category breakdown & threshold settings' };
+        return { title: 'Executive Operations Overview', sub: 'Real-time complaint metrics, overdue SLA alerts & threshold controls' };
       case '/notices':
         return { title: 'Community Notice Board', sub: 'Official society announcements and broadcasts' };
+      case '/admin/settings':
+        return { title: 'Society SLA Settings', sub: 'Configure complaint threshold parameters and SLA resolution targets' };
+      case '/profile':
+        return { title: 'User Profile & Settings', sub: 'Account credentials, role parameters, and flat assignment' };
       default:
         return { title: 'Society Maintenance Tracker', sub: 'Smart Housing Society Operations' };
     }
@@ -33,7 +40,7 @@ export default function Navbar({ onToggleSidebar }) {
           onClick={onToggleSidebar}
           aria-label="Toggle Navigation Drawer"
         >
-          ☰
+          <SVGIcon name="filter" size={20} />
         </button>
         <div className="page-title-box">
           <h1 className="header-title">{title}</h1>
@@ -42,11 +49,6 @@ export default function Navbar({ onToggleSidebar }) {
       </div>
 
       <div className="header-right">
-        <div className="notification-bell-box" title="System Status Active">
-          <span className="bell-icon">🔔</span>
-          <span className="bell-pulse-dot" />
-        </div>
-
         <div className="header-user-badge">
           <div className="header-avatar">
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}

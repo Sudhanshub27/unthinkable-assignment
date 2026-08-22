@@ -1,4 +1,5 @@
 import React from 'react';
+import SVGIcon from './SVGIcon';
 
 /* ==========================================================================
    1. BUTTON COMPONENT
@@ -168,12 +169,14 @@ export function ErrorState({ title = 'Failed to load data', message, onRetry }) 
   return (
     <div className="content-card error-state-card">
       <div className="empty-state-box">
-        <div className="empty-state-icon">⚠️</div>
+        <div className="empty-state-icon">
+          <SVGIcon name="alert-triangle" size={36} color="#DC2626" />
+        </div>
         <h3 className="empty-state-title text-danger">{title}</h3>
         {message && <p className="empty-state-desc">{message}</p>}
         {onRetry && (
           <Button variant="outline" size="sm" onClick={onRetry} style={{ marginTop: 14 }}>
-            🔄 Retry Loading
+            Retry Loading
           </Button>
         )}
       </div>
@@ -188,7 +191,12 @@ export function PageHeader({ title, subtitle, date, badge, action }) {
   return (
     <div className="dashboard-header-card">
       <div className="header-title-group">
-        {date && <div className="dashboard-badge-date">📅 {date}</div>}
+        {date && (
+          <div className="dashboard-badge-date">
+            <SVGIcon name="calendar" size={14} style={{ display: 'inline-block', marginRight: 6, verticalAlign: 'middle' }} />
+            {date}
+          </div>
+        )}
         {badge && <div className="header-badge-inline">{badge}</div>}
         <h2 className="dashboard-main-title">{title}</h2>
         {subtitle && <p className="dashboard-sub-title">{subtitle}</p>}
@@ -220,7 +228,7 @@ export function StatCard({ label, value, icon, variant = 'indigo', alert = false
 /* ==========================================================================
    11. COMPLAINT CARD COMPONENT (RESIDENT / GRID VIEW)
    ========================================================================== */
-export function ComplaintCard({ complaint, onClick, categoryIcon = '📦' }) {
+export function ComplaintCard({ complaint, onClick, categoryIcon }) {
   const { id, category, description, status, priority, is_overdue, created_at, photo_url } = complaint;
 
   return (
@@ -228,22 +236,24 @@ export function ComplaintCard({ complaint, onClick, categoryIcon = '📦' }) {
       <div className="complaint-card-header">
         <span className="complaint-card-id">#{id}</span>
         <div className="complaint-card-badges">
-          {is_overdue && <span className="badge badge-overdue">⚠️ Overdue</span>}
+          {is_overdue && <span className="badge badge-overdue">OVERDUE</span>}
           <span className={`badge badge-status-${status.toLowerCase().replace(/\s+/g, '')}`}>
-            {status === 'Open' ? '🔴' : status === 'In Progress' ? '⏳' : '🟢'} {status}
+            {status}
           </span>
         </div>
       </div>
 
       <div className="table-cat-pill" style={{ marginBottom: 10, display: 'inline-block' }}>
-        {categoryIcon} {category}
+        {categoryIcon || <SVGIcon name="file-text" size={14} style={{ display: 'inline-block', marginRight: 4 }} />}
+        {category}
       </div>
 
       <p className="complaint-card-desc">{description}</p>
 
       {photo_url && (
         <div className="complaint-card-photo-tag">
-          📷 Photo Attachment Attached
+          <SVGIcon name="image" size={14} style={{ display: 'inline-block', marginRight: 6, verticalAlign: 'middle' }} />
+          Photo Attachment Attached
         </div>
       )}
 
@@ -267,12 +277,18 @@ export function NoticeCard({ notice, onDelete, isAdmin }) {
     <div className={`notice-card ${is_important ? 'notice-card-important' : ''}`}>
       <div className="notice-card-header">
         <div>
-          {is_important && <span className="badge badge-important" style={{ marginBottom: 6 }}>📌 IMPORTANT ANNOUNCEMENT</span>}
+          {is_important && (
+            <span className="badge badge-important" style={{ marginBottom: 6 }}>
+              <SVGIcon name="megaphone" size={12} style={{ display: 'inline-block', marginRight: 4 }} />
+              IMPORTANT ANNOUNCEMENT
+            </span>
+          )}
           <h3 className="notice-card-title">{title}</h3>
         </div>
         {isAdmin && onDelete && (
           <button className="btn btn-ghost btn-xs text-danger" onClick={() => onDelete(id)} title="Delete notice">
-            🗑️ Delete
+            <SVGIcon name="trash" size={14} style={{ display: 'inline-block', marginRight: 4 }} />
+            Delete
           </button>
         )}
       </div>
@@ -280,7 +296,7 @@ export function NoticeCard({ notice, onDelete, isAdmin }) {
       <p className="notice-card-body">{body}</p>
 
       <div className="notice-card-footer">
-        <span className="notice-author">📢 Posted by {posted_by_name || 'Society Office'}</span>
+        <span className="notice-author">Posted by {posted_by_name || 'Society Office'}</span>
         <span className="notice-date">{new Date(created_at).toLocaleDateString()}</span>
       </div>
     </div>

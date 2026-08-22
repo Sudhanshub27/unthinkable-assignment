@@ -1,22 +1,24 @@
+import SVGIcon from './SVGIcon';
+
 export default function Timeline({ history }) {
   if (!history || history.length === 0) {
     return <p className="timeline-empty">No history entries recorded yet.</p>;
   }
 
-  const getEventIcon = (type) => {
+  const getEventIconName = (type) => {
     switch (type) {
       case 'created':
-        return '📋';
+        return 'clipboard';
       case 'status_change':
-        return '🔄';
+        return 'clock';
       case 'priority_change':
-        return '⚡';
+        return 'alert-triangle';
       case 'overdue_flag':
-        return '⚠️';
+        return 'alert-triangle';
       case 'note_added':
-        return '💬';
+        return 'file-text';
       default:
-        return '📌';
+        return 'file-text';
     }
   };
 
@@ -26,7 +28,9 @@ export default function Timeline({ history }) {
       <div className="timeline-list">
         {history.map((h, idx) => (
           <div className="timeline-item" key={h.id || idx}>
-            <div className="timeline-badge-icon">{getEventIcon(h.change_type)}</div>
+            <div className="timeline-badge-icon">
+              <SVGIcon name={getEventIconName(h.change_type)} size={14} />
+            </div>
             <div className="timeline-content">
               <div className="timeline-header-row">
                 <span className="timeline-action">
@@ -57,7 +61,12 @@ export default function Timeline({ history }) {
                 Logged by <span className="actor-name">{h.actor_name || 'System'}</span> ({h.actor_role})
               </div>
 
-              {h.note && <div className="timeline-note-box">💬 {h.note}</div>}
+              {h.note && (
+                <div className="timeline-note-box">
+                  <SVGIcon name="file-text" size={13} style={{ display: 'inline-block', marginRight: 6, verticalAlign: 'middle' }} />
+                  {h.note}
+                </div>
+              )}
             </div>
           </div>
         ))}

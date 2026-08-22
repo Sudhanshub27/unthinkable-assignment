@@ -1,10 +1,22 @@
+import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SVGIcon from './SVGIcon';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        if (setIsOpen) setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, setIsOpen]);
 
   if (!user) return null;
 
@@ -27,14 +39,16 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       <aside className={`app-sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <div className="brand-logo">🏢</div>
+            <div className="brand-logo-icon">
+              <SVGIcon name="clipboard" size={22} color="#2563EB" />
+            </div>
             <div className="brand-text">
               <div className="brand-name">Society Notebook</div>
               <div className="brand-sub">Management Suite</div>
             </div>
           </div>
-          <button className="mobile-close-btn" onClick={closeDrawer}>
-            ✕
+          <button className="mobile-close-btn" onClick={closeDrawer} aria-label="Close sidebar">
+            <SVGIcon name="x" size={18} />
           </button>
         </div>
 
@@ -57,11 +71,19 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           {user.role === 'resident' && (
             <>
               <Link
+                to="/dashboard"
+                className={`sidebar-link ${isActive('/dashboard') ? 'active' : ''}`}
+                onClick={closeDrawer}
+              >
+                <SVGIcon name="layout-dashboard" size={18} className="link-icon-svg" />
+                <span className="link-text">Dashboard</span>
+              </Link>
+              <Link
                 to="/complaints"
                 className={`sidebar-link ${isActive('/complaints') ? 'active' : ''}`}
                 onClick={closeDrawer}
               >
-                <span className="link-icon">📋</span>
+                <SVGIcon name="clipboard" size={18} className="link-icon-svg" />
                 <span className="link-text">My Complaints</span>
               </Link>
               <Link
@@ -69,8 +91,16 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 className={`sidebar-link ${isActive('/notices') ? 'active' : ''}`}
                 onClick={closeDrawer}
               >
-                <span className="link-icon">📢</span>
+                <SVGIcon name="megaphone" size={18} className="link-icon-svg" />
                 <span className="link-text">Notice Board</span>
+              </Link>
+              <Link
+                to="/profile"
+                className={`sidebar-link ${isActive('/profile') ? 'active' : ''}`}
+                onClick={closeDrawer}
+              >
+                <SVGIcon name="user" size={18} className="link-icon-svg" />
+                <span className="link-text">Profile</span>
               </Link>
             </>
           )}
@@ -82,7 +112,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 className={`sidebar-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
                 onClick={closeDrawer}
               >
-                <span className="link-icon">📊</span>
+                <SVGIcon name="layout-dashboard" size={18} className="link-icon-svg" />
                 <span className="link-text">Dashboard</span>
               </Link>
               <Link
@@ -90,16 +120,32 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
                 onClick={closeDrawer}
               >
-                <span className="link-icon">⚙️</span>
-                <span className="link-text">Complaints Queue</span>
+                <SVGIcon name="clipboard" size={18} className="link-icon-svg" />
+                <span className="link-text">Complaints</span>
               </Link>
               <Link
                 to="/notices"
                 className={`sidebar-link ${isActive('/notices') ? 'active' : ''}`}
                 onClick={closeDrawer}
               >
-                <span className="link-icon">📢</span>
+                <SVGIcon name="megaphone" size={18} className="link-icon-svg" />
                 <span className="link-text">Notice Board</span>
+              </Link>
+              <Link
+                to="/admin/settings"
+                className={`sidebar-link ${isActive('/admin/settings') ? 'active' : ''}`}
+                onClick={closeDrawer}
+              >
+                <SVGIcon name="settings" size={18} className="link-icon-svg" />
+                <span className="link-text">Settings</span>
+              </Link>
+              <Link
+                to="/profile"
+                className={`sidebar-link ${isActive('/profile') ? 'active' : ''}`}
+                onClick={closeDrawer}
+              >
+                <SVGIcon name="user" size={18} className="link-icon-svg" />
+                <span className="link-text">Profile</span>
               </Link>
             </>
           )}
@@ -107,7 +153,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
         <div className="sidebar-footer">
           <button className="sidebar-logout-btn" onClick={handleLogout}>
-            <span className="link-icon">🚪</span>
+            <SVGIcon name="log-out" size={18} className="link-icon-svg" />
             <span>Sign Out</span>
           </button>
         </div>

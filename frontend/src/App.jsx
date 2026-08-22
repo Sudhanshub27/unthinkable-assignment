@@ -11,6 +11,17 @@ import AdminDashboard from './pages/AdminDashboard';
 import NoticeBoard from './pages/NoticeBoard';
 import { ToastProvider } from './context/ToastContext';
 
+function PagePlaceholder({ title, description }) {
+  return (
+    <div className="page-container">
+      <div className="content-card" style={{ padding: '40px 24px', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: 8 }}>{title}</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{description}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -61,6 +72,19 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         }
       />
       <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <PagePlaceholder
+                title="Resident Dashboard"
+                description="Executive resident overview module will be activated in the upcoming phase."
+              />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/complaints"
         element={
           <ProtectedRoute>
@@ -81,6 +105,19 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         }
       />
       <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <PagePlaceholder
+                title="User Profile & Account Settings"
+                description="Profile management and credentials module will be activated in the upcoming phase."
+              />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/admin"
         element={
           <ProtectedRoute adminOnly>
@@ -96,6 +133,19 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
           <ProtectedRoute adminOnly>
             <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
               <AdminDashboard />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <PagePlaceholder
+                title="Society SLA Settings"
+                description="SLA threshold configuration and parameters module will be activated in the upcoming phase."
+              />
             </AppLayout>
           </ProtectedRoute>
         }
