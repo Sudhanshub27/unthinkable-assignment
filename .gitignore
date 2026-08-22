@@ -5,3 +5,8 @@ uploads/*
 !uploads/.gitkeep
 *.log
 .DS_Store
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+society-maintenance-tracker.zip

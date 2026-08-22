@@ -1,4 +1,4 @@
--- Society Maintenance Tracker - Database Schema (PostgreSQL)
+-- Society Maintenance Tracker - Database Schema (PostgreSQL & SQLite compatible)
 
 CREATE TABLE IF NOT EXISTS users (
     id              SERIAL PRIMARY KEY,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash   VARCHAR(255) NOT NULL,
     role            VARCHAR(20) NOT NULL DEFAULT 'resident' CHECK (role IN ('resident', 'admin')),
     flat_number     VARCHAR(20),
-    created_at      TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS complaints (
@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS complaints (
     photo_url       VARCHAR(500),
     status          VARCHAR(20) NOT NULL DEFAULT 'Open' CHECK (status IN ('Open', 'In Progress', 'Resolved')),
     priority        VARCHAR(10) NOT NULL DEFAULT 'Low' CHECK (priority IN ('Low', 'Medium', 'High')),
-    is_overdue_flag BOOLEAN NOT NULL DEFAULT FALSE, -- manual admin override flag
+    is_overdue_flag BOOLEAN NOT NULL DEFAULT FALSE,
     resolved_at     TIMESTAMP,
-    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_complaints_resident ON complaints(resident_id);
@@ -29,17 +29,16 @@ CREATE INDEX IF NOT EXISTS idx_complaints_status ON complaints(status);
 CREATE INDEX IF NOT EXISTS idx_complaints_category ON complaints(category);
 CREATE INDEX IF NOT EXISTS idx_complaints_created_at ON complaints(created_at);
 
--- Every status/priority change is recorded here. This is the audit trail.
 CREATE TABLE IF NOT EXISTS complaint_history (
     id              SERIAL PRIMARY KEY,
     complaint_id    INTEGER NOT NULL REFERENCES complaints(id) ON DELETE CASCADE,
     actor_id        INTEGER REFERENCES users(id) ON DELETE SET NULL,
     actor_role      VARCHAR(20) NOT NULL,
-    change_type     VARCHAR(30) NOT NULL, -- 'created', 'status_change', 'priority_change', 'note'
+    change_type     VARCHAR(30) NOT NULL,
     old_value       VARCHAR(50),
     new_value       VARCHAR(50),
     note            TEXT,
-    created_at      TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_history_complaint ON complaint_history(complaint_id);
@@ -50,12 +49,11 @@ CREATE TABLE IF NOT EXISTS notices (
     body            TEXT NOT NULL,
     is_important    BOOLEAN NOT NULL DEFAULT FALSE,
     posted_by       INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    created_at      TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_notices_important ON notices(is_important);
 
--- App-wide configurable settings (e.g. overdue threshold in days)
 CREATE TABLE IF NOT EXISTS settings (
     key             VARCHAR(50) PRIMARY KEY,
     value           VARCHAR(200) NOT NULL

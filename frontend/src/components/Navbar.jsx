@@ -1,9 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   function handleLogout() {
     logout();
@@ -12,28 +13,52 @@ export default function Navbar() {
 
   if (!user) return null;
 
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <div className="navbar">
-      <div>
-        <span className="brand">🏢 Society Tracker</span>
+    <nav className="navbar">
+      <div className="brand-container">
+        <div className="brand-icon">🏢</div>
+        <span className="brand-title">Society Tracker</span>
+      </div>
+
+      <div className="nav-links">
         {user.role === 'resident' && (
           <>
-            <Link to="/">My Complaints</Link>
-            <Link to="/notices">Notices</Link>
+            <Link to="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}>
+              📋 My Complaints
+            </Link>
+            <Link to="/notices" className={`nav-item ${isActive('/notices') ? 'active' : ''}`}>
+              📢 Notice Board
+            </Link>
           </>
         )}
         {user.role === 'admin' && (
           <>
-            <Link to="/admin">Complaints</Link>
-            <Link to="/admin/dashboard">Dashboard</Link>
-            <Link to="/notices">Notices</Link>
+            <Link to="/admin" className={`nav-item ${isActive('/admin') ? 'active' : ''}`}>
+              ⚙️ Complaints Queue
+            </Link>
+            <Link to="/admin/dashboard" className={`nav-item ${isActive('/admin/dashboard') ? 'active' : ''}`}>
+              📊 Analytics Dashboard
+            </Link>
+            <Link to="/notices" className={`nav-item ${isActive('/notices') ? 'active' : ''}`}>
+              📢 Notice Board
+            </Link>
           </>
         )}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span>{user.name} ({user.role})</span>
-        <button onClick={handleLogout}>Logout</button>
+
+      <div className="user-profile">
+        <div className="user-info">
+          <div className="user-name">{user.name}</div>
+          <div className="user-role-badge">
+            {user.role} {user.flat_number ? `• ${user.flat_number}` : ''}
+          </div>
+        </div>
+        <button className="btn-logout" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
-    </div>
+    </nav>
   );
 }

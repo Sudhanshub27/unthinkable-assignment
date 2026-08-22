@@ -11,15 +11,20 @@ export default function NoticeBoard() {
   const [isImportant, setIsImportant] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  async function load() {
+  async function loadNotices() {
     setLoading(true);
-    const res = await client.get('/notices');
-    setNotices(res.data);
-    setLoading(false);
+    try {
+      const res = await client.get('/notices');
+      setNotices(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    load();
+    loadNotices();
   }, []);
 
   async function handlePost(e) {
@@ -31,61 +36,109 @@ export default function NoticeBoard() {
       setTitle('');
       setBody('');
       setIsImportant(false);
-      await load();
+      await loadNotices();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to post notice');
     } finally {
       setSubmitting(false);
     }
   }
 
   async function handleDelete(id) {
-    await client.delete(`/notices/${id}`);
-    await load();
+    if (!confirm('Are you sure you want to delete this notice?')) return;
+    try {
+      await client.delete(`/notices/${id}`);
+      await loadNotices();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to delete notice');
+    }
   }
 
   return (
     <div className="container">
-      <h2>Notice Board</h2>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Community Notice Board</h1>
+          <p className="page-subtitle">Official announcements, updates, and important society notices.</p>
+        </div>
+      </div>
 
       {user.role === 'admin' && (
-        <div className="card">
-          <h3>Post a Notice</h3>
+        <div className="card" style={{ marginBottom: 28 }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 16 }}>Post an Official Notice</h3>
           <form onSubmit={handlePost}>
             <div className="form-group">
-              <label>Title</label>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+              <label>Notice Title</label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Annual Water Tank Cleaning Schedule"
+                required
+              />
             </div>
             <div className="form-group">
-              <label>Body</label>
-              <textarea value={body} onChange={(e) => setBody(e.target.value)} required />
+              <label>Notice Details</label>
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Provide complete information for residents..."
+                required
+              />
             </div>
-            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="checkbox" style={{ width: 'auto' }} checked={isImportant} onChange={(e) => setIsImportant(e.target.checked)} />
-              <label style={{ margin: 0 }}>Mark as important (pins to top + emails all residents)</label>
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="checkbox"
+                id="isImportant"
+                style={{ width: 'auto', cursor: 'pointer' }}
+                checked={isImportant}
+                onChange={(e) => setIsImportant(e.target.checked)}
+              />
+              <label htmlFor="isImportant" style={{ margin: 0, cursor: 'pointer', color: 'var(--text-main)' }}>
+                ⭐ Mark as Important (Pins to top of notice board & broadcasts email to all residents)
+              </label>
             </div>
             <button className="primary" type="submit" disabled={submitting}>
-              {submitting ? 'Posting...' : 'Post Notice'}
+              {submitting ? 'Publishing Announcement...' : 'Post Notice'}
             </button>
           </form>
         </div>
       )}
 
-      {loading && <p>Loading...</p>}
-      {!loading && notices.length === 0 && <p className="empty-state">No notices yet.</p>}
+      {loading && <p style={{ color: 'var(--text-muted)' }}>Loading notice board...</p>}
+
+      {!loading && notices.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-icon">📌</div>
+          <p>No notices have been posted yet.</p>
+        </div>
+      )}
+
       {notices.map((n) => (
-        <div className="card" key={n.id}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <strong>{n.title}</strong>
-                {n.is_important && <span className="badge badge-important">IMPORTANT</span>}
+        <div
+          className="card"
+          key={n.id}
+          style={{
+            borderLeft: n.is_important ? '4px solid #f59e0b' : '1px solid var(--bg-card-border)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>{n.title}</h3>
+                {n.is_important && <span className="badge badge-important">📌 PINNED & IMPORTANT</span>}
               </div>
-              <p style={{ margin: '6px 0' }}>{n.body}</p>
-              <small style={{ color: '#667085' }}>
-                Posted {new Date(n.created_at).toLocaleString()} by {n.posted_by_name || 'Admin'}
-              </small>
+
+              <p style={{ color: '#cbd5e1', fontSize: '0.95rem', margin: '8px 0 12px 0', whiteSpace: 'pre-wrap' }}>{n.body}</p>
+
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                Posted on {new Date(n.created_at).toLocaleString()} by {n.posted_by_name || 'Society Admin'}
+              </div>
             </div>
+
             {user.role === 'admin' && (
-              <button className="secondary" onClick={() => handleDelete(n.id)}>Delete</button>
+              <button className="danger" onClick={() => handleDelete(n.id)}>
+                Delete
+              </button>
             )}
           </div>
         </div>

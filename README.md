@@ -1,143 +1,235 @@
-# Society Maintenance Tracker
+# 🏢 Society Maintenance Tracker
 
-A platform for apartment societies to manage maintenance complaints end-to-end: residents raise
-complaints with photos, admins triage and resolve them through a tracked workflow, and everyone
-stays informed via a notice board and email alerts.
+A comprehensive, full-stack application for apartment societies to manage maintenance complaints end-to-end. Residents can raise complaints with categories and optional photos, admins triage and resolve them through a tracked workflow with priorities, and everyone stays informed via a notice board and email notifications.
 
-## Tech Stack
+---
 
-- **Backend:** Node.js, Express, PostgreSQL (`pg`), JWT auth, bcrypt, Multer (photo upload), Nodemailer (email)
-- **Frontend:** React (Vite), React Router, Axios
-- **Database:** PostgreSQL
+## ✨ Features & Highlights
 
-## Project Structure
+- 🔐 **Role-Based Authentication**: JWT-based authentication for **Resident** and **Admin** roles.
+- 📋 **Complaint Lifecycle Management**: Track complaints through `Open` ➔ `In Progress` ➔ `Resolved` states.
+- 📜 **Append-Only Audit History**: Every status or priority change records a immutable log entry with actor ID, role, old/new values, note, and timestamp.
+- 🖼️ **Photo Upload & Lightbox**: Support for image upload handling (JPEG/PNG/WEBP/GIF) with instant preview and interactive full-screen lightbox.
+- ⚠️ **Automated & Manual Overdue Detection**: Complaints remaining open beyond an admin-configurable threshold (days) are automatically flagged as overdue and prioritized at the top of the admin queue. Admins can also manually flag urgent items.
+- 📢 **Interactive Notice Board**: Admins can post announcements and mark critical ones as **Important** to pin them to the top and automatically broadcast emails to all residents.
+- 📧 **Email Integration**: Automated notifications for status updates and important notices via Nodemailer (supports SMTP providers like Gmail, Brevo, or mock console mode for zero-config testing).
+- 📊 **Analytics Dashboard**: Real-time metrics on total complaints, overdue count, status distribution, and visual category breakdown progress bars.
+- ⚡ **Dual Database Support**: Zero-config local development out-of-the-box using SQLite, plus 100% PostgreSQL compatibility for cloud hosted environments (Render, Neon, Supabase).
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend**: Node.js, Express.js, PostgreSQL (`pg`) / SQLite (`better-sqlite3`), JWT Authentication, bcryptjs, Multer (file upload), Nodemailer (email).
+- **Frontend**: React 18 (Vite), React Router v6, Axios, Custom HSL Glassmorphism CSS Design System.
+- **Database**: PostgreSQL (Production) / SQLite (Zero-config local fallback).
+
+---
+
+## 📂 Repository Structure
 
 ```
 society-maintenance-tracker/
 ├── backend/
 │   ├── src/
-│   │   ├── db/           # schema.sql, migrate.js, seed.js, pool.js
-│   │   ├── middleware/   # auth.js (JWT), upload.js (Multer)
+│   │   ├── db/           # schema.sql, pool.js (Dual PG/SQLite adapter), migrate.js, seed.js
+│   │   ├── middleware/   # auth.js (JWT & Admin guard), upload.js (Multer)
 │   │   ├── routes/       # auth, complaints, notices, dashboard, settings
 │   │   ├── utils/        # email.js, overdue.js
-│   │   └── server.js
+│   │   └── server.js     # Express server entry point
+│   ├── uploads/          # Static photo uploads directory
 │   ├── .env.example
 │   └── package.json
 ├── frontend/
 │   ├── src/
-│   │   ├── api/          # axios client
-│   │   ├── components/   # Navbar, ProtectedRoute, Badges
+│   │   ├── api/          # Axios HTTP client with interceptors
+│   │   ├── components/   # Navbar, Badges, ProtectedRoute
 │   │   ├── context/      # AuthContext
-│   │   ├── pages/        # Login, Register, Resident/Admin views, NoticeBoard
-│   │   └── App.jsx
+│   │   ├── pages/        # ResidentComplaints, AdminComplaints, AdminDashboard, NoticeBoard, Login, Register
+│   │   ├── styles.css    # Modern HSL CSS Design System
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── index.html
 │   ├── .env.example
 │   └── package.json
-└── SYSTEM_DESIGN.md
+├── SYSTEM_DESIGN.md      # 800-word system design write-up
+└── README.md
 ```
 
-## Local Setup
+---
+
+## 🚀 Quick Setup Guide
 
 ### Prerequisites
-- Node.js 18+
-- PostgreSQL 14+ running locally (or a hosted instance)
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
 
-### 1. Database
-```bash
-createdb society_tracker
-```
+---
 
-### 2. Backend
-```bash
-cd backend
-cp .env.example .env
-# Edit .env: set DATABASE_URL to your Postgres connection string,
-# set JWT_SECRET to any long random string.
-npm install
-npm run migrate     # creates tables
-npm run seed        # creates a default admin: admin@society.com / Admin@123
-npm run dev          # starts on http://localhost:4000
-```
+### Option A: Zero-Config Local Setup (Uses SQLite automatically)
 
-### 3. Frontend
-```bash
-cd frontend
-cp .env.example .env
-# VITE_API_URL should point at the backend, e.g. http://localhost:4000/api
-npm install
-npm run dev          # starts on http://localhost:5173
-```
+No database installation required!
 
-Log in as admin with the seeded credentials, or register a new resident account from the UI.
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Sudhanshub27/unthinkable-assignment.git
+   cd unthinkable-assignment
+   ```
 
-## Email Setup (optional but recommended)
+2. **Setup and run Backend**:
+   ```bash
+   cd backend
+   npm install
+   npm run migrate    # Initializes database schema
+   npm run seed       # Creates default admin user
+   npm run dev        # Starts API server on http://localhost:4000
+   ```
 
-The backend sends email on: (1) complaint status changes, (2) important notices being posted.
-Configure any free-tier SMTP provider in `backend/.env`:
+3. **Setup and run Frontend** (in a new terminal window):
+   ```bash
+   cd frontend
+   npm install
+   npm run dev        # Starts React Vite dev server on http://localhost:5173
+   ```
 
-- **Gmail:** use an [App Password](https://myaccount.google.com/apppasswords) (not your regular password), `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`.
-- **Brevo (Sendinblue), Mailtrap, etc.** also work — just fill in their SMTP host/port/credentials.
+4. **Access Application**:
+   Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-If SMTP env vars are left blank, the app doesn't fail — it logs the email content to the console
-instead, so the rest of the app remains fully testable without a mail account.
+---
 
-## Deployment
+### Option B: PostgreSQL Local / Production Setup
 
-- **Backend:** Deploy `backend/` to Render as a Web Service. Add a Render PostgreSQL instance and
-  set `DATABASE_URL` (with `DATABASE_SSL=true`) plus the other `.env` vars in Render's dashboard.
-  Run `npm run migrate` and `npm run seed` once via Render's shell after first deploy.
-- **Frontend:** Deploy `frontend/` to Vercel. Set `VITE_API_URL` to your Render backend URL + `/api`.
-- Set `CORS_ORIGIN` on the backend to your Vercel frontend URL once it's live.
+1. **Create PostgreSQL Database**:
+   ```bash
+   createdb society_tracker
+   ```
 
-## API Documentation
+2. **Configure Backend `.env`**:
+   Copy `backend/.env.example` to `backend/.env` and update your PostgreSQL connection string:
+   ```env
+   PORT=4000
+   CORS_ORIGIN=http://localhost:5173
+   DATABASE_URL=postgresql://postgres:password@localhost:5432/society_tracker
+   DATABASE_SSL=false
+   JWT_SECRET=your-super-secret-jwt-key
+   SEED_ADMIN_EMAIL=admin@society.com
+   SEED_ADMIN_PASSWORD=Admin@123
+   ```
 
-All endpoints except `/api/auth/*` and `/api/health` require `Authorization: Bearer <token>`.
-Endpoints marked **(admin)** additionally require the logged-in user's role to be `admin`.
+3. **Run Migration & Seed**:
+   ```bash
+   cd backend
+   npm run migrate
+   npm run seed
+   npm run dev
+   ```
 
-### Auth
-| Method | Endpoint | Body | Description |
-|---|---|---|---|
-| POST | `/api/auth/register` | `{ name, email, password, flatNumber }` | Creates a resident account, returns JWT |
-| POST | `/api/auth/login` | `{ email, password }` | Returns JWT + user object |
+---
 
-### Complaints
-| Method | Endpoint | Body / Query | Description |
-|---|---|---|---|
-| POST | `/api/complaints` | multipart form: `category`, `description`, `photo` (optional file) | Resident raises a complaint |
-| GET | `/api/complaints/mine` | — | Resident's own complaints, each with full history |
-| GET | `/api/complaints` **(admin)** | query: `category`, `status`, `from`, `to` | All complaints, filtered; overdue ones sorted to the top |
-| GET | `/api/complaints/:id` | — | Single complaint with history (owner or admin only) |
-| PATCH | `/api/complaints/:id/status` **(admin)** | `{ status, note }` | Updates status; records a history entry; emails resident |
-| PATCH | `/api/complaints/:id/priority` **(admin)** | `{ priority }` | Updates priority; records a history entry |
-| PATCH | `/api/complaints/:id/overdue-flag` **(admin)** | `{ flag: boolean }` | Manually flags/unflags a complaint as overdue |
-| GET | `/api/complaints/meta/categories` | — | List of valid categories |
-
-### Notices
-| Method | Endpoint | Body | Description |
-|---|---|---|---|
-| GET | `/api/notices` | — | All notices, important ones pinned to top |
-| POST | `/api/notices` **(admin)** | `{ title, body, isImportant }` | Posts a notice; emails all residents if important |
-| DELETE | `/api/notices/:id` **(admin)** | — | Deletes a notice |
-
-### Dashboard & Settings
-| Method | Endpoint | Body | Description |
-|---|---|---|---|
-| GET | `/api/dashboard` **(admin)** | — | Totals by status, by category, overdue count |
-| GET | `/api/settings/overdue-threshold` **(admin)** | — | Current overdue threshold (days) |
-| PUT | `/api/settings/overdue-threshold` **(admin)** | `{ days }` | Updates the overdue threshold |
-
-## Database Schema
-
-See [`backend/src/db/schema.sql`](backend/src/db/schema.sql) for the full DDL. Summary:
-
-- **users** — residents and admins, `role` column distinguishes them, `flat_number` for residents.
-- **complaints** — one row per complaint; `status`, `priority`, `is_overdue_flag` (manual override).
-- **complaint_history** — append-only audit log; one row per creation/status change/priority change,
-  with `actor_id`, `actor_role`, `old_value`, `new_value`, `note`, `created_at`.
-- **notices** — `is_important` boolean controls pinning.
-- **settings** — key/value store, currently holds `overdue_threshold_days`.
-
-## Default Login
+## 🔑 Default Credentials
 
 After running `npm run seed`:
-- **Admin:** `admin@society.com` / `Admin@123`
-- **Resident:** register your own from the `/register` page.
+
+| Role | Email | Password |
+|---|---|---|
+| **Admin** | `admin@society.com` | `Admin@123` |
+| **Resident** | Register any account from the `/register` page | *User chosen* |
+
+*(Note: Admin login has a quick fill button on the login screen for easy testing).*
+
+---
+
+## 📧 Email Configuration
+
+The app sends automated emails on:
+1. **Complaint Status Updates** (sent to the resident who raised the complaint).
+2. **Important Community Notices** (broadcast to all registered residents).
+
+To enable real email delivery via SMTP (e.g. Gmail App Password, Brevo, Mailtrap):
+Set the following in `backend/.env`:
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+SMTP_FROM=your-email@gmail.com
+```
+
+> **Note**: If SMTP environment variables are left blank, email notifications operate in **mock mode**, logging email content cleanly to the backend server console without throwing errors or breaking API requests.
+
+---
+
+## 📚 API Documentation
+
+All protected endpoints require the HTTP header: `Authorization: Bearer <JWT_TOKEN>`.
+
+### Authentication
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Public | Register resident account (`name`, `email`, `password`, `flatNumber`) |
+| `POST` | `/api/auth/login` | Public | Authenticate user (`email`, `password`), returns JWT & user object |
+
+### Complaints
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `POST` | `/api/complaints` | Resident | Create complaint (multipart/form-data: `category`, `description`, `photo`) |
+| `GET` | `/api/complaints/mine` | Resident | Fetch resident's own complaints with complete audit history |
+| `GET` | `/api/complaints` | Admin | Fetch all complaints (filterable by `category`, `status`, `from`, `to`) |
+| `GET` | `/api/complaints/:id` | Resident/Admin | Fetch single complaint details and audit history |
+| `PATCH` | `/api/complaints/:id/status` | Admin | Update status (`Open`, `In Progress`, `Resolved`), record note & trigger email |
+| `PATCH` | `/api/complaints/:id/priority` | Admin | Update priority (`Low`, `Medium`, `High`) & record audit entry |
+| `PATCH` | `/api/complaints/:id/overdue-flag` | Admin | Manually toggle overdue override flag (`flag: boolean`) |
+| `GET` | `/api/complaints/meta/categories` | Authenticated | List all complaint categories |
+
+### Notices
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/notices` | Authenticated | Fetch notices (important notices pinned to top) |
+| `POST` | `/api/notices` | Admin | Create notice (`title`, `body`, `isImportant`). Broadcasts email if important |
+| `DELETE` | `/api/notices/:id` | Admin | Delete a notice by ID |
+
+### Dashboard & Settings
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/dashboard` | Admin | Aggregate counts (total, overdue, status distribution, category breakdown) |
+| `GET` | `/api/settings/overdue-threshold` | Admin | Get current overdue threshold in days |
+| `PUT` | `/api/settings/overdue-threshold` | Admin | Update overdue threshold (`days: number`) |
+
+---
+
+## 🗄️ Database Schema Summary
+
+See [`backend/src/db/schema.sql`](backend/src/db/schema.sql) for full DDL:
+
+- `users`: User profiles with roles (`resident`, `admin`), hashed passwords, and flat numbers.
+- `complaints`: Primary complaint records with category, status, priority, photo URL, and timestamp flags.
+- `complaint_history`: Immutable audit trail tracking every creation, status transition, priority change, actor, and note.
+- `notices`: Community notices with pinned importance flag (`is_important`).
+- `settings`: System settings key-value store holding configurable parameters like `overdue_threshold_days`.
+
+---
+
+## 🌐 Hosted Deployment Guide
+
+### Backend (Render Web Service)
+1. Create a **Web Service** on Render connected to `backend/`.
+2. Environment: `Node`. Build Command: `npm install`. Start Command: `node src/server.js`.
+3. Add environment variables:
+   - `DATABASE_URL` (Internal or External PostgreSQL URL)
+   - `DATABASE_SSL` = `true`
+   - `JWT_SECRET` = `random-secret-key`
+   - `CORS_ORIGIN` = `https://your-frontend.vercel.app`
+4. Run `npm run migrate` and `npm run seed` once from Render Shell or deployment hook.
+
+### Frontend (Vercel)
+1. Import project into Vercel and set Root Directory to `frontend`.
+2. Build Command: `npm run build`. Output Directory: `dist`.
+3. Set Environment Variable:
+   - `VITE_API_URL` = `https://your-backend.onrender.com/api`
+
+---
+
+## 📄 System Design Document
+
+For in-depth architectural details covering Complaint History Modeling, Overdue Detection, Photo Upload Handling, and Non-blocking Notification Flow, please refer to [`SYSTEM_DESIGN.md`](SYSTEM_DESIGN.md).

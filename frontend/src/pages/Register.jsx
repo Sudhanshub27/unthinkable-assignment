@@ -28,34 +28,61 @@ export default function Register() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 420, marginTop: 40 }}>
+    <div className="container" style={{ maxWidth: 460, marginTop: 30 }}>
       <div className="card">
-        <h2>Create a resident account</h2>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div className="brand-icon" style={{ width: 48, height: 48, fontSize: '1.6rem', margin: '0 auto 12px auto' }}>
+            🏠
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Resident Registration</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: 4 }}>
+            Create an account to log complaints and receive updates
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Full name</label>
-            <input value={form.name} onChange={(e) => update('name', e.target.value)} required />
+            <label>Full Name</label>
+            <input value={form.name} onChange={(e) => update('name', e.target.value)} placeholder="John Doe" required />
           </div>
+
           <div className="form-group">
-            <label>Flat number</label>
-            <input value={form.flatNumber} onChange={(e) => update('flatNumber', e.target.value)} placeholder="e.g. B-204" />
+            <label>Flat / Apartment Number</label>
+            <input value={form.flatNumber} onChange={(e) => update('flatNumber', e.target.value)} placeholder="e.g. A-402" required />
           </div>
+
           <div className="form-group">
-            <label>Email</label>
-            <input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required />
+            <label>Email Address</label>
+            <input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="john@example.com" required />
           </div>
+
           <div className="form-group">
             <label>Password</label>
-            <input type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={6} />
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => update('password', e.target.value)}
+              placeholder="At least 6 characters"
+              required
+              minLength={6}
+            />
           </div>
-          {error && <p className="error-text">{error}</p>}
-          <button className="primary" type="submit" disabled={loading}>
-            {loading ? 'Creating account...' : 'Register'}
+
+          {error && <div className="error-text">{error}</div>}
+
+          <button className="primary" type="submit" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'Creating Resident Account...' : 'Register Account'}
           </button>
         </form>
-        <p style={{ marginTop: 16, fontSize: '0.9rem' }}>
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
+
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--bg-card-border)', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: '#818cf8', fontWeight: 600 }}>
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

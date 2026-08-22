@@ -4,10 +4,9 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'society-tracker-secret-key-2026';
 
 // POST /api/auth/register
-// Residents self-register. Admin accounts are seeded, not registered publicly,
-// to avoid anyone granting themselves admin rights.
 router.post('/register', async (req, res) => {
   const { name, email, password, flatNumber } = req.body;
   if (!name || !email || !password) {
@@ -31,12 +30,12 @@ router.post('/register', async (req, res) => {
     const user = result.rows[0];
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email, name: user.name },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
     res.status(201).json({ token, user });
   } catch (err) {
-    console.error(err);
+    console.error('Registration error:', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 });
@@ -59,7 +58,7 @@ router.post('/login', async (req, res) => {
     }
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email, name: user.name },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
     res.json({
@@ -73,7 +72,7 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
   }
 });
