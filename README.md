@@ -185,8 +185,8 @@ Storing only the current status in `complaints` loses critical operational visib
    - `High` (Urgent hazards, e.g., main lift failure, main electrical outage)
 
 3. **Overdue SLA Determination**:
-   $$\text{Age (Days)} = \lfloor \frac{\text{Current Time} - \text{Created Time}}{86400 \text{ seconds}} \rfloor$$
-   $$\text{Is Overdue} = (\text{Status} \neq \text{'Resolved'}) \text{ AND } (\text{Age} \ge \text{SLA Threshold} \text{ OR } \text{is\_overdue\_flag} = \text{true})$$
+   $$\text{Age (Days)} = \left\lfloor \frac{\text{Current Time} - \text{Created Time}}{86400\text{ seconds}} \right\rfloor$$
+   $$\text{Is Overdue} = (\text{Status} \neq \text{"Resolved"}) \land (\text{Age} \ge \text{SLA Threshold} \lor \text{Manual Overdue Flag} = \text{true})$$
 
 4. **Atomic Admin Triage Operations**:
    When an admin updates a complaint, status changes, priority shifts, overdue flags, and audit notes are sent in a single `PATCH /api/complaints/:id` request. The backend executes all modifications inside an explicit database transaction (`BEGIN ... COMMIT`), guaranteeing that either **all updates and history records persist successfully or none do**.
