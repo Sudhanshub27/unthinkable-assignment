@@ -1,6 +1,6 @@
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const pool = require('./pool');
-require('dotenv').config();
 
 async function seed() {
   try {
