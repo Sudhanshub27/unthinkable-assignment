@@ -31,7 +31,7 @@ A full-stack apartment society maintenance platform that allows residents to rai
 
 * **Frontend**: React 18, Vite, React Router v6, Axios, Modern HSL Vanilla CSS Design System.
 * **Backend**: Node.js, Express.js.
-* **Database**: Dual Compatibility Layer — SQLite (`better-sqlite3`) for zero-config local development, PostgreSQL (`pg`) for cloud production.
+* **Database**: Dual Compatibility Layer — SQLite (`sqlite3`) for zero-config local development, PostgreSQL (`pg`) for cloud production.
 * **Authentication**: JSON Web Tokens (JWT) with HTTP Bearer authorization headers and `bcryptjs` password hashing.
 * **Email Service**: Nodemailer with SMTP configuration and safe mock console fallback.
 * **File Upload & Validation**: Multer with disk storage, file extension filtering, and binary magic-byte header inspection.
