@@ -13,7 +13,12 @@ router.get('/', authenticate, async (req, res) => {
        LEFT JOIN users u ON u.id = n.posted_by
        ORDER BY n.is_important DESC, n.created_at DESC`
     );
-    res.json(result.rows);
+    // Convert is_important to boolean for consistent client handling across DB drivers
+    const notices = result.rows.map((n) => ({
+      ...n,
+      is_important: n.is_important === true || n.is_important === 1 || n.is_important === '1',
+    }));
+    res.json(notices);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch notices' });
@@ -22,16 +27,23 @@ router.get('/', authenticate, async (req, res) => {
 
 // POST /api/notices  (admin only)
 router.post('/', authenticate, requireAdmin, async (req, res) => {
-  const { title, body, isImportant } = req.body;
+  const { title, body } = req.body;
+  const isImp = req.body.is_important !== undefined ? req.body.is_important : req.body.isImportant;
+  const isImportantFlag = Boolean(isImp);
+
   if (!title || !body) {
     return res.status(400).json({ error: 'title and body are required' });
   }
   try {
     const result = await pool.query(
       `INSERT INTO notices (title, body, is_important, posted_by) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [title, body, Boolean(isImportant), req.user.id]
+      [title, body, isImportantFlag ? 1 : 0, req.user.id]
     );
-    const notice = result.rows[0];
+    const rawNotice = result.rows[0];
+    const notice = {
+      ...rawNotice,
+      is_important: Boolean(isImportantFlag),
+    };
 
     if (notice.is_important) {
       // Best-effort broadcast to all residents; failures are logged, not thrown,

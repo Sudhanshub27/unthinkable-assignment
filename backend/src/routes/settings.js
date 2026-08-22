@@ -13,19 +13,19 @@ router.get('/overdue-threshold', authenticate, requireAdmin, async (req, res) =>
 
 // PUT /api/settings/overdue-threshold  (admin) — { days: number }
 router.put('/overdue-threshold', authenticate, requireAdmin, async (req, res) => {
-  const { days } = req.body;
-  if (!Number.isInteger(days) || days < 1) {
-    return res.status(400).json({ error: 'days must be a positive integer' });
+  const daysNum = parseInt(req.body.days, 10);
+  if (isNaN(daysNum) || daysNum < 1) {
+    return res.status(400).json({ error: 'days must be a positive integer (minimum 1 day)' });
   }
   try {
     await pool.query(
       `INSERT INTO settings (key, value) VALUES ('overdue_threshold_days', $1)
-       ON CONFLICT (key) DO UPDATE SET value = $1`,
-      [String(days)]
+       ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value`,
+      [String(daysNum)]
     );
-    res.json({ days });
+    res.json({ days: daysNum });
   } catch (err) {
-    console.error(err);
+    console.error('Settings update error:', err);
     res.status(500).json({ error: 'Failed to update setting' });
   }
 });

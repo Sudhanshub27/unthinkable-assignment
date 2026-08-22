@@ -7,6 +7,7 @@ import PhotoUpload from '../components/PhotoUpload';
 import Timeline from '../components/Timeline';
 import Modal from '../components/Modal';
 import EmptyState from '../components/EmptyState';
+import { StatCard, Button } from '../components/UIComponents';
 
 const CATEGORIES = [
   { name: 'Plumbing', icon: '🔧' },
@@ -37,6 +38,7 @@ export default function ResidentComplaints() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [successComplaintId, setSuccessComplaintId] = useState(null);
 
   // Filters State
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,11 +55,11 @@ export default function ResidentComplaints() {
         client.get('/complaints/mine'),
         client.get('/notices'),
       ]);
-      setComplaints(compRes.data);
-      setNotices(noticeRes.data);
+      setComplaints(compRes.data || []);
+      setNotices(noticeRes.data || []);
     } catch (err) {
       console.error(err);
-      addToast('Failed to load resident data.', 'error');
+      addToast('Failed to load resident maintenance data.', 'error');
     } finally {
       setLoading(false);
     }
@@ -72,11 +74,11 @@ export default function ResidentComplaints() {
     setLoadingHistory(true);
     try {
       const res = await client.get(`/complaints/${c.id}`);
-      setSelectedComplaint(res.data.complaint);
+      setSelectedComplaint(res.data.complaint || res.data);
       setComplaintHistory(res.data.history || []);
     } catch (err) {
       console.error(err);
-      addToast('Failed to fetch complaint timeline history.', 'error');
+      addToast('Failed to fetch complaint history timeline.', 'error');
     } finally {
       setLoadingHistory(false);
     }
@@ -87,11 +89,11 @@ export default function ResidentComplaints() {
     setFormError('');
 
     if (!category) {
-      setFormError('Please select a valid issue category.');
+      setFormError('Please select a maintenance issue category.');
       return;
     }
     if (!description.trim()) {
-      setFormError('Please provide a detailed description of the maintenance issue.');
+      setFormError('Please describe the issue in detail.');
       return;
     }
 
@@ -99,20 +101,21 @@ export default function ResidentComplaints() {
     try {
       const formData = new FormData();
       formData.append('category', category);
-      formData.append('description', description);
+      formData.append('description', description.trim());
       if (photo) formData.append('photo', photo);
 
       const res = await client.post('/complaints', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      addToast(`Complaint #${res.data.id} raised successfully!`, 'success');
+      const newId = res.data.id;
+      setSuccessComplaintId(newId);
+      addToast(`Complaint #${newId} submitted successfully!`, 'success');
 
       setCategory('');
       setDescription('');
       setPhoto(null);
       setPhotoPreview(null);
-      setShowFormModal(false);
       await loadData();
     } catch (err) {
       setFormError(err.response?.data?.error || 'Failed to submit complaint');
@@ -121,6 +124,25 @@ export default function ResidentComplaints() {
       setSubmitting(false);
     }
   }
+
+  const handleCloseFormModal = () => {
+    setShowFormModal(false);
+    setSuccessComplaintId(null);
+    setFormError('');
+  };
+
+  const handleViewSubmittedComplaint = (id) => {
+    handleCloseFormModal();
+    const found = complaints.find((c) => c.id === id);
+    if (found) {
+      openComplaintDetail(found);
+    } else {
+      loadData().then(() => {
+        const newlyCreated = complaints.find((c) => c.id === id);
+        if (newlyCreated) openComplaintDetail(newlyCreated);
+      });
+    }
+  };
 
   const getBackendOrigin = () => {
     const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
@@ -137,7 +159,7 @@ export default function ResidentComplaints() {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  // Metrics
+  // Summary Metrics (Resident Specific)
   const totalCount = complaints.length;
   const openCount = complaints.filter((c) => c.status === 'Open').length;
   const progressCount = complaints.filter((c) => c.status === 'In Progress').length;
@@ -159,65 +181,46 @@ export default function ResidentComplaints() {
   });
 
   return (
-    <div className="page-container">
-      {/* Greeting & Action Header */}
+    <div className="page-container resident-dashboard-container">
+      {/* 1. GREETING & PRIMARY ACTION */}
       <div className="resident-welcome-card">
         <div className="welcome-left">
+          <div className="welcome-profile-badge">
+            🏢 Flat {user?.flat_number || 'A-301'} • Resident Portal
+          </div>
           <h2 className="welcome-greeting">
-            Welcome back, <span className="highlight-name">{user.name}</span> 👋
+            Welcome back, <span className="highlight-name">{user?.name}</span> 👋
           </h2>
           <p className="welcome-sub">
-            Resident of <span className="highlight-flat">Flat {user.flat_number || 'A-301'}</span> • Maintain your society seamlessly
+            Track maintenance requests, raise new issues & view community updates
           </p>
         </div>
-        <button
-          className="btn btn-primary btn-lg shadow-sm"
-          onClick={() => setShowFormModal(true)}
+        <Button
+          variant="primary"
+          size="lg"
+          icon="➕"
+          onClick={() => {
+            setSuccessComplaintId(null);
+            setShowFormModal(true);
+          }}
         >
-          ➕ Raise New Complaint
-        </button>
+          Raise New Complaint
+        </Button>
       </div>
 
-      {/* KPI Cards */}
+      {/* 2. COMPLAINT SUMMARY KPIs (RESIDENT ONLY) */}
       <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-indigo">📋</div>
-          <div className="kpi-data">
-            <div className="kpi-label">Total Raised</div>
-            <div className="kpi-value">{totalCount}</div>
-          </div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-red">🔴</div>
-          <div className="kpi-data">
-            <div className="kpi-label">Pending / Open</div>
-            <div className="kpi-value">{openCount}</div>
-          </div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-amber">⏳</div>
-          <div className="kpi-data">
-            <div className="kpi-label">In Progress</div>
-            <div className="kpi-value">{progressCount}</div>
-          </div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-icon kpi-icon-emerald">🟢</div>
-          <div className="kpi-data">
-            <div className="kpi-label">Resolved</div>
-            <div className="kpi-value">{resolvedCount}</div>
-          </div>
-        </div>
+        <StatCard label="Total Requests" value={totalCount} icon="📋" variant="indigo" />
+        <StatCard label="Pending / Open" value={openCount} icon="🔴" variant="red" />
+        <StatCard label="In Progress" value={progressCount} icon="⏳" variant="amber" />
+        <StatCard label="Resolved" value={resolvedCount} icon="🟢" variant="emerald" />
       </div>
 
-      {/* Important Notices Banner */}
+      {/* 3. IMPORTANT NOTICES BANNER */}
       {importantNotices.length > 0 && (
         <div className="important-notices-banner">
           <div className="banner-header">
-            <span className="banner-title-text">📌 Important Community Announcements</span>
+            <span className="banner-title-text">📌 Important Community Notice</span>
           </div>
           <div className="banner-notice-list">
             {importantNotices.slice(0, 2).map((n) => (
@@ -235,19 +238,19 @@ export default function ResidentComplaints() {
         </div>
       )}
 
-      {/* Complaints List Section */}
+      {/* 4. MY COMPLAINTS LIST */}
       <div className="content-card">
         <div className="card-header-row">
           <div>
             <h3 className="card-title">My Maintenance Requests</h3>
-            <p className="card-subtitle">Track real-time status and audit timeline of your requests</p>
+            <p className="card-subtitle">Complete history and live status tracking</p>
           </div>
 
           <div className="filter-controls-group">
             <input
               type="text"
               className="form-control search-input"
-              placeholder="🔍 Search complaints..."
+              placeholder="🔍 Search requests..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -281,19 +284,22 @@ export default function ResidentComplaints() {
         {loading ? (
           <div className="loading-container">
             <div className="loading-spinner" />
-            <p>Loading complaints...</p>
+            <p>Loading maintenance records...</p>
           </div>
         ) : filteredComplaints.length === 0 ? (
           <EmptyState
             icon="🛠️"
-            title="No complaints found"
+            title="No complaints logged"
             description={
               searchQuery || filterCategory || filterStatus
-                ? 'No maintenance complaints match your current search filters.'
-                : "You haven't logged any maintenance complaints yet."
+                ? 'No maintenance complaints match your current search criteria.'
+                : "You haven't submitted any maintenance requests yet."
             }
             actionText="+ Raise Your First Complaint"
-            onAction={() => setShowFormModal(true)}
+            onAction={() => {
+              setSuccessComplaintId(null);
+              setShowFormModal(true);
+            }}
           />
         ) : (
           <div className="complaint-cards-grid">
@@ -317,11 +323,17 @@ export default function ResidentComplaints() {
 
                 <p className="complaint-card-desc">{c.description}</p>
 
+                {c.photo_url && (
+                  <div className="complaint-card-photo-tag">
+                    📷 Photo attachment attached
+                  </div>
+                )}
+
                 <div className="complaint-card-footer">
                   <div className="meta-left">
                     <PriorityBadge priority={c.priority} />
                     <span className="meta-date">
-                      📅 {new Date(c.created_at).toLocaleDateString()}
+                      {new Date(c.created_at).toLocaleDateString()}
                     </span>
                   </div>
                   <button className="btn btn-ghost btn-xs">View Timeline ➔</button>
@@ -332,85 +344,117 @@ export default function ResidentComplaints() {
         )}
       </div>
 
-      {/* Raise Complaint Modal */}
+      {/* RAISE COMPLAINT MODAL */}
       <Modal
         isOpen={showFormModal}
-        onClose={() => setShowFormModal(false)}
-        title="➕ Raise Maintenance Complaint"
-        maxWidth="620px"
+        onClose={handleCloseFormModal}
+        title={successComplaintId ? '🎉 Complaint Submitted' : '➕ Raise Maintenance Complaint'}
+        maxWidth="580px"
       >
-        <form onSubmit={handleSubmit} className="modal-form">
-          {formError && <div className="alert alert-danger">{formError}</div>}
+        {successComplaintId ? (
+          <div className="empty-state-box" style={{ padding: '24px 10px' }}>
+            <div className="empty-state-icon" style={{ fontSize: '3rem' }}>🎉</div>
+            <h3 className="empty-state-title" style={{ fontSize: '1.2rem', marginBottom: 8 }}>
+              Complaint #{successComplaintId} Created!
+            </h3>
+            <p className="empty-state-desc" style={{ marginBottom: 20 }}>
+              Your maintenance request has been registered and routed to the society administrative team.
+            </p>
+            <div className="modal-actions" style={{ justifyContent: 'center', gap: 12 }}>
+              <Button
+                variant="secondary"
+                onClick={handleCloseFormModal}
+              >
+                Close
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => handleViewSubmittedComplaint(successComplaintId)}
+              >
+                View Complaint Timeline ➔
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="modal-form">
+            {formError && <div className="alert alert-danger">{formError}</div>}
 
-          <div className="form-group">
-            <label className="form-label">Issue Category <span className="req">*</span></label>
-            <select
-              className="form-control"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="" disabled>
-                -- Select Issue Category --
-              </option>
-              {CATEGORIES.map((c) => (
-                <option key={c.name} value={c.name}>
-                  {c.icon} {c.name}
+            <div className="form-group">
+              <label className="form-label">Issue Category <span className="req">*</span></label>
+              <select
+                className="form-control"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  -- Select Issue Category --
                 </option>
-              ))}
-            </select>
-          </div>
+                {CATEGORIES.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.icon} {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Detailed Description <span className="req">*</span></label>
-            <textarea
-              className="form-control"
-              rows={4}
-              placeholder="Describe the issue in detail (e.g. Water leak under kitchen sink since morning...)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+            <div className="form-group">
+              <label className="form-label">Detailed Description <span className="req">*</span></label>
+              <textarea
+                className="form-control"
+                rows={4}
+                placeholder="Describe the maintenance issue in detail (e.g. Low water pressure in master bathroom...)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Attach Supporting Photo (Optional)</label>
-            <PhotoUpload
-              file={photo}
-              preview={photoPreview}
-              onChange={(f, p) => {
-                setPhoto(f);
-                setPhotoPreview(p);
-              }}
-              onRemove={() => {
-                setPhoto(null);
-                setPhotoPreview(null);
-              }}
-              error={formError}
-              setError={setFormError}
-            />
-          </div>
+            <div className="form-group">
+              <label className="form-label">Attach Photo (Optional)</label>
+              <PhotoUpload
+                file={photo}
+                preview={photoPreview}
+                onChange={(f, p) => {
+                  setPhoto(f);
+                  setPhotoPreview(p);
+                }}
+                onRemove={() => {
+                  setPhoto(null);
+                  setPhotoPreview(null);
+                }}
+                error={formError}
+                setError={setFormError}
+              />
+            </div>
 
-          <div className="modal-actions">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setShowFormModal(false)}
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit Complaint'}
-            </button>
-          </div>
-        </form>
+            <div className="modal-actions">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleCloseFormModal}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={submitting}
+              >
+                {submitting ? 'Uploading & Saving...' : 'Submit Complaint'}
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
 
-      {/* Complaint Detail & History Modal */}
+      {/* COMPLAINT DETAIL MODAL */}
       {selectedComplaint && (
         <Modal
           isOpen={!!selectedComplaint}
           onClose={() => setSelectedComplaint(null)}
-          title={`Complaint #${selectedComplaint.id} Details`}
+          title={`Complaint #${selectedComplaint.id} Timeline & Status`}
           maxWidth="820px"
         >
           <div className="complaint-detail-two-col">
@@ -434,7 +478,7 @@ export default function ResidentComplaints() {
 
               {selectedComplaint.photo_url && (
                 <div className="detail-section">
-                  <h4 className="section-subtitle">Attached Photo</h4>
+                  <h4 className="section-subtitle">Attached Attachment</h4>
                   <div
                     className="detail-photo-wrapper"
                     onClick={() =>
@@ -446,7 +490,7 @@ export default function ResidentComplaints() {
                       alt="Complaint Attachment"
                       className="detail-photo-img"
                     />
-                    <div className="photo-hover-overlay">🔍 Click to enlarge</div>
+                    <div className="photo-hover-overlay">🔍 Click to enlarge photo</div>
                   </div>
                 </div>
               )}
@@ -454,7 +498,7 @@ export default function ResidentComplaints() {
 
             <div className="detail-right-col">
               <div className="detail-info-card">
-                <h4 className="info-card-heading">Operational Status</h4>
+                <h4 className="info-card-heading">Current Status Details</h4>
 
                 <div className="info-row">
                   <span className="info-label">Status</span>
@@ -471,18 +515,18 @@ export default function ResidentComplaints() {
                   {selectedComplaint.is_overdue ? (
                     <OverdueBadge ageDays={getAgeDays(selectedComplaint.created_at)} />
                   ) : (
-                    <span className="badge badge-status-resolved">On Schedule</span>
+                    <span className="badge badge-status-resolved">Within SLA</span>
                   )}
                 </div>
 
                 <div className="info-row">
-                  <span className="info-label">Resident</span>
-                  <span className="info-val">{user.name}</span>
+                  <span className="info-label">Resident Name</span>
+                  <span className="info-val">{user?.name}</span>
                 </div>
 
                 <div className="info-row">
                   <span className="info-label">Flat Number</span>
-                  <span className="info-val">Flat {user.flat_number || 'A-301'}</span>
+                  <span className="info-val">Flat {user?.flat_number || 'A-301'}</span>
                 </div>
               </div>
             </div>
@@ -490,11 +534,11 @@ export default function ResidentComplaints() {
 
           <hr className="divider" />
 
-          {/* Audit History Timeline */}
+          {/* Chronological Audit Timeline */}
           {loadingHistory ? (
             <div className="loading-container">
               <div className="loading-spinner" />
-              <p>Fetching history timeline...</p>
+              <p>Loading history timeline...</p>
             </div>
           ) : (
             <Timeline history={complaintHistory} />
@@ -502,7 +546,7 @@ export default function ResidentComplaints() {
         </Modal>
       )}
 
-      {/* Lightbox Overlay */}
+      {/* Photo Lightbox */}
       {lightboxPhoto && (
         <div className="lightbox-backdrop" onClick={() => setLightboxPhoto(null)}>
           <div className="lightbox-content">
