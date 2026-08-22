@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'society-tracker-secret-key-2026';
+const { getJwtSecret } = require('../utils/jwt');
 
 function authenticate(req, res, next) {
   const header = req.headers.authorization;
@@ -8,7 +8,7 @@ function authenticate(req, res, next) {
   }
   const token = header.split(' ')[1];
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, getJwtSecret());
     req.user = payload; // { id, role, email, name }
     next();
   } catch (err) {

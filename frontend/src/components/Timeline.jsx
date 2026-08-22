@@ -13,6 +13,8 @@ export default function Timeline({ history }) {
         return '⚡';
       case 'overdue_flag':
         return '⚠️';
+      case 'note_added':
+        return '💬';
       default:
         return '📌';
     }
@@ -36,6 +38,8 @@ export default function Timeline({ history }) {
                     ? `Priority updated: ${h.old_value || 'Low'} → ${h.new_value}`
                     : h.change_type === 'overdue_flag'
                     ? `Overdue flag set to ${h.new_value}`
+                    : h.change_type === 'note_added'
+                    ? 'Audit Note Added'
                     : h.change_type}
                 </span>
                 <span className="timeline-date">

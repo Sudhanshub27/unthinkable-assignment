@@ -54,7 +54,7 @@ export default function Navbar({ onToggleSidebar }) {
           <div className="header-user-info">
             <span className="header-user-name">{user.name}</span>
             <span className="header-user-role">
-              {user.role} {user.flat_number ? `• Flat ${user.flat_number}` : ''}
+              {user.role} • {user.flat_number ? `Flat ${user.flat_number}` : 'Flat not specified'}
             </span>
           </div>
         </div>

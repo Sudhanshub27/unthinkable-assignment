@@ -45,21 +45,25 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
       is_important: Boolean(isImportantFlag),
     };
 
-    if (notice.is_important) {
-      // Best-effort broadcast to all residents; failures are logged, not thrown,
-      // so one bad email address never blocks notice creation.
-      const residents = await pool.query(`SELECT name, email FROM users WHERE role = 'resident'`);
-      for (const resident of residents.rows) {
-        const { subject, text } = importantNoticeEmail({
-          residentName: resident.name,
-          title: notice.title,
-          body: notice.body,
-        });
-        sendEmail({ to: resident.email, subject, text }).catch(() => {});
-      }
-    }
-
     res.status(201).json(notice);
+
+    if (notice.is_important) {
+      setImmediate(async () => {
+        try {
+          const residents = await pool.query(`SELECT name, email FROM users WHERE role = 'resident'`);
+          for (const resident of residents.rows) {
+            const { subject, text } = importantNoticeEmail({
+              residentName: resident.name,
+              title: notice.title,
+              body: notice.body,
+            });
+            sendEmail({ to: resident.email, subject, text }).catch(() => {});
+          }
+        } catch (emailErr) {
+          console.error('Async notice email broadcast error:', emailErr);
+        }
+      });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create notice' });

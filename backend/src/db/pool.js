@@ -29,6 +29,48 @@ if (isPgRequested) {
   const dbPath = path.join(__dirname, '..', '..', 'society_tracker.db');
   const sqliteDb = new sqlite3.Database(dbPath);
 
+  function replacePostgresParamsWithQuestionMarks(sql) {
+    let result = '';
+    let inString = false;
+    let i = 0;
+
+    while (i < sql.length) {
+      const char = sql[i];
+
+      if (char === "'") {
+        if (inString && i + 1 < sql.length && sql[i + 1] === "'") {
+          result += "''";
+          i += 2;
+          continue;
+        }
+        inString = !inString;
+        result += char;
+        i++;
+        continue;
+      }
+
+      if (!inString && char === '$') {
+        let digitStr = '';
+        let j = i + 1;
+        while (j < sql.length && sql[j] >= '0' && sql[j] <= '9') {
+          digitStr += sql[j];
+          j++;
+        }
+
+        if (digitStr.length > 0) {
+          result += '?';
+          i = j;
+          continue;
+        }
+      }
+
+      result += char;
+      i++;
+    }
+
+    return result;
+  }
+
   function transformSql(sql) {
     let clean = sql
       .replace(/SERIAL PRIMARY KEY/gi, 'INTEGER PRIMARY KEY AUTOINCREMENT')
@@ -36,8 +78,8 @@ if (isPgRequested) {
       .replace(/NOW\(\)/gi, "datetime('now')")
       .replace(/::int/gi, '')
       .replace(/FOR UPDATE/gi, '');
-    
-    clean = clean.replace(/\$(\d+)/g, '?');
+
+    clean = replacePostgresParamsWithQuestionMarks(clean);
     return clean;
   }
 

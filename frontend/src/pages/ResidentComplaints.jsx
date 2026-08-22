@@ -154,11 +154,6 @@ export default function ResidentComplaints() {
     return found ? found.icon : '📦';
   };
 
-  const getAgeDays = (createdAt) => {
-    const diffTime = Math.abs(new Date() - new Date(createdAt));
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  };
-
   // Summary Metrics (Resident Specific)
   const totalCount = complaints.length;
   const openCount = complaints.filter((c) => c.status === 'Open').length;
@@ -186,7 +181,7 @@ export default function ResidentComplaints() {
       <div className="resident-welcome-card">
         <div className="welcome-left">
           <div className="welcome-profile-badge">
-            🏢 Flat {user?.flat_number || 'A-301'} • Resident Portal
+            🏢 {user?.flat_number ? `Flat ${user.flat_number}` : 'Flat not specified'} • Resident Portal
           </div>
           <h2 className="welcome-greeting">
             Welcome back, <span className="highlight-name">{user?.name}</span> 👋
@@ -316,7 +311,7 @@ export default function ResidentComplaints() {
                     <span className="complaint-id-pill">#{c.id}</span>
                   </div>
                   <div className="badges-group">
-                    {c.is_overdue && <OverdueBadge ageDays={getAgeDays(c.created_at)} />}
+                    {c.is_overdue && <OverdueBadge ageDays={c.age_days} />}
                     <StatusBadge status={c.status} />
                   </div>
                 </div>
@@ -513,7 +508,7 @@ export default function ResidentComplaints() {
                 <div className="info-row">
                   <span className="info-label">Overdue</span>
                   {selectedComplaint.is_overdue ? (
-                    <OverdueBadge ageDays={getAgeDays(selectedComplaint.created_at)} />
+                    <OverdueBadge ageDays={selectedComplaint.age_days} />
                   ) : (
                     <span className="badge badge-status-resolved">Within SLA</span>
                   )}
@@ -526,7 +521,7 @@ export default function ResidentComplaints() {
 
                 <div className="info-row">
                   <span className="info-label">Flat Number</span>
-                  <span className="info-val">Flat {user?.flat_number || 'A-301'}</span>
+                  <span className="info-val">{user?.flat_number ? `Flat ${user.flat_number}` : 'Flat not specified'}</span>
                 </div>
               </div>
             </div>

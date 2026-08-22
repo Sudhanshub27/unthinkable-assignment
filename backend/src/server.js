@@ -13,9 +13,32 @@ const settingsRoutes = require('./routes/settings');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+const corsOrigin = process.env.CORS_ORIGIN;
+if (!corsOrigin && process.env.NODE_ENV === 'production') {
+  console.error('FATAL ERROR: CORS_ORIGIN environment variable is not defined in production!');
+  process.exit(1);
+}
+
+app.use(
+  cors({
+    origin: corsOrigin || 'http://localhost:5173',
+    credentials: true,
+  })
+);
+
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
+// Serve uploaded media with security headers
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+    res.setHeader('Content-Disposition', 'inline');
+    next();
+  },
+  express.static(path.join(__dirname, '..', 'uploads'))
+);
 
 app.get('/api/health', async (req, res) => {
   try {
@@ -32,7 +55,7 @@ app.use('/api/notices', noticesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// Multer errors (file too large, bad type) land here as generic errors
+// Multer and general error middleware
 app.use((err, req, res, next) => {
   if (err) {
     console.error(err);

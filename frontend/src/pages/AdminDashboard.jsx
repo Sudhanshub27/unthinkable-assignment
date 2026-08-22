@@ -114,25 +114,12 @@ export default function AdminDashboard() {
 
     setUpdating(true);
     try {
-      if (newStatus !== selectedComplaint.status || note.trim()) {
-        await client.patch(`/complaints/${selectedComplaint.id}/status`, {
-          status: newStatus,
-          note: note.trim() || undefined,
-        });
-      }
-
-      if (newPriority !== selectedComplaint.priority) {
-        await client.patch(`/complaints/${selectedComplaint.id}/priority`, {
-          priority: newPriority,
-          note: note.trim() || undefined,
-        });
-      }
-
-      if (manualOverdue !== !!selectedComplaint.is_overdue_flag) {
-        await client.patch(`/complaints/${selectedComplaint.id}/overdue-flag`, {
-          flag: manualOverdue,
-        });
-      }
+      await client.patch(`/complaints/${selectedComplaint.id}`, {
+        status: newStatus,
+        priority: newPriority,
+        is_overdue: manualOverdue,
+        note: note.trim() || undefined,
+      });
 
       addToast(`Complaint #${selectedComplaint.id} updated successfully!`, 'success');
       setSelectedComplaint(null);
@@ -153,11 +140,6 @@ export default function AdminDashboard() {
   const getCategoryIcon = (catName) => {
     const found = CATEGORIES.find((c) => c.name === catName);
     return found ? found.icon : '📦';
-  };
-
-  const getAgeDays = (createdAt) => {
-    const diffTime = Math.abs(new Date() - new Date(createdAt));
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
   };
 
   if (loading) {
@@ -286,7 +268,7 @@ export default function AdminDashboard() {
                           <div className="table-user-cell">
                             <span className="table-user-name">{c.resident_name || 'Resident'}</span>
                             <span className="table-flat-badge">
-                              Flat {c.flat_number || 'A-301'}
+                              {c.flat_number ? `Flat ${c.flat_number}` : 'Flat not specified'}
                             </span>
                           </div>
                         </td>
@@ -294,10 +276,10 @@ export default function AdminDashboard() {
                           <PriorityBadge priority={c.priority} />
                         </td>
                         <td>
-                          <span className="text-muted">{getAgeDays(c.created_at)}d ago</span>
+                          <span className="text-muted">{c.age_days ?? 0}d ago</span>
                         </td>
                         <td>
-                          <OverdueBadge ageDays={getAgeDays(c.created_at)} />
+                          <OverdueBadge ageDays={c.age_days} />
                         </td>
                         <td>
                           <StatusBadge status={c.status} />
@@ -356,7 +338,7 @@ export default function AdminDashboard() {
                         <div className="table-user-cell">
                           <span className="table-user-name">{c.resident_name || 'Resident'}</span>
                           <span className="table-flat-badge">
-                            Flat {c.flat_number || 'A-301'}
+                            {c.flat_number ? `Flat ${c.flat_number}` : 'Flat not specified'}
                           </span>
                         </div>
                       </td>
@@ -543,7 +525,7 @@ export default function AdminDashboard() {
                       {selectedComplaint.resident_name || 'Resident'}
                     </div>
                     <div className="profile-sub">
-                      Flat {selectedComplaint.flat_number || 'A-301'} • {selectedComplaint.resident_email}
+                      {selectedComplaint.flat_number ? `Flat ${selectedComplaint.flat_number}` : 'Flat not specified'} • {selectedComplaint.resident_email}
                     </div>
                   </div>
                 </div>

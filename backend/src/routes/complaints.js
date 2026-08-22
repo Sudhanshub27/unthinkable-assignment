@@ -14,6 +14,11 @@ router.post('/', authenticate, upload.single('photo'), async (req, res) => {
   if (!category || !description) {
     return res.status(400).json({ error: 'category and description are required' });
   }
+
+  if (!CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: `Invalid category. Must be one of: ${CATEGORIES.join(', ')}` });
+  }
+
   const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
   const client = await pool.connect();
@@ -152,7 +157,146 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 });
 
-// PATCH /api/complaints/:id/status  (admin updates status; records history; sends email)
+// PATCH /api/complaints/:id  (Atomic Admin Triage: status, priority, is_overdue, note in single transaction)
+router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
+  const { status, priority, is_overdue, is_overdue_flag, note } = req.body;
+
+  const VALID_STATUS = ['Open', 'In Progress', 'Resolved'];
+  if (status !== undefined && !VALID_STATUS.includes(status)) {
+    return res.status(400).json({ error: `status must be one of: ${VALID_STATUS.join(', ')}` });
+  }
+
+  const VALID_PRIORITY = ['Low', 'Medium', 'High'];
+  if (priority !== undefined && !VALID_PRIORITY.includes(priority)) {
+    return res.status(400).json({ error: `priority must be one of: ${VALID_PRIORITY.join(', ')}` });
+  }
+
+  const overdueVal = is_overdue !== undefined ? is_overdue : is_overdue_flag;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const existingRes = await client.query(
+      `SELECT c.*, u.name AS resident_name, u.email AS resident_email
+       FROM complaints c JOIN users u ON u.id = c.resident_id WHERE c.id = $1 FOR UPDATE`,
+      [req.params.id]
+    );
+
+    if (existingRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Complaint not found' });
+    }
+
+    const existing = existingRes.rows[0];
+    const oldStatus = existing.status;
+    const oldPriority = existing.priority;
+    const oldOverdueFlag = Boolean(existing.is_overdue_flag);
+
+    const statusChanged = status !== undefined && status !== oldStatus;
+    const priorityChanged = priority !== undefined && priority !== oldPriority;
+    const overdueChanged = overdueVal !== undefined && Boolean(overdueVal) !== oldOverdueFlag;
+    const noteText = note ? note.trim() : '';
+    const hasNote = noteText.length > 0;
+
+    const newStatus = statusChanged ? status : oldStatus;
+    const newPriority = priorityChanged ? priority : oldPriority;
+    const newOverdueFlag = overdueChanged ? Boolean(overdueVal) : oldOverdueFlag;
+
+    let resolvedAt = existing.resolved_at;
+    if (statusChanged) {
+      resolvedAt = newStatus === 'Resolved' ? new Date() : null;
+    }
+
+    // Single atomic update of all complaint fields
+    const updateRes = await client.query(
+      `UPDATE complaints
+       SET status = $1, priority = $2, is_overdue_flag = $3, resolved_at = $4, updated_at = NOW()
+       WHERE id = $5 RETURNING *`,
+      [newStatus, newPriority, newOverdueFlag, resolvedAt, req.params.id]
+    );
+
+    // Track attached note state to avoid note duplication across events
+    let noteAttachedToEvent = false;
+
+    if (statusChanged) {
+      await client.query(
+        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value, note)
+         VALUES ($1, $2, $3, 'status_change', $4, $5, $6)`,
+        [req.params.id, req.user.id, req.user.role, oldStatus, newStatus, hasNote ? noteText : null]
+      );
+      noteAttachedToEvent = true;
+    }
+
+    if (priorityChanged) {
+      await client.query(
+        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value, note)
+         VALUES ($1, $2, $3, 'priority_change', $4, $5, $6)`,
+        [
+          req.params.id,
+          req.user.id,
+          req.user.role,
+          oldPriority,
+          newPriority,
+          hasNote && !noteAttachedToEvent ? noteText : null,
+        ]
+      );
+      noteAttachedToEvent = true;
+    }
+
+    if (overdueChanged) {
+      await client.query(
+        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value, note)
+         VALUES ($1, $2, $3, 'overdue_flag', $4, $5, $6)`,
+        [
+          req.params.id,
+          req.user.id,
+          req.user.role,
+          oldOverdueFlag ? 'Flagged' : 'Normal',
+          newOverdueFlag ? 'Flagged' : 'Normal',
+          hasNote && !noteAttachedToEvent ? noteText : null,
+        ]
+      );
+      noteAttachedToEvent = true;
+    }
+
+    // If only a note was added without any field changes
+    if (hasNote && !noteAttachedToEvent) {
+      await client.query(
+        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, note)
+         VALUES ($1, $2, $3, 'note_added', $4)`,
+        [req.params.id, req.user.id, req.user.role, noteText]
+      );
+    }
+
+    await client.query('COMMIT');
+
+    // Non-blocking email trigger on status change
+    if (statusChanged && existing.resident_email) {
+      const { subject, text } = complaintStatusChangeEmail({
+        residentName: existing.resident_name,
+        complaintId: req.params.id,
+        category: existing.category,
+        oldStatus,
+        newStatus,
+        note: hasNote ? noteText : undefined,
+      });
+      sendEmail({ to: existing.resident_email, subject, text }).catch(() => {});
+    }
+
+    const threshold = await getOverdueThresholdDays();
+    const [annotated] = annotateOverdue(updateRes.rows, threshold);
+    res.json(annotated);
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Atomic triage update failed:', err);
+    res.status(500).json({ error: 'Failed to update complaint' });
+  } finally {
+    client.release();
+  }
+});
+
+// PATCH /api/complaints/:id/status  (Backwards-compatible legacy status route)
 router.patch('/:id/status', authenticate, requireAdmin, async (req, res) => {
   const { status, note } = req.body;
   const VALID = ['Open', 'In Progress', 'Resolved'];
@@ -174,31 +318,41 @@ router.patch('/:id/status', authenticate, requireAdmin, async (req, res) => {
     }
     const existing = existingRes.rows[0];
     const oldStatus = existing.status;
+    const statusChanged = oldStatus !== status;
+    const noteText = note ? note.trim() : '';
+    const hasNote = noteText.length > 0;
 
-    const resolvedAt = status === 'Resolved' ? new Date() : existing.resolved_at;
+    const resolvedAt = status === 'Resolved' ? new Date() : (statusChanged ? null : existing.resolved_at);
     const updateRes = await client.query(
       `UPDATE complaints SET status = $1, resolved_at = $2, updated_at = NOW() WHERE id = $3 RETURNING *`,
       [status, resolvedAt, req.params.id]
     );
 
-    await client.query(
-      `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value, note)
-       VALUES ($1, $2, $3, 'status_change', $4, $5, $6)`,
-      [req.params.id, req.user.id, req.user.role, oldStatus, status, note || null]
-    );
+    if (statusChanged) {
+      await client.query(
+        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value, note)
+         VALUES ($1, $2, $3, 'status_change', $4, $5, $6)`,
+        [req.params.id, req.user.id, req.user.role, oldStatus, status, hasNote ? noteText : null]
+      );
+    } else if (hasNote) {
+      // Avoid Open -> Open redundant event; log note_added instead
+      await client.query(
+        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, note)
+         VALUES ($1, $2, $3, 'note_added', $4)`,
+        [req.params.id, req.user.id, req.user.role, noteText]
+      );
+    }
 
     await client.query('COMMIT');
 
-    // Email is best-effort: fire after commit so a slow/broken SMTP provider
-    // never rolls back a valid status change.
-    if (oldStatus !== status) {
+    if (statusChanged) {
       const { subject, text } = complaintStatusChangeEmail({
         residentName: existing.resident_name,
         complaintId: req.params.id,
         category: existing.category,
         oldStatus,
         newStatus: status,
-        note,
+        note: hasNote ? noteText : undefined,
       });
       sendEmail({ to: existing.resident_email, subject, text }).catch(() => {});
     }
@@ -213,7 +367,7 @@ router.patch('/:id/status', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
-// PATCH /api/complaints/:id/priority  (admin sets priority)
+// PATCH /api/complaints/:id/priority  (Backwards-compatible legacy priority route)
 router.patch('/:id/priority', authenticate, requireAdmin, async (req, res) => {
   const { priority } = req.body;
   const VALID = ['Low', 'Medium', 'High'];
@@ -229,15 +383,21 @@ router.patch('/:id/priority', authenticate, requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Complaint not found' });
     }
     const oldPriority = existingRes.rows[0].priority;
+    const priorityChanged = oldPriority !== priority;
+
     const updateRes = await client.query(
       `UPDATE complaints SET priority = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
       [priority, req.params.id]
     );
-    await client.query(
-      `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value)
-       VALUES ($1, $2, $3, 'priority_change', $4, $5)`,
-      [req.params.id, req.user.id, req.user.role, oldPriority, priority]
-    );
+
+    if (priorityChanged) {
+      await client.query(
+        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value)
+         VALUES ($1, $2, $3, 'priority_change', $4, $5)`,
+        [req.params.id, req.user.id, req.user.role, oldPriority, priority]
+      );
+    }
+
     await client.query('COMMIT');
     res.json(updateRes.rows[0]);
   } catch (err) {
@@ -249,7 +409,7 @@ router.patch('/:id/priority', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
-// PATCH /api/complaints/:id/overdue-flag  (admin manually flags/unflags as overdue)
+// PATCH /api/complaints/:id/overdue-flag  (Backwards-compatible legacy overdue route)
 router.patch('/:id/overdue-flag', authenticate, requireAdmin, async (req, res) => {
   const { flag } = req.body; // boolean
   try {

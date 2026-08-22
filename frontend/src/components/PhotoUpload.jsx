@@ -1,8 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function PhotoUpload({ file, preview, onChange, onRemove, error, setError }) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith('blob:')) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -24,7 +32,11 @@ export default function PhotoUpload({ file, preview, onChange, onRemove, error, 
       return;
     }
     if (setError) setError('');
-    onChange(selectedFile, URL.createObjectURL(selectedFile));
+    if (preview && preview.startsWith('blob:')) {
+      URL.revokeObjectURL(preview);
+    }
+    const objectUrl = URL.createObjectURL(selectedFile);
+    onChange(selectedFile, objectUrl);
   };
 
   const handleDrop = (e) => {
@@ -83,6 +95,9 @@ export default function PhotoUpload({ file, preview, onChange, onRemove, error, 
             className="photo-preview-remove"
             onClick={(e) => {
               e.stopPropagation();
+              if (preview && preview.startsWith('blob:')) {
+                URL.revokeObjectURL(preview);
+              }
               onRemove();
             }}
             title="Remove photo"

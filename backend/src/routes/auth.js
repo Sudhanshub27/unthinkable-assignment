@@ -2,9 +2,9 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
+const { getJwtSecret } = require('../utils/jwt');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'society-tracker-secret-key-2026';
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
     const user = result.rows[0];
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email, name: user.name },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: '7d' }
     );
     res.status(201).json({ token, user });
@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
     }
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email, name: user.name },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: '7d' }
     );
     res.json({
