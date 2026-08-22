@@ -57,7 +57,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const { totalComplaints = 0, byCategory = [], byStatus = [], overdueCount = 0 } = stats || {};
+  const { totalComplaints = 0, byCategory = [], byStatus = [], overdueCount = 0, recentActivity = [] } = stats || {};
   const total = Number(totalComplaints || 0);
 
   const getStatusCount = (stName) => {

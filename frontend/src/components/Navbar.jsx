@@ -9,6 +9,7 @@ export default function Navbar({ onToggleSidebar }) {
 
   const getPageTitle = () => {
     switch (location.pathname) {
+      case '/complaints':
       case '/':
         return { title: 'Resident Portal', sub: 'Raise maintenance issues and track status history' };
       case '/admin':

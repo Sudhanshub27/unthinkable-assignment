@@ -57,8 +57,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           {user.role === 'resident' && (
             <>
               <Link
-                to="/"
-                className={`sidebar-link ${isActive('/') ? 'active' : ''}`}
+                to="/complaints"
+                className={`sidebar-link ${isActive('/complaints') ? 'active' : ''}`}
                 onClick={closeDrawer}
               >
                 <span className="link-icon">📋</span>

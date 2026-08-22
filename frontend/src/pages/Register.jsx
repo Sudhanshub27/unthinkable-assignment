@@ -29,7 +29,7 @@ export default function Register() {
       });
 
       addToast(`Account created successfully! Welcome, ${user.name}.`, 'success');
-      navigate('/');
+      navigate('/complaints');
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || 'Registration failed. Please try again.');

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -9,20 +9,9 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { user, login, logout } = useAuth();
+  const { login, logout } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-
-  // If user is already authenticated, redirect immediately
-  useEffect(() => {
-    if (user) {
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
-    }
-  }, [user, navigate]);
 
   function handleResetSession() {
     logout();
@@ -43,7 +32,7 @@ export default function Login() {
       if (loggedUser.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate('/', { replace: true });
+        navigate('/complaints', { replace: true });
       }
     } catch (err) {
       console.error('Login Error:', err);

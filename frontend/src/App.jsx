@@ -10,7 +10,6 @@ import AdminComplaints from './pages/AdminComplaints';
 import AdminDashboard from './pages/AdminDashboard';
 import NoticeBoard from './pages/NoticeBoard';
 import { ToastProvider } from './context/ToastContext';
-import { useAuth } from './context/AuthContext';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,45 +21,86 @@ export default function App() {
   );
 }
 
-function HomeRoute() {
-  const { user } = useAuth();
-  if (user?.role === 'admin') {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-  return <ResidentComplaints />;
-}
-
-function AppShell({ sidebarOpen, setSidebarOpen }) {
-  const { user } = useAuth();
-
-  if (!user) {
-    return (
-      <div className="auth-standalone-wrapper">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<Login />} />
-        </Routes>
-      </div>
-    );
-  }
-
+function AppLayout({ sidebarOpen, setSidebarOpen, children }) {
   return (
     <div className="app-layout">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       <div className="app-main-content">
         <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="content-viewport">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/" element={<ProtectedRoute><HomeRoute /></ProtectedRoute>} />
-            <Route path="/notices" element={<ProtectedRoute><NoticeBoard /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute adminOnly><AdminComplaints /></ProtectedRoute>} />
-            <Route path="/admin/dashboard" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
-          </Routes>
-        </main>
+        <main className="content-viewport">{children}</main>
       </div>
     </div>
+  );
+}
+
+function AppShell({ sidebarOpen, setSidebarOpen }) {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div className="auth-standalone-wrapper">
+            <Login />
+          </div>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <div className="auth-standalone-wrapper">
+            <Login />
+          </div>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <div className="auth-standalone-wrapper">
+            <Register />
+          </div>
+        }
+      />
+      <Route
+        path="/complaints"
+        element={
+          <ProtectedRoute>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <ResidentComplaints />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notices"
+        element={
+          <ProtectedRoute>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <NoticeBoard />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <AdminComplaints />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <AdminDashboard />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
