@@ -13,13 +13,16 @@ import AdminSettings from './pages/AdminSettings';
 import NoticeBoard from './pages/NoticeBoard';
 import Profile from './pages/Profile';
 import { ToastProvider } from './context/ToastContext';
+import { SettingsProvider } from './context/SettingsContext';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <ToastProvider>
-      <AppShell sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <SettingsProvider>
+        <AppShell sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      </SettingsProvider>
     </ToastProvider>
   );
 }

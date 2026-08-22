@@ -77,51 +77,64 @@ function isValidImageBuffer(buffer) {
   }
 
   return false;
+const pool = require('../db/pool');
+
+async function getMaxUploadSizeMb() {
+  try {
+    const result = await pool.query("SELECT value FROM settings WHERE key = 'max_upload_size_mb'");
+    if (result.rows.length > 0) {
+      const parsed = parseInt(result.rows[0].value, 10);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+  } catch (err) {
+    // Fall back to default if query fails
+  }
+  return 5;
 }
 
-const multerUpload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-});
-
 function singlePhoto(req, res, next) {
-  multerUpload.single('photo')(req, res, (err) => {
-    if (err) {
-      if (err instanceof multer.MulterError) {
-        if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({ error: 'File size exceeds maximum limit of 5MB.' });
+  getMaxUploadSizeMb().then((maxMb) => {
+    const dynamicUpload = multer({
+      storage,
+      fileFilter,
+      limits: { fileSize: maxMb * 1024 * 1024 },
+    });
+
+    dynamicUpload.single('photo')(req, res, (err) => {
+      if (err) {
+        if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ error: `File size exceeds the configured maximum limit of ${maxMb}MB.` });
         }
+        return res.status(400).json({ error: err.message || 'File upload failed.' });
       }
-      return res.status(400).json({ error: err.message || 'File upload failed.' });
-    }
 
-    if (!req.file) {
-      return next();
-    }
+      if (!req.file) {
+        return next();
+      }
 
-    const filePath = req.file.path;
-    try {
-      const fd = fs.openSync(filePath, 'r');
-      const buffer = Buffer.alloc(16);
-      fs.readSync(fd, buffer, 0, 16, 0);
-      fs.closeSync(fd);
+      const filePath = req.file.path;
+      try {
+        const fd = fs.openSync(filePath, 'r');
+        const buffer = Buffer.alloc(16);
+        fs.readSync(fd, buffer, 0, 16, 0);
+        fs.closeSync(fd);
 
-      if (!isValidImageBuffer(buffer)) {
+        if (!isValidImageBuffer(buffer)) {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+          return res.status(400).json({ error: 'Uploaded file is not a valid image file.' });
+        }
+
+        next();
+      } catch (readErr) {
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
-        return res.status(400).json({ error: 'Uploaded file is not a valid image file.' });
+        return res.status(400).json({ error: 'Failed to validate uploaded file signature.' });
       }
-
-      next();
-    } catch (readErr) {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-      return res.status(400).json({ error: 'Failed to validate uploaded file signature.' });
-    }
-  });
+    });
+  }).catch(() => next());
 }
 
 module.exports = {

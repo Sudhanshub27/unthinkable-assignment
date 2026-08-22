@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
+import { useSettings } from '../context/SettingsContext';
 import PageHeader from '../components/PageHeader';
 import SVGIcon from '../components/SVGIcon';
 import { SkeletonCard } from '../components/Skeletons';
 
 export default function AdminSettings() {
   const { addToast } = useToast();
+  const { fetchSettings } = useSettings();
 
   const [settings, setSettings] = useState({
     overdue_threshold_days: '5',
@@ -64,6 +66,7 @@ export default function AdminSettings() {
       if (res.data) {
         setSettings((prev) => ({ ...prev, ...res.data }));
       }
+      await fetchSettings();
       addToast('Society configuration updated successfully!', 'success');
     } catch (err) {
       console.error(err);

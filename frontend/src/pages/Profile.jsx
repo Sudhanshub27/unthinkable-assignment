@@ -1,10 +1,12 @@
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 import PageHeader from '../components/PageHeader';
 import SVGIcon from '../components/SVGIcon';
 import { formatFlatNumber } from '../utils/formatters';
 
 export default function Profile() {
   const { user } = useAuth();
+  const { settings } = useSettings();
 
   if (!user) return null;
 
@@ -132,14 +134,56 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Society Helplines & Office Contact Info */}
+        <div className="content-card">
+          <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid var(--border-color)', paddingBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <SVGIcon name="shield" size={18} color="#2563EB" />
+            <span>Society Office & Emergency Helplines</span>
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+            <div className="profile-item" style={{ background: 'var(--bg-page)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
+                <SVGIcon name="file-text" size={14} color="#2563EB" />
+                <span>Society Association</span>
+              </div>
+              <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                {settings.society_name || 'Green Valley Co-Op Housing Society'}
+              </div>
+            </div>
+
+            <div className="profile-item" style={{ background: 'var(--bg-page)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
+                <SVGIcon name="mail" size={14} color="#059669" />
+                <span>Management Office Email</span>
+              </div>
+              <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                <a href={`mailto:${settings.support_email}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                  {settings.support_email || 'office@greenvalley.com'}
+                </a>
+              </div>
+            </div>
+
+            <div className="profile-item" style={{ background: 'var(--bg-page)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
+                <SVGIcon name="alert-triangle" size={14} color="#DC2626" />
+                <span>24/7 Security Helpline</span>
+              </div>
+              <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#DC2626' }}>
+                {settings.emergency_phone || '+91 98765 43210'}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Account Security Card */}
         <div className="content-card">
           <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <SVGIcon name="shield" size={16} color="#2563EB" />
-            <span>Account Security</span>
+            <SVGIcon name="lock" size={16} color="#2563EB" />
+            <span>Account Security & Session</span>
           </h3>
           <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-            Your account is protected using secure authentication.
+            Your account is authenticated via encrypted JSON Web Tokens (JWT) with RBAC access control.
           </p>
         </div>
       </div>

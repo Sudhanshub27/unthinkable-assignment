@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { useSettings } from '../context/SettingsContext';
 import SVGIcon from './SVGIcon';
 
 export default function PhotoUpload({ file, preview, onChange, onRemove, error, setError }) {
+  const { settings } = useSettings();
+  const maxMb = Number(settings.max_upload_size_mb) || 5;
+  const maxBytes = maxMb * 1024 * 1024;
+
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef(null);
 
@@ -28,8 +33,8 @@ export default function PhotoUpload({ file, preview, onChange, onRemove, error, 
       if (setError) setError('Please upload a valid image file (JPEG, PNG, WEBP, GIF).');
       return;
     }
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      if (setError) setError('Photo size must be under 5MB.');
+    if (selectedFile.size > maxBytes) {
+      if (setError) setError(`Photo size exceeds the maximum limit of ${maxMb}MB.`);
       return;
     }
     if (setError) setError('');
@@ -84,7 +89,7 @@ export default function PhotoUpload({ file, preview, onChange, onRemove, error, 
           <div className="dropzone-text">
             <span className="dropzone-link">Click to upload photo</span> or drag & drop file here
           </div>
-          <div className="dropzone-hint">PNG, JPG, WEBP or GIF up to 5MB (Optional)</div>
+          <div className="dropzone-hint">PNG, JPG, WEBP or GIF up to {maxMb}MB (Optional)</div>
         </div>
       ) : (
         <div className="photo-preview-card">

@@ -236,23 +236,25 @@ Every status transition, priority modification, or manual overdue flag creates a
 
 ---
 
-## ⏱️ Overdue SLA Engine
+## ⚙️ Society Governance & Settings Hub
 
-The system calculates overdue status **dynamically on demand**:
-- The administrative overdue threshold (`overdue_threshold_days`) is stored in the `settings` table and editable via `PUT /api/settings/overdue-threshold`.
-- When complaints are fetched, `annotateOverdue()` dynamically compares `created_at` against the active threshold setting.
-- This dynamic evaluation eliminates the need for background cron schedulers and guarantees that threshold changes immediately reflect across all complaints across the application.
+The system features an administrative **Society Governance Hub** backed by PostgreSQL key-value storage (`settings` table):
+- **Society Identity & Branding**: Configurable `society_name` rendered across the application header/sidebar.
+- **Emergency Helplines**: Dynamic `support_email` and `emergency_phone` surfaced to residents on their Profile and help screens.
+- **Dynamic SLA Threshold**: Configurable `overdue_threshold_days` (default 5 days) dynamically evaluated across all complaint listings.
+- **Dynamic Upload Size Limit**: Configurable `max_upload_size_mb` enforced on client dropzones and server-side Multer validation.
+- **Email Notification Toggle**: Admin setting (`email_notifications`) allowing instant enabling or suppressing of outbound status emails.
 
 ---
 
-## 📧 Email Notification System
+## 📧 Email Notification System (Resend & SMTP)
 
-Implemented using **Nodemailer** for asynchronous, non-blocking notifications:
-1. **Status Update Alerts**: Sent to the complaint author when an admin modifies complaint status.
-2. **Important Community Announcements**: Broadcast to all registered residents when an important notice is posted.
+Implemented for asynchronous, non-blocking notifications on status transitions and important notices.
 
-### Safe Fallback Mechanism
-If SMTP environment variables (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`) are omitted, `sendEmail()` gracefully operates in **mock mode**, logging email contents cleanly to the server console. This allows local development and demonstration without requiring active mail server credentials.
+### Configuration Modes
+1. **Resend API Integration (Recommended)**: Set `RESEND_API_KEY` (and optional `RESEND_FROM`) in your environment variables for instant serverless email delivery.
+2. **SMTP Integration**: Provide `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM` for custom mail server configurations.
+3. **Safe Console Mock Mode**: If neither `RESEND_API_KEY` nor `SMTP_HOST` is set, `sendEmail()` operates in mock mode, logging email payloads to the server console without failing requests.
 
 ---
 

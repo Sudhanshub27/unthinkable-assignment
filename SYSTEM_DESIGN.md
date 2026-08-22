@@ -67,9 +67,4 @@ frontend.
 Two triggers fire email: a complaint's status changing, and a new *important* notice being
 posted. Both are implemented as **best-effort, non-blocking side effects**: the database write
 (status update, or notice insert) commits first inside its own transaction, and the email send is
-fired afterward without being awaited into the response path. If the SMTP provider times out or
-rejects, the error is logged but never rolled back into the underlying complaint/notice change —
-a flaky mail provider should never make a legitimate status update fail. If no SMTP credentials
-are configured, `sendEmail()` falls back to logging the message to the console, so the entire
-app — including the "resident gets notified" flow — is demoable and testable without needing a
-real mail account.
+fired afterward without being awaited into the response path. The system supports direct **Resend API Integration** (`RESEND_API_KEY`) as well as standard **SMTP**. Outbound status notifications respect the admin's `email_notifications` setting stored in the `settings` table. If no provider is configured, `sendEmail()` falls back to logging the message to the console, so the entire app is fully demoable without external dependencies.

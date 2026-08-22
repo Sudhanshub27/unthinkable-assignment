@@ -285,17 +285,25 @@ router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
 
     await client.query('COMMIT');
 
-    // Non-blocking email trigger on status change
+    // Non-blocking email trigger on status change (respects admin email_notifications setting)
     if (statusChanged && existing.resident_email) {
-      const { subject, text } = complaintStatusChangeEmail({
-        residentName: existing.resident_name,
-        complaintId: req.params.id,
-        category: existing.category,
-        oldStatus,
-        newStatus,
-        note: hasNote ? noteText : undefined,
-      });
-      sendEmail({ to: existing.resident_email, subject, text }).catch(() => {});
+      try {
+        const notifSetting = await pool.query("SELECT value FROM settings WHERE key = 'email_notifications'");
+        const isEnabled = notifSetting.rows.length === 0 || notifSetting.rows[0].value === 'enabled';
+        if (isEnabled) {
+          const { subject, text } = complaintStatusChangeEmail({
+            residentName: existing.resident_name,
+            complaintId: req.params.id,
+            category: existing.category,
+            oldStatus,
+            newStatus,
+            note: hasNote ? noteText : undefined,
+          });
+          sendEmail({ to: existing.resident_email, subject, text }).catch(() => {});
+        }
+      } catch (emailErr) {
+        console.error('Email notification error check failed:', emailErr);
+      }
     }
 
     const threshold = await getOverdueThresholdDays();

@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 import SVGIcon from './SVGIcon';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const { user, logout } = useAuth();
+  const { settings } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -43,7 +45,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               <SVGIcon name="clipboard" size={22} color="#2563EB" />
             </div>
             <div className="brand-text">
-              <div className="brand-name">Society Notebook</div>
+              <div className="brand-name" style={{ fontSize: '0.9375rem', fontWeight: 700, lineHeight: 1.2, color: '#ffffff' }}>
+                {settings.society_name || 'Society Notebook'}
+              </div>
               <div className="brand-sub">Management Suite</div>
             </div>
           </div>
