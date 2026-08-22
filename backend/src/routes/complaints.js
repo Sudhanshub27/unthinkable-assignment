@@ -125,8 +125,17 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+function isValidId(id) {
+  const num = Number(id);
+  return Number.isInteger(num) && num > 0 && String(num) === String(id);
+}
+
 // GET /api/complaints/:id  (detail + full history; resident can view own, admin can view any)
 router.get('/:id', authenticate, async (req, res) => {
+  if (!isValidId(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid complaint id' });
+  }
+
   try {
     const result = await pool.query(
       `SELECT c.*, u.name AS resident_name, u.flat_number, u.email AS resident_email
@@ -159,6 +168,10 @@ router.get('/:id', authenticate, async (req, res) => {
 
 // PATCH /api/complaints/:id  (Atomic Admin Triage: status, priority, is_overdue, note in single transaction)
 router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
+  if (!isValidId(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid complaint id' });
+  }
+
   const { status, priority, is_overdue, is_overdue_flag, note } = req.body;
 
   const VALID_STATUS = ['Open', 'In Progress', 'Resolved'];
@@ -293,135 +306,6 @@ router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to update complaint' });
   } finally {
     client.release();
-  }
-});
-
-// PATCH /api/complaints/:id/status  (Backwards-compatible legacy status route)
-router.patch('/:id/status', authenticate, requireAdmin, async (req, res) => {
-  const { status, note } = req.body;
-  const VALID = ['Open', 'In Progress', 'Resolved'];
-  if (!VALID.includes(status)) {
-    return res.status(400).json({ error: `status must be one of: ${VALID.join(', ')}` });
-  }
-
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const existingRes = await client.query(
-      `SELECT c.*, u.name AS resident_name, u.email AS resident_email
-       FROM complaints c JOIN users u ON u.id = c.resident_id WHERE c.id = $1 FOR UPDATE`,
-      [req.params.id]
-    );
-    if (existingRes.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'Complaint not found' });
-    }
-    const existing = existingRes.rows[0];
-    const oldStatus = existing.status;
-    const statusChanged = oldStatus !== status;
-    const noteText = note ? note.trim() : '';
-    const hasNote = noteText.length > 0;
-
-    const resolvedAt = status === 'Resolved' ? new Date() : (statusChanged ? null : existing.resolved_at);
-    const updateRes = await client.query(
-      `UPDATE complaints SET status = $1, resolved_at = $2, updated_at = NOW() WHERE id = $3 RETURNING *`,
-      [status, resolvedAt, req.params.id]
-    );
-
-    if (statusChanged) {
-      await client.query(
-        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value, note)
-         VALUES ($1, $2, $3, 'status_change', $4, $5, $6)`,
-        [req.params.id, req.user.id, req.user.role, oldStatus, status, hasNote ? noteText : null]
-      );
-    } else if (hasNote) {
-      // Avoid Open -> Open redundant event; log note_added instead
-      await client.query(
-        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, note)
-         VALUES ($1, $2, $3, 'note_added', $4)`,
-        [req.params.id, req.user.id, req.user.role, noteText]
-      );
-    }
-
-    await client.query('COMMIT');
-
-    if (statusChanged) {
-      const { subject, text } = complaintStatusChangeEmail({
-        residentName: existing.resident_name,
-        complaintId: req.params.id,
-        category: existing.category,
-        oldStatus,
-        newStatus: status,
-        note: hasNote ? noteText : undefined,
-      });
-      sendEmail({ to: existing.resident_email, subject, text }).catch(() => {});
-    }
-
-    res.json(updateRes.rows[0]);
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error(err);
-    res.status(500).json({ error: 'Failed to update status' });
-  } finally {
-    client.release();
-  }
-});
-
-// PATCH /api/complaints/:id/priority  (Backwards-compatible legacy priority route)
-router.patch('/:id/priority', authenticate, requireAdmin, async (req, res) => {
-  const { priority } = req.body;
-  const VALID = ['Low', 'Medium', 'High'];
-  if (!VALID.includes(priority)) {
-    return res.status(400).json({ error: `priority must be one of: ${VALID.join(', ')}` });
-  }
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const existingRes = await client.query('SELECT priority FROM complaints WHERE id = $1', [req.params.id]);
-    if (existingRes.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'Complaint not found' });
-    }
-    const oldPriority = existingRes.rows[0].priority;
-    const priorityChanged = oldPriority !== priority;
-
-    const updateRes = await client.query(
-      `UPDATE complaints SET priority = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-      [priority, req.params.id]
-    );
-
-    if (priorityChanged) {
-      await client.query(
-        `INSERT INTO complaint_history (complaint_id, actor_id, actor_role, change_type, old_value, new_value)
-         VALUES ($1, $2, $3, 'priority_change', $4, $5)`,
-        [req.params.id, req.user.id, req.user.role, oldPriority, priority]
-      );
-    }
-
-    await client.query('COMMIT');
-    res.json(updateRes.rows[0]);
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error(err);
-    res.status(500).json({ error: 'Failed to update priority' });
-  } finally {
-    client.release();
-  }
-});
-
-// PATCH /api/complaints/:id/overdue-flag  (Backwards-compatible legacy overdue route)
-router.patch('/:id/overdue-flag', authenticate, requireAdmin, async (req, res) => {
-  const { flag } = req.body; // boolean
-  try {
-    const result = await pool.query(
-      `UPDATE complaints SET is_overdue_flag = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-      [Boolean(flag), req.params.id]
-    );
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Complaint not found' });
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to update overdue flag' });
   }
 });
 

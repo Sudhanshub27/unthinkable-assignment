@@ -16,7 +16,7 @@ A full-stack apartment society maintenance platform that allows residents to rai
 
 ### 👤 Resident Capabilities
 * **Account Registration & Authentication**: Secure sign-up with flat number designation and JWT token session management.
-* **Complaint Submission**: Create maintenance requests across categories (Plumbing, Electrical, Elevator, Security, Common Area, General) with detailed descriptions and optional photo attachments.
+* **Complaint Submission**: Create maintenance requests across categories (Plumbing, Electrical, Cleaning, Security, Lift, Parking, Other) with detailed descriptions and optional photo attachments.
 * **Secure Photo Uploads**: Multipart image uploading with binary magic-byte validation and instant preview lightbox.
 * **Live Complaint Tracking**: Monitor real-time status (`Open`, `In Progress`, `Resolved`), priority levels, and SLA age.
 * **Audit History Timeline**: Transparent, read-only inspection of every status transition, priority change, and admin note.
