@@ -27,10 +27,10 @@ async function seed() {
     console.log('✅ Demo accounts seeded successfully:');
     console.log('   Admin:    admin@society.com    / Admin@123');
     console.log('   Resident: resident@society.com / Resident@123');
-  } catch (err) {
-    console.error('Seed failed:', err);
-  } finally {
     process.exit(0);
+  } catch (err) {
+    console.error('❌ Seed failed:', err);
+    process.exit(1);
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -9,30 +9,56 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { user, login, logout } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+
+  // If user is already authenticated, redirect immediately
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, navigate]);
+
+  function handleResetSession() {
+    logout();
+    setEmail('');
+    setPassword('');
+    setError('');
+    addToast('Cleared cached session data.', 'info');
+  }
 
   async function performLogin(loginEmail, loginPassword) {
     setError('');
     setLoading(true);
 
     try {
-      const user = await login(loginEmail, loginPassword);
-      addToast(`Welcome back, ${user.name}!`, 'success');
+      const loggedUser = await login(loginEmail, loginPassword);
+      addToast(`Welcome back, ${loggedUser.name}!`, 'success');
 
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard');
+      if (loggedUser.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate('/');
+        navigate('/', { replace: true });
       }
     } catch (err) {
-      console.error(err);
-      const errMsg =
-        err.response?.data?.error ||
-        'Invalid email or password. Please check your credentials.';
+      console.error('Login Error:', err);
+      let errMsg = 'Sign in failed. Please check your credentials.';
+      if (!err.response) {
+        errMsg = 'Backend server is unavailable (connection refused). Make sure backend is running on port 4000.';
+      } else if (err.response.status === 401) {
+        errMsg = err.response.data?.error || 'Invalid email or password.';
+      } else if (err.response.status === 403) {
+        errMsg = err.response.data?.error || 'Access forbidden for this role.';
+      } else if (err.response.data?.error) {
+        errMsg = err.response.data.error;
+      }
       setError(errMsg);
-      addToast('Sign in failed.', 'error');
+      addToast(errMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -66,7 +92,7 @@ export default function Login() {
             <input
               type="email"
               className="form-control"
-              placeholder="e.g. resident@society.com"
+              placeholder="e.g. admin@society.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -111,11 +137,21 @@ export default function Login() {
           </button>
         </div>
 
-        <div className="auth-footer">
-          Don't have a resident account?{' '}
-          <Link to="/register" className="auth-link">
-            Register Here
-          </Link>
+        <div className="auth-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>
+            Don't have an account?{' '}
+            <Link to="/register" className="auth-link">
+              Register
+            </Link>
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-xs text-muted"
+            onClick={handleResetSession}
+            title="Purge cached browser session"
+          >
+            🧹 Reset Session
+          </button>
         </div>
       </div>
     </div>
