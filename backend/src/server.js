@@ -14,14 +14,21 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 const corsOrigin = process.env.CORS_ORIGIN;
-if (!corsOrigin && process.env.NODE_ENV === 'production') {
-  console.error('FATAL ERROR: CORS_ORIGIN environment variable is not defined in production!');
-  process.exit(1);
-}
 
 app.use(
   cors({
-    origin: corsOrigin || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (!corsOrigin || corsOrigin === '*') return callback(null, true);
+      
+      const allowedOrigins = corsOrigin.split(',').map((o) => o.trim().replace(/\/$/, ''));
+      const cleanOrigin = origin.replace(/\/$/, '');
+      
+      if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
