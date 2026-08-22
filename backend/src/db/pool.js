@@ -7,9 +7,24 @@ const isPgRequested = process.env.DATABASE_URL && (process.env.DATABASE_URL.star
 let poolInstance = null;
 
 if (isPgRequested) {
+  let connectionString = process.env.DATABASE_URL;
+  const isRemotePg = connectionString.includes('render.com') ||
+                     connectionString.includes('amazonaws.com') ||
+                     process.env.DATABASE_SSL === 'true' ||
+                     (!connectionString.includes('localhost') && !connectionString.includes('127.0.0.1'));
+  
+  const isSslDisabled = process.env.DATABASE_SSL === 'false';
+
+  if (isRemotePg && !isSslDisabled) {
+    process.env.PGSSLMODE = 'require';
+    if (!connectionString.includes('ssl=')) {
+      connectionString += (connectionString.includes('?') ? '&' : '?') + 'ssl=true';
+    }
+  }
+
   const pgPool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    connectionString,
+    ssl: (isRemotePg && !isSslDisabled) ? { rejectUnauthorized: false } : false,
   });
 
   poolInstance = {

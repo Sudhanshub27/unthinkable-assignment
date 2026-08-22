@@ -40,6 +40,28 @@ router.post('/', authenticate, upload.single('photo'), async (req, res) => {
 
     await client.query('COMMIT');
     res.status(201).json(complaint);
+
+    // Asynchronously notify all admins of new complaint creation
+    setImmediate(async () => {
+      try {
+        const admins = await pool.query("SELECT id, name, email FROM users WHERE role = 'admin'");
+        for (const admin of admins.rows) {
+          await pool.query(
+            `INSERT INTO notifications (user_id, type, title, message, complaint_id)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+              admin.id,
+              'new_complaint',
+              `New Complaint #${complaint.id} (${category})`,
+              `A new complaint "${category}" was submitted by ${req.user.name || 'a resident'}.`,
+              complaint.id,
+            ]
+          );
+        }
+      } catch (notifErr) {
+        console.error('Failed to create admin notification for new complaint:', notifErr);
+      }
+    });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error(err);
