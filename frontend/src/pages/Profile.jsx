@@ -8,13 +8,15 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const flatDisplay = formatFlatNumber(user.flat_number);
+  const flatDisplay = user.role === 'resident'
+    ? (user.flat_number ? formatFlatNumber(user.flat_number) : 'Flat not specified')
+    : (user.flat_number ? formatFlatNumber(user.flat_number) : 'N/A (Admin)');
 
   return (
     <div className="page-container profile-page-container">
       <PageHeader
-        title="Account Profile & Credentials"
-        subtitle="Manage your society resident account parameters and profile details."
+        title="Profile"
+        subtitle="Manage your account parameters and view profile information."
       />
 
       <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24, maxWidth: 800 }}>
@@ -59,19 +61,21 @@ export default function Profile() {
                   {user.role}
                 </span>
 
-                <span
-                  style={{
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: 'var(--text-secondary)',
-                    background: 'var(--bg-page)',
-                    border: '1px solid var(--border-color)',
-                    padding: '2px 8px',
-                    borderRadius: 'var(--radius-sm)',
-                  }}
-                >
-                  {flatDisplay}
-                </span>
+                {user.role === 'resident' && (
+                  <span
+                    style={{
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      color: 'var(--text-secondary)',
+                      background: 'var(--bg-page)',
+                      border: '1px solid var(--border-color)',
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-sm)',
+                    }}
+                  >
+                    {flatDisplay}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -104,15 +108,17 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="profile-item" style={{ background: 'var(--bg-page)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
-                <SVGIcon name="clipboard" size={14} />
-                <span>Flat Number</span>
+            {user.role === 'resident' && (
+              <div className="profile-item" style={{ background: 'var(--bg-page)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
+                  <SVGIcon name="clipboard" size={14} />
+                  <span>Flat Number</span>
+                </div>
+                <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                  {flatDisplay}
+                </div>
               </div>
-              <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                {flatDisplay}
-              </div>
-            </div>
+            )}
 
             <div className="profile-item" style={{ background: 'var(--bg-page)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
@@ -124,6 +130,17 @@ export default function Profile() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Account Security Card */}
+        <div className="content-card">
+          <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <SVGIcon name="shield" size={16} color="#2563EB" />
+            <span>Account Security</span>
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            Your account is protected using secure authentication.
+          </p>
         </div>
       </div>
     </div>

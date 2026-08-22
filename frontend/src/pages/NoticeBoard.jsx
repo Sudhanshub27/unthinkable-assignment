@@ -30,7 +30,7 @@ export default function NoticeBoard() {
       setNotices(res.data || []);
     } catch (err) {
       console.error(err);
-      addToast('Failed to load society notices.', 'error');
+      addToast('Unable to load notices.', 'error');
     } finally {
       setLoading(false);
     }
@@ -39,6 +39,17 @@ export default function NoticeBoard() {
   useEffect(() => {
     loadNotices();
   }, []);
+
+  // Keyboard Escape listener for modal
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && showCreateModal) {
+        setShowCreateModal(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showCreateModal]);
 
   async function handleCreateNotice(e) {
     e.preventDefault();
@@ -49,7 +60,7 @@ export default function NoticeBoard() {
       return;
     }
     if (!body.trim()) {
-      setFormError('Please enter the notice details/content.');
+      setFormError('Please enter announcement details.');
       return;
     }
 
@@ -62,9 +73,7 @@ export default function NoticeBoard() {
       });
 
       addToast(
-        isImportant
-          ? 'Important notice published and broadcasted to residents!'
-          : 'Notice published successfully!',
+        isImportant ? 'Important notice published' : 'Notice published successfully',
         'success'
       );
 
@@ -95,7 +104,7 @@ export default function NoticeBoard() {
     }
   }
 
-  // Sort important notices to top
+  // Sort important notices to top, then chronological
   const sortedNotices = [...notices].sort((a, b) => {
     if (a.is_important && !b.is_important) return -1;
     if (!a.is_important && b.is_important) return 1;
@@ -107,8 +116,8 @@ export default function NoticeBoard() {
       {/* Page Header */}
       <PageHeader
         title="Notice Board"
-        subtitle="Stay updated with important society announcements."
-        actionText={user?.role === 'admin' ? 'Publish Announcement' : undefined}
+        subtitle="Stay updated with society announcements and important information."
+        actionText={user?.role === 'admin' ? 'Create Notice' : undefined}
         onAction={user?.role === 'admin' ? () => setShowCreateModal(true) : undefined}
         actionIcon="plus"
       />
@@ -120,8 +129,8 @@ export default function NoticeBoard() {
         <EmptyState
           icon="megaphone"
           title="No notices yet"
-          description="There are no society announcements at the moment."
-          actionText={user?.role === 'admin' ? 'Publish Announcement' : undefined}
+          description="Society announcements will appear here."
+          actionText={user?.role === 'admin' ? 'Create Notice' : undefined}
           onAction={user?.role === 'admin' ? () => setShowCreateModal(true) : undefined}
         />
       ) : (
@@ -149,7 +158,7 @@ export default function NoticeBoard() {
           >
             <div className="modal-header">
               <h2 id="create-notice-title" className="modal-title">
-                Publish Society Announcement
+                Create Notice
               </h2>
               <button
                 className="modal-close-btn"
@@ -172,7 +181,7 @@ export default function NoticeBoard() {
                     id="notice-title"
                     type="text"
                     className="form-control"
-                    placeholder="e.g. Scheduled Lift Maintenance & Power Outage"
+                    placeholder="e.g. Scheduled Lift Maintenance"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
@@ -181,20 +190,20 @@ export default function NoticeBoard() {
 
                 <div className="form-group">
                   <label htmlFor="notice-body" className="form-label">
-                    Announcement Details <span className="text-danger">*</span>
+                    Announcement Content <span className="text-danger">*</span>
                   </label>
                   <textarea
                     id="notice-body"
                     className="form-control"
                     rows={5}
-                    placeholder="Provide full details regarding the maintenance schedule or policy update..."
+                    placeholder="Provide full details regarding the society update..."
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
                     required
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="form-group mb-0">
                   <label className="checkbox-label">
                     <input
                       type="checkbox"
@@ -216,7 +225,7 @@ export default function NoticeBoard() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Publishing...' : 'Publish Announcement'}
+                  {submitting ? 'Publishing...' : 'Create Notice'}
                 </button>
               </div>
             </form>

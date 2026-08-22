@@ -14,7 +14,7 @@ export default function Navbar({ onToggleSidebar }) {
           onClick={onToggleSidebar}
           aria-label="Toggle Navigation Drawer"
         >
-          <SVGIcon name="filter" size={20} />
+          <SVGIcon name="menu" size={20} />
         </button>
       </div>
 

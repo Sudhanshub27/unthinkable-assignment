@@ -26,6 +26,14 @@ export default function SVGIcon({ name, size = 18, className = '', color = 'curr
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </svg>
       );
+    case 'menu':
+      return (
+        <svg {...iconProps}>
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      );
     case 'plus':
       return (
         <svg {...iconProps}>

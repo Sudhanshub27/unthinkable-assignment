@@ -4,11 +4,11 @@ require('dotenv').config();
 
 async function seed() {
   try {
-    // Clean up old demo users
-    await pool.query('DELETE FROM users WHERE email IN ($1, $2)', [
-      'admin@society.com',
-      'resident@society.com',
-    ]);
+    // Clean up old tables
+    await pool.query('DELETE FROM complaint_history');
+    await pool.query('DELETE FROM complaints');
+    await pool.query('DELETE FROM notices');
+    await pool.query('DELETE FROM users');
 
     // Admin Demo Account
     const adminHash = await bcrypt.hash('Admin@123', 10);
@@ -24,7 +24,7 @@ async function seed() {
       ['John Resident', 'resident@society.com', residentHash, 'A-301']
     );
 
-    console.log('✅ Demo accounts seeded successfully:');
+    console.log('✅ Database cleaned & demo accounts seeded successfully:');
     console.log('   Admin:    admin@society.com    / Admin@123');
     console.log('   Resident: resident@society.com / Resident@123');
     process.exit(0);
