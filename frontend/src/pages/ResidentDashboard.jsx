@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -6,8 +7,11 @@ import PageHeader from '../components/PageHeader';
 import StatCard from '../components/StatCard';
 import ComplaintTable from '../components/ComplaintTable';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
+import NoticeCard from '../components/NoticeCard';
+import EmptyState from '../components/EmptyState';
 import PhotoUpload from '../components/PhotoUpload';
 import SVGIcon from '../components/SVGIcon';
+import { SkeletonCards, SkeletonTable } from '../components/Skeletons';
 
 const CATEGORIES = [
   'Plumbing',
@@ -19,17 +23,21 @@ const CATEGORIES = [
   'Other',
 ];
 
-export default function ResidentComplaints() {
+export default function ResidentDashboard() {
   const { user } = useAuth();
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const [complaints, setComplaints] = useState([]);
+  const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Detail Modal State
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [complaintHistory, setComplaintHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // Form State
+  // Raise Complaint Form Modal State
   const [showFormModal, setShowFormModal] = useState(false);
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
@@ -38,26 +46,33 @@ export default function ResidentComplaints() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
-  // Filters State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
+  // Get greeting based on time of day
+  function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
 
-  async function loadData() {
+  async function loadDashboardData() {
     setLoading(true);
     try {
-      const res = await client.get('/complaints/mine');
-      setComplaints(res.data || []);
+      const [compRes, noticeRes] = await Promise.all([
+        client.get('/complaints/mine'),
+        client.get('/notices'),
+      ]);
+      setComplaints(compRes.data || []);
+      setNotices(noticeRes.data || []);
     } catch (err) {
       console.error(err);
-      addToast('Failed to load resident maintenance data.', 'error');
+      addToast('Failed to load resident dashboard data.', 'error');
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadData();
+    loadDashboardData();
   }, []);
 
   async function handleOpenDetail(c) {
@@ -92,7 +107,7 @@ export default function ResidentComplaints() {
     setFormError('');
 
     if (!category) {
-      setFormError('Please select a category.');
+      setFormError('Please select an issue category.');
       return;
     }
     if (!description.trim()) {
@@ -116,7 +131,7 @@ export default function ResidentComplaints() {
       addToast(`Complaint #${res.data.id} submitted successfully!`, 'success');
       resetForm();
       setShowFormModal(false);
-      await loadData();
+      await loadDashboardData();
     } catch (err) {
       console.error(err);
       const msg = err.response?.data?.error || 'Failed to submit complaint. Please try again.';
@@ -126,31 +141,26 @@ export default function ResidentComplaints() {
     }
   }
 
-  // Filters
-  const filteredComplaints = complaints.filter((c) => {
-    if (filterStatus && c.status !== filterStatus) return false;
-    if (filterCategory && c.category !== filterCategory) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchId = String(c.id).includes(q);
-      const matchDesc = (c.description || '').toLowerCase().includes(q);
-      const matchCat = (c.category || '').toLowerCase().includes(q);
-      return matchId || matchDesc || matchCat;
-    }
-    return true;
-  });
-
+  // Statistics
   const totalCount = complaints.length;
   const openCount = complaints.filter((c) => c.status === 'Open').length;
   const progressCount = complaints.filter((c) => c.status === 'In Progress').length;
   const resolvedCount = complaints.filter((c) => c.status === 'Resolved').length;
 
+  // Important announcements
+  const importantNotices = notices.filter((n) => n.is_important);
+
+  // Recent complaints (last 4)
+  const recentComplaints = [...complaints]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 4);
+
   return (
-    <div className="page-container resident-complaints-container">
-      {/* 1. PAGE HEADER */}
+    <div className="page-container resident-dashboard-container">
+      {/* 1. HEADER */}
       <PageHeader
-        title="My Maintenance Complaints"
-        subtitle="Raise new requests, track resolution progress, and review audit history"
+        title={`${getGreeting()}, ${user?.name || 'Resident'}`}
+        subtitle="Here's an overview of your maintenance requests and society updates."
         actionText="Raise Complaint"
         onAction={() => {
           resetForm();
@@ -159,76 +169,117 @@ export default function ResidentComplaints() {
         actionIcon="plus"
       />
 
-      {/* 2. STAT CARDS */}
-      <div className="kpi-grid" style={{ marginBottom: 24 }}>
-        <StatCard label="Total Submitted" value={totalCount} icon="clipboard" variant="primary" />
-        <StatCard label="Open" value={openCount} icon="clock" variant="danger" />
-        <StatCard label="In Progress" value={progressCount} icon="clock" variant="warning" />
-        <StatCard label="Resolved" value={resolvedCount} icon="check-circle" variant="success" />
-      </div>
-
-      {/* 3. SEARCH & FILTER BAR */}
-      <div className="content-card filter-card" style={{ marginBottom: 20 }}>
-        <div className="filter-controls-grid">
-          <div className="filter-search-box">
-            <div className="input-relative-wrapper">
-              <span className="input-icon-prefix">
-                <SVGIcon name="search" size={16} />
-              </span>
-              <input
-                type="text"
-                className="form-control input-has-icon"
-                placeholder="Search by ID, category, description..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="filter-selects-row">
-            <select
-              className="form-control"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-
-            <select
-              className="form-control"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* 2. SUMMARY KPI STAT CARDS */}
+      {loading ? (
+        <div className="mb-6">
+          <SkeletonCards count={4} />
         </div>
-      </div>
+      ) : (
+        <div className="kpi-grid" style={{ marginBottom: 24 }}>
+          <StatCard
+            label="Total Complaints"
+            value={totalCount}
+            icon="clipboard"
+            variant="primary"
+            onClick={() => navigate('/complaints')}
+          />
+          <StatCard
+            label="Open"
+            value={openCount}
+            icon="clock"
+            variant="danger"
+            onClick={() => navigate('/complaints')}
+          />
+          <StatCard
+            label="In Progress"
+            value={progressCount}
+            icon="clock"
+            variant="warning"
+            onClick={() => navigate('/complaints')}
+          />
+          <StatCard
+            label="Resolved"
+            value={resolvedCount}
+            icon="check-circle"
+            variant="success"
+            onClick={() => navigate('/complaints')}
+          />
+        </div>
+      )}
 
-      {/* 4. COMPLAINT TABLE / CARDS */}
-      <div className="content-card">
-        <ComplaintTable
-          complaints={filteredComplaints}
-          loading={loading}
-          mode="resident"
-          emptyMessage="No maintenance complaints found"
-          emptyDescription="You haven't submitted any complaints matching your filters yet. Click '+ Raise Complaint' to submit a new request."
-          emptyActionText="Raise Maintenance Complaint"
-          onEmptyAction={() => {
-            resetForm();
-            setShowFormModal(true);
-          }}
-          onSelectComplaint={handleOpenDetail}
-          onRetry={loadData}
-        />
+      {/* TWO COLUMN GRID: Important Announcements & Recent Complaints */}
+      <div className="dashboard-two-col-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
+        {/* IMPORTANT ANNOUNCEMENTS SECTION */}
+        <div className="content-card">
+          <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <SVGIcon name="megaphone" size={18} color="#2563EB" />
+              <span>Important Announcements</span>
+            </h3>
+            <button
+              className="btn btn-outline btn-xs"
+              onClick={() => navigate('/notices')}
+            >
+              <span>View all notices</span>
+              <SVGIcon name="file-text" size={12} className="btn-icon-right" />
+            </button>
+          </div>
+
+          {loading ? (
+            <SkeletonCards count={1} />
+          ) : importantNotices.length === 0 ? (
+            <div className="empty-subtext-box" style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-page)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <p className="text-muted" style={{ margin: 0, fontSize: '0.875rem' }}>
+                No important announcements
+              </p>
+            </div>
+          ) : (
+            <div className="notices-grid" style={{ gridTemplateColumns: '1fr' }}>
+              {importantNotices.slice(0, 2).map((notice) => (
+                <NoticeCard key={notice.id} notice={notice} isAdmin={false} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* RECENT COMPLAINTS SECTION */}
+        <div className="content-card">
+          <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <SVGIcon name="clipboard" size={18} color="#2563EB" />
+              <span>Recent Complaints</span>
+            </h3>
+            <button
+              className="btn btn-outline btn-xs"
+              onClick={() => navigate('/complaints')}
+            >
+              <span>View all complaints</span>
+              <SVGIcon name="file-text" size={12} className="btn-icon-right" />
+            </button>
+          </div>
+
+          {loading ? (
+            <SkeletonTable rows={3} cols={6} />
+          ) : complaints.length === 0 ? (
+            <EmptyState
+              icon="clipboard"
+              title="No complaints yet"
+              description="Raise a maintenance complaint to track an issue with your society."
+              actionText="Raise Maintenance Complaint"
+              onAction={() => {
+                resetForm();
+                setShowFormModal(true);
+              }}
+            />
+          ) : (
+            <ComplaintTable
+              complaints={recentComplaints}
+              loading={false}
+              mode="resident"
+              onSelectComplaint={handleOpenDetail}
+            />
+          )}
+        </div>
       </div>
 
       {/* RAISE COMPLAINT MODAL FORM */}
@@ -238,11 +289,11 @@ export default function ResidentComplaints() {
             className="modal-dialog modal-md"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="raise-modal-title"
+            aria-labelledby="dashboard-raise-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
-              <h2 id="raise-modal-title" className="modal-title">
+              <h2 id="dashboard-raise-modal-title" className="modal-title">
                 Raise Maintenance Complaint
               </h2>
               <button
@@ -259,11 +310,11 @@ export default function ResidentComplaints() {
                 {formError && <div className="field-error-box mb-4">{formError}</div>}
 
                 <div className="form-group">
-                  <label htmlFor="complaint-category" className="form-label">
+                  <label htmlFor="dash-complaint-category" className="form-label">
                     Category <span className="text-danger">*</span>
                   </label>
                   <select
-                    id="complaint-category"
+                    id="dash-complaint-category"
                     className="form-control"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
@@ -278,11 +329,11 @@ export default function ResidentComplaints() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="complaint-description" className="form-label">
+                  <label htmlFor="dash-complaint-description" className="form-label">
                     Description <span className="text-danger">*</span>
                   </label>
                   <textarea
-                    id="complaint-description"
+                    id="dash-complaint-description"
                     className="form-control"
                     rows={4}
                     placeholder="Describe the maintenance issue, location details, or urgency..."
