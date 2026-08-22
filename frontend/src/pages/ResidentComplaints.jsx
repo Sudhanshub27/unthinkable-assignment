@@ -113,7 +113,8 @@ export default function ResidentComplaints() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      addToast(`Complaint #${res.data.id} submitted successfully!`, 'success');
+      const newId = res.data.id;
+      addToast(`Complaint #${newId} submitted successfully!`, 'success');
       resetForm();
       setShowFormModal(false);
       await loadData();
@@ -149,8 +150,8 @@ export default function ResidentComplaints() {
     <div className="page-container resident-complaints-container">
       {/* 1. PAGE HEADER */}
       <PageHeader
-        title="My Maintenance Complaints"
-        subtitle="Raise new requests, track resolution progress, and review audit history"
+        title="My Complaints"
+        subtitle="Track the status of your maintenance requests."
         actionText="Raise Complaint"
         onAction={() => {
           resetForm();
@@ -161,7 +162,7 @@ export default function ResidentComplaints() {
 
       {/* 2. STAT CARDS */}
       <div className="kpi-grid" style={{ marginBottom: 24 }}>
-        <StatCard label="Total Submitted" value={totalCount} icon="clipboard" variant="primary" />
+        <StatCard label="Total Complaints" value={totalCount} icon="clipboard" variant="primary" />
         <StatCard label="Open" value={openCount} icon="clock" variant="danger" />
         <StatCard label="In Progress" value={progressCount} icon="clock" variant="warning" />
         <StatCard label="Resolved" value={resolvedCount} icon="check-circle" variant="success" />
@@ -219,8 +220,8 @@ export default function ResidentComplaints() {
           complaints={filteredComplaints}
           loading={loading}
           mode="resident"
-          emptyMessage="No maintenance complaints found"
-          emptyDescription="You haven't submitted any complaints matching your filters yet. Click '+ Raise Complaint' to submit a new request."
+          emptyMessage="No complaints found"
+          emptyDescription="You haven't submitted any complaints matching your filters yet. Click 'Raise Complaint' to submit a new request."
           emptyActionText="Raise Maintenance Complaint"
           onEmptyAction={() => {
             resetForm();

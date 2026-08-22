@@ -26,6 +26,8 @@ export function SkeletonCard({ count = 3 }) {
   );
 }
 
+export const SkeletonCards = SkeletonCard;
+
 export function SkeletonTable({ rows = 5, cols = 6 }) {
   return (
     <div className="skeleton-table-wrapper">

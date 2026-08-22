@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
 import PageHeader from '../components/PageHeader';
@@ -6,17 +7,18 @@ import StatCard from '../components/StatCard';
 import ComplaintTable from '../components/ComplaintTable';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import EmptyState from '../components/EmptyState';
+import SVGIcon from '../components/SVGIcon';
+import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
 
 export default function AdminDashboard() {
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [overdueThreshold, setOverdueThreshold] = useState(3);
-  const [savingSettings, setSavingSettings] = useState(false);
 
-  // Detail Modal State
+  // Detail / Triage Modal State
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [complaintHistory, setComplaintHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -30,12 +32,9 @@ export default function AdminDashboard() {
       ]);
       setStats(dashRes.data);
       setComplaints(complaintsRes.data || []);
-      if (dashRes.data && dashRes.data.overdueThresholdDays) {
-        setOverdueThreshold(Number(dashRes.data.overdueThresholdDays));
-      }
     } catch (err) {
       console.error(err);
-      addToast('Failed to load dashboard operational analytics.', 'error');
+      addToast('Failed to load operational analytics.', 'error');
     } finally {
       if (showSpinner) setLoading(false);
     }
@@ -44,30 +43,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadDashboardData(true);
   }, []);
-
-  async function handleSaveSettings(e) {
-    e.preventDefault();
-    const parsedDays = parseInt(overdueThreshold, 10);
-    if (isNaN(parsedDays) || parsedDays < 1) {
-      addToast('Please enter a valid positive integer for SLA threshold days.', 'error');
-      return;
-    }
-
-    setSavingSettings(true);
-    try {
-      const res = await client.put('/settings/overdue-threshold', {
-        days: parsedDays,
-      });
-      setOverdueThreshold(res.data.days);
-      addToast(`SLA overdue threshold updated to ${res.data.days} days!`, 'success');
-      await loadDashboardData(false);
-    } catch (err) {
-      console.error(err);
-      addToast(err.response?.data?.error || 'Failed to update threshold settings.', 'error');
-    } finally {
-      setSavingSettings(false);
-    }
-  }
 
   async function handleOpenDetail(c) {
     setSelectedComplaint(c);
@@ -97,15 +72,6 @@ export default function AdminDashboard() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner" />
-        <p>Loading society operations console...</p>
-      </div>
-    );
-  }
-
   const { totalComplaints = 0, byCategory = [], byStatus = [], overdueCount = 0 } = stats || {};
   const total = Number(totalComplaints || 0);
 
@@ -118,150 +84,203 @@ export default function AdminDashboard() {
   const progressCount = getStatusCount('In Progress');
   const resolvedCount = getStatusCount('Resolved');
 
+  // Overdue Complaints list
   const overdueComplaints = complaints.filter((c) => c.is_overdue);
-  const highPriorityCount = complaints.filter((c) => c.priority === 'High').length;
-  const mediumPriorityCount = complaints.filter((c) => c.priority === 'Medium').length;
-  const lowPriorityCount = complaints.filter((c) => c.priority === 'Low').length;
 
-  const currentDateFormatted = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  // Recent Complaints list (last 5)
+  const recentComplaints = [...complaints]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 5);
 
   return (
     <div className="page-container admin-dashboard-container">
-      {/* 1. HEADER */}
+      {/* 1. PAGE HEADER */}
       <PageHeader
-        title="Society Operations Overview"
-        subtitle="Real-time complaint triage, overdue SLA monitoring & service performance"
-        breadcrumb={currentDateFormatted}
+        title="Society Operations"
+        subtitle="Monitor maintenance requests, SLA breaches, and resident issues."
       />
 
-      {/* 2. TOP PRIMARY KPIs ROW */}
-      <div className="kpi-grid">
-        <StatCard label="Total Complaints" value={total} icon="clipboard" variant="primary" />
-        <StatCard label="Open" value={openCount} icon="clock" variant="danger" />
-        <StatCard label="In Progress" value={progressCount} icon="clock" variant="warning" />
-        <StatCard label="Resolved" value={resolvedCount} icon="check-circle" variant="success" />
-        <StatCard
-          label="Overdue Alerts"
-          value={overdueCount}
-          icon="alert-triangle"
-          variant="danger"
-          alert={overdueCount > 0}
-        />
-      </div>
-
-      {total === 0 ? (
-        <div className="content-card" style={{ marginTop: 20 }}>
-          <EmptyState
-            icon="clipboard"
-            title="No complaints recorded yet"
-            description="The society complaint registry is empty. New resident complaints will appear here automatically."
-          />
+      {/* 2. PRIMARY KPI ROW */}
+      {loading ? (
+        <div style={{ marginBottom: 24 }}>
+          <SkeletonCard count={5} />
         </div>
       ) : (
-        <div className="dashboard-sections-wrapper">
-          {/* 3. OVERDUE / NEEDS ATTENTION SECTION */}
-          <div className="content-card overdue-section-card">
-            <div className="card-header-row">
-              <div>
-                <h3 className="card-title text-danger">Overdue Complaints (Action Required)</h3>
-                <p className="card-subtitle">
-                  Issues unresolved beyond the society SLA threshold ({overdueThreshold} days)
-                </p>
-              </div>
-              <span className="badge badge-overdue">
-                {overdueComplaints.length} Action Needed
-              </span>
-            </div>
-
-            <ComplaintTable
-              complaints={overdueComplaints}
-              mode="admin"
-              emptyMessage="Zero Overdue Complaints"
-              emptyDescription={`All active complaints are within normal SLA threshold (${overdueThreshold} days).`}
-              onSelectComplaint={handleOpenDetail}
-            />
-          </div>
-
-          {/* 4. PERFORMANCE & CATEGORIES GRID */}
-          <div className="dashboard-secondary-grid">
-            {/* Category Breakdown */}
-            <div className="content-card">
-              <div className="card-header-row">
-                <h3 className="card-title">Category Distribution</h3>
-              </div>
-              <div className="category-bars-list">
-                {byCategory.length === 0 ? (
-                  <p className="text-muted text-sm">No category distribution data.</p>
-                ) : (
-                  byCategory.map((cat) => {
-                    const count = Number(cat.count);
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div className="cat-bar-item" key={cat.category}>
-                        <div className="cat-bar-header">
-                          <span className="cat-name">{cat.category}</span>
-                          <span className="cat-count">
-                            {count} ({pct}%)
-                          </span>
-                        </div>
-                        <div className="cat-bar-track">
-                          <div className="cat-bar-fill" style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* SLA Settings & Priorities */}
-            <div className="content-card">
-              <div className="card-header-row">
-                <h3 className="card-title">SLA Threshold & Priority</h3>
-              </div>
-
-              <form onSubmit={handleSaveSettings} className="inline-settings-form">
-                <div className="form-group">
-                  <label htmlFor="overdueThresholdInput" className="form-label">
-                    Overdue Threshold (Days)
-                  </label>
-                  <div className="inline-input-row">
-                    <input
-                      id="overdueThresholdInput"
-                      type="number"
-                      min="1"
-                      className="form-control"
-                      value={overdueThreshold}
-                      onChange={(e) => setOverdueThreshold(e.target.value)}
-                    />
-                    <button
-                      type="submit"
-                      className="btn btn-outline btn-sm"
-                      disabled={savingSettings}
-                    >
-                      {savingSettings ? 'Saving...' : 'Update SLA'}
-                    </button>
-                  </div>
-                </div>
-              </form>
-
-              <div className="priority-summary-box" style={{ marginTop: 20 }}>
-                <h4 className="priority-box-title">Active Priorities Breakdown</h4>
-                <div className="priority-pills-row">
-                  <span className="badge badge-priority-high">High: {highPriorityCount}</span>
-                  <span className="badge badge-priority-medium">Medium: {mediumPriorityCount}</span>
-                  <span className="badge badge-priority-low">Low: {lowPriorityCount}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="kpi-grid" style={{ marginBottom: 24 }}>
+          <StatCard
+            label="Total Complaints"
+            value={total}
+            icon="clipboard"
+            variant="primary"
+            onClick={() => navigate('/admin')}
+          />
+          <StatCard
+            label="Open"
+            value={openCount}
+            icon="clock"
+            variant="danger"
+            onClick={() => navigate('/admin')}
+          />
+          <StatCard
+            label="In Progress"
+            value={progressCount}
+            icon="clock"
+            variant="warning"
+            onClick={() => navigate('/admin')}
+          />
+          <StatCard
+            label="Resolved"
+            value={resolvedCount}
+            icon="check-circle"
+            variant="success"
+            onClick={() => navigate('/admin')}
+          />
+          <StatCard
+            label="Overdue"
+            value={overdueCount}
+            icon="alert-triangle"
+            variant="danger"
+            alert={overdueCount > 0}
+            onClick={() => navigate('/admin')}
+          />
         </div>
       )}
+
+      {/* 3. OVERDUE / ACTION REQUIRED SECTION */}
+      <div className="content-card overdue-section-card" style={{ marginBottom: 24 }}>
+        <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <h3 className="card-title text-danger" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <SVGIcon name="alert-triangle" size={18} color="#DC2626" />
+              <span>Overdue Complaints</span>
+            </h3>
+            <p className="card-subtitle" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+              Complaints that have exceeded the configured SLA.
+            </p>
+          </div>
+          {overdueComplaints.length > 0 && (
+            <button className="btn btn-outline btn-xs" onClick={() => navigate('/admin')}>
+              <span>Manage Complaints →</span>
+            </button>
+          )}
+        </div>
+
+        {loading ? (
+          <SkeletonTable rows={2} cols={8} />
+        ) : overdueComplaints.length === 0 ? (
+          <EmptyState
+            icon="check-circle"
+            title="No overdue complaints"
+            description="All complaints are currently within the configured SLA."
+            actionText="Manage Complaints →"
+            onAction={() => navigate('/admin')}
+          />
+        ) : (
+          <ComplaintTable
+            complaints={overdueComplaints}
+            mode="admin"
+            onSelectComplaint={handleOpenDetail}
+          />
+        )}
+      </div>
+
+      {/* TWO-COLUMN LAYOUT: Recent Activity & Visual Analytics */}
+      <div className="dashboard-two-col-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24, marginBottom: 24 }}>
+        {/* RECENT COMPLAINTS */}
+        <div className="content-card">
+          <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <SVGIcon name="clipboard" size={18} color="#2563EB" />
+              <span>Recent Complaints</span>
+            </h3>
+            <button className="btn btn-outline btn-xs" onClick={() => navigate('/admin')}>
+              <span>View Queue →</span>
+            </button>
+          </div>
+
+          {loading ? (
+            <SkeletonTable rows={3} cols={8} />
+          ) : recentComplaints.length === 0 ? (
+            <EmptyState
+              icon="clipboard"
+              title="No complaints recorded yet"
+              description="New resident complaints will appear here automatically."
+            />
+          ) : (
+            <ComplaintTable
+              complaints={recentComplaints}
+              mode="admin"
+              onSelectComplaint={handleOpenDetail}
+            />
+          )}
+        </div>
+
+        {/* STATUS & CATEGORY BREAKDOWN ANALYTICS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+          {/* Status Breakdown */}
+          <div className="content-card">
+            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid var(--border-color)', paddingBottom: 10 }}>
+              Status Breakdown
+            </h3>
+
+            {loading ? (
+              <SkeletonCard count={1} />
+            ) : (
+              <div className="status-bars-list" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {[
+                  { label: 'Open', count: openCount, color: '#DC2626' },
+                  { label: 'In Progress', count: progressCount, color: '#D97706' },
+                  { label: 'Resolved', count: resolvedCount, color: '#16A34A' },
+                ].map((st) => {
+                  const pct = total > 0 ? Math.round((st.count / total) * 100) : 0;
+                  return (
+                    <div key={st.label} className="status-bar-item">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', fontWeight: 600, marginBottom: 4 }}>
+                        <span style={{ color: 'var(--text-main)' }}>{st.label}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>{st.count} ({pct}%)</span>
+                      </div>
+                      <div style={{ height: 8, background: 'var(--bg-page)', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: st.color, borderRadius: 4, transition: 'width 0.3s' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Category Breakdown */}
+          <div className="content-card">
+            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid var(--border-color)', paddingBottom: 10 }}>
+              Category Breakdown
+            </h3>
+
+            {loading ? (
+              <SkeletonCard count={1} />
+            ) : byCategory.length === 0 ? (
+              <p className="text-muted" style={{ fontSize: '0.875rem', margin: 0 }}>No category breakdown data available.</p>
+            ) : (
+              <div className="category-bars-list" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {byCategory.map((cat) => {
+                  const count = Number(cat.count);
+                  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                  return (
+                    <div key={cat.category} className="cat-bar-item">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', fontWeight: 600, marginBottom: 4 }}>
+                        <span style={{ color: 'var(--text-main)' }}>{cat.category}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>{count} ({pct}%)</span>
+                      </div>
+                      <div style={{ height: 8, background: 'var(--bg-page)', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: 'var(--primary)', borderRadius: 4, transition: 'width 0.3s' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* REUSABLE COMPLAINT DETAIL & ATOMIC TRIAGE MODAL */}
       <ComplaintDetailModal

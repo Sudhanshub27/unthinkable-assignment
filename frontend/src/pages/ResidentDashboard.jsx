@@ -11,7 +11,7 @@ import NoticeCard from '../components/NoticeCard';
 import EmptyState from '../components/EmptyState';
 import PhotoUpload from '../components/PhotoUpload';
 import SVGIcon from '../components/SVGIcon';
-import { SkeletonCards, SkeletonTable } from '../components/Skeletons';
+import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
 
 const CATEGORIES = [
   'Plumbing',
@@ -172,7 +172,7 @@ export default function ResidentDashboard() {
       {/* 2. SUMMARY KPI STAT CARDS */}
       {loading ? (
         <div className="mb-6">
-          <SkeletonCards count={4} />
+          <SkeletonCard count={4} />
         </div>
       ) : (
         <div className="kpi-grid" style={{ marginBottom: 24 }}>
@@ -226,7 +226,7 @@ export default function ResidentDashboard() {
           </div>
 
           {loading ? (
-            <SkeletonCards count={1} />
+            <SkeletonCard count={1} />
           ) : importantNotices.length === 0 ? (
             <div className="empty-subtext-box" style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-page)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
               <p className="text-muted" style={{ margin: 0, fontSize: '0.875rem' }}>

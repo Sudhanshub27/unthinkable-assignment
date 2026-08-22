@@ -5,22 +5,14 @@ import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ResidentDashboard from './pages/ResidentDashboard';
 import ResidentComplaints from './pages/ResidentComplaints';
 import AdminComplaints from './pages/AdminComplaints';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminSettings from './pages/AdminSettings';
 import NoticeBoard from './pages/NoticeBoard';
+import Profile from './pages/Profile';
 import { ToastProvider } from './context/ToastContext';
-
-function PagePlaceholder({ title, description }) {
-  return (
-    <div className="page-container">
-      <div className="content-card" style={{ padding: '40px 24px', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: 8 }}>{title}</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{description}</p>
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -76,10 +68,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         element={
           <ProtectedRoute>
             <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-              <PagePlaceholder
-                title="Resident Dashboard"
-                description="Executive resident overview module will be activated in the upcoming phase."
-              />
+              <ResidentDashboard />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -109,10 +98,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         element={
           <ProtectedRoute>
             <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-              <PagePlaceholder
-                title="User Profile & Account Settings"
-                description="Profile management and credentials module will be activated in the upcoming phase."
-              />
+              <Profile />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -142,10 +128,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         element={
           <ProtectedRoute adminOnly>
             <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-              <PagePlaceholder
-                title="Society SLA Settings"
-                description="SLA threshold configuration and parameters module will be activated in the upcoming phase."
-              />
+              <AdminSettings />
             </AppLayout>
           </ProtectedRoute>
         }

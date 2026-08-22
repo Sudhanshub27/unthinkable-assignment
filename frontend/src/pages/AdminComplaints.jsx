@@ -80,6 +80,21 @@ export default function AdminComplaints() {
     }
   }
 
+  function handleClearFilters() {
+    setSearchQuery('');
+    setFilterCategory('');
+    setFilterStatus('');
+    setFilterPriority('');
+    setOverdueOnly(false);
+  }
+
+  const isFilterActive =
+    Boolean(searchQuery.trim()) ||
+    Boolean(filterCategory) ||
+    Boolean(filterStatus) ||
+    Boolean(filterPriority) ||
+    overdueOnly;
+
   // Filter Logic
   const filteredComplaints = complaints.filter((c) => {
     if (filterStatus && c.status !== filterStatus) return false;
@@ -109,10 +124,10 @@ export default function AdminComplaints() {
 
   return (
     <div className="page-container admin-complaints-container">
-      {/* 1. HEADER */}
+      {/* 1. PAGE HEADER */}
       <PageHeader
-        title="Complaints Operations Queue"
-        subtitle="Manage, triage, assign priorities, and resolve resident complaints"
+        title="Complaints"
+        subtitle="Review, prioritize, and resolve resident maintenance requests."
       />
 
       {/* 2. STAT CARDS */}
@@ -141,7 +156,7 @@ export default function AdminComplaints() {
               <input
                 type="text"
                 className="form-control input-has-icon"
-                placeholder="Search by ID, resident, flat, description..."
+                placeholder="Search by resident, flat, complaint ID, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -191,6 +206,16 @@ export default function AdminComplaints() {
               <SVGIcon name="alert-triangle" size={14} className="btn-icon-left" />
               <span>Overdue Only</span>
             </button>
+
+            {isFilterActive && (
+              <button
+                className="btn btn-ghost btn-sm text-muted"
+                onClick={handleClearFilters}
+              >
+                <SVGIcon name="x" size={14} className="btn-icon-left" />
+                <span>Clear Filters</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

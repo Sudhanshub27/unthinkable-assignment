@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader';
 import NoticeCard from '../components/NoticeCard';
 import EmptyState from '../components/EmptyState';
 import SVGIcon from '../components/SVGIcon';
+import { SkeletonCard } from '../components/Skeletons';
 
 export default function NoticeBoard() {
   const { user } = useAuth();
@@ -14,7 +15,7 @@ export default function NoticeBoard() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Notice Form State
+  // Notice Form State (Admin Only)
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -105,8 +106,8 @@ export default function NoticeBoard() {
     <div className="page-container notice-board-container">
       {/* Page Header */}
       <PageHeader
-        title="Community Notice Board"
-        subtitle="Official society announcements, maintenance schedules & emergency broadcasts"
+        title="Notice Board"
+        subtitle="Stay updated with important society announcements."
         actionText={user?.role === 'admin' ? 'Publish Announcement' : undefined}
         onAction={user?.role === 'admin' ? () => setShowCreateModal(true) : undefined}
         actionIcon="plus"
@@ -114,16 +115,13 @@ export default function NoticeBoard() {
 
       {/* Notices Feed */}
       {loading ? (
-        <div className="loading-container">
-          <div className="loading-spinner" />
-          <p>Loading notices...</p>
-        </div>
+        <SkeletonCard count={3} />
       ) : sortedNotices.length === 0 ? (
         <EmptyState
           icon="megaphone"
-          title="No notices published yet"
-          description="You're all caught up! There are currently no active society announcements."
-          actionText={user?.role === 'admin' ? 'Publish First Notice' : undefined}
+          title="No notices yet"
+          description="There are no society announcements at the moment."
+          actionText={user?.role === 'admin' ? 'Publish Announcement' : undefined}
           onAction={user?.role === 'admin' ? () => setShowCreateModal(true) : undefined}
         />
       ) : (
