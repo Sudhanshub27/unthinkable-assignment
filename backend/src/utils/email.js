@@ -22,18 +22,26 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
 
 const pool = require('../db/pool');
 
-async function getSocietyName() {
+async function getSocietySettings() {
   try {
-    const res = await pool.query("SELECT value FROM settings WHERE key = 'society_name'");
-    if (res.rows.length > 0 && res.rows[0].value) {
-      return res.rows[0].value;
-    }
+    const res = await pool.query("SELECT key, value FROM settings WHERE key IN ('society_name', 'support_email')");
+    const map = {};
+    res.rows.forEach((r) => {
+      map[r.key] = r.value;
+    });
+    return {
+      societyName: map.society_name || 'Unthinkable Society',
+      supportEmail: map.support_email || 'office@unthinkable.com',
+    };
   } catch (e) {}
-  return 'Green Valley Co-Op Housing Society';
+  return {
+    societyName: 'Unthinkable Sudhanshu Society',
+    supportEmail: 'office@sudhanshubatraunthinkable.com',
+  };
 }
 
 async function sendEmail({ to, subject, text, html }) {
-  const societyName = await getSocietyName();
+  const { societyName, supportEmail } = await getSocietySettings();
   const rawSender = process.env.RESEND_FROM || process.env.SMTP_FROM || process.env.SMTP_USER || 'onboarding@resend.dev';
   let emailAddr = rawSender;
   const match = rawSender.match(/<([^>]+)>/);
@@ -54,6 +62,7 @@ async function sendEmail({ to, subject, text, html }) {
         body: JSON.stringify({
           from: dynamicFrom,
           to: Array.isArray(to) ? to : [to],
+          reply_to: supportEmail,
           subject,
           text,
           html: html || `<p>${text ? text.replace(/\n/g, '<br/>') : ''}</p>`,
@@ -77,6 +86,7 @@ async function sendEmail({ to, subject, text, html }) {
       const info = await transporter.sendMail({
         from: dynamicFrom,
         to,
+        replyTo: supportEmail,
         subject,
         text,
         html: html || `<p>${text}</p>`,
@@ -89,7 +99,7 @@ async function sendEmail({ to, subject, text, html }) {
   }
 
   // Option 3: Fallback console mock mode
-  console.log(`[email:mock] From: ${dynamicFrom} | To: ${to} | Subject: ${subject}\n${text}`);
+  console.log(`[email:mock] From: ${dynamicFrom} | Reply-To: ${supportEmail} | To: ${to} | Subject: ${subject}\n${text}`);
   return { mocked: true };
 }
 

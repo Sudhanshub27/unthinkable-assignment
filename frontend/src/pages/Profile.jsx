@@ -148,7 +148,7 @@ export default function Profile() {
                 <span>Society Association</span>
               </div>
               <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                {settings.society_name || 'Green Valley Co-Op Housing Society'}
+                {settings.society_name || 'Unthinkable Society'}
               </div>
             </div>
 
@@ -159,7 +159,7 @@ export default function Profile() {
               </div>
               <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)' }}>
                 <a href={`mailto:${settings.support_email}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>
-                  {settings.support_email || 'office@greenvalley.com'}
+                  {settings.support_email || 'office@unthinkable.com'}
                 </a>
               </div>
             </div>

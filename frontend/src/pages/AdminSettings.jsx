@@ -12,8 +12,8 @@ export default function AdminSettings() {
 
   const [settings, setSettings] = useState({
     overdue_threshold_days: '5',
-    society_name: 'Green Valley Co-Op Housing Society',
-    support_email: 'office@greenvalley.com',
+    society_name: 'Unthinkable Society',
+    support_email: 'office@unthinkable.com',
     emergency_phone: '+91 98765 43210',
     email_notifications: 'enabled',
     max_upload_size_mb: '5',

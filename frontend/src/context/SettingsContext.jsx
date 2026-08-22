@@ -7,8 +7,8 @@ const SettingsContext = createContext();
 export function SettingsProvider({ children }) {
   const { user } = useAuth();
   const [settings, setSettings] = useState({
-    society_name: 'Green Valley Co-Op Housing Society',
-    support_email: 'office@greenvalley.com',
+    society_name: 'Unthinkable Society',
+    support_email: 'office@unthinkable.com',
     emergency_phone: '+91 98765 43210',
     overdue_threshold_days: '5',
     max_upload_size_mb: '5',
@@ -46,8 +46,8 @@ export function useSettings() {
   if (!context) {
     return {
       settings: {
-        society_name: 'Green Valley Co-Op Housing Society',
-        support_email: 'office@greenvalley.com',
+        society_name: 'Unthinkable Society',
+        support_email: 'office@unthinkable.com',
         emergency_phone: '+91 98765 43210',
         overdue_threshold_days: '5',
         max_upload_size_mb: '5',
