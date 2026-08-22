@@ -144,6 +144,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 <span className="link-text">Settings</span>
               </Link>
               <Link
+                to="/admin/emails"
+                className={`sidebar-link ${isActive('/admin/emails') ? 'active' : ''}`}
+                onClick={closeDrawer}
+              >
+                <SVGIcon name="mail" size={18} className="link-icon-svg" />
+                <span className="link-text">Email Activity</span>
+              </Link>
+              <Link
                 to="/profile"
                 className={`sidebar-link ${isActive('/profile') ? 'active' : ''}`}
                 onClick={closeDrawer}

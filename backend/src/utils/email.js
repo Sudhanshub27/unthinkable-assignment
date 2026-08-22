@@ -30,8 +30,8 @@ async function getSocietySettings() {
       map[r.key] = r.value;
     });
     return {
-      societyName: map.society_name || 'Unthinkable Society',
-      supportEmail: map.support_email || 'office@unthinkable.com',
+      societyName: map.society_name || 'Unthinkable Sudhanshu Society',
+      supportEmail: map.support_email || 'office@sudhanshubatraunthinkable.com',
     };
   } catch (e) {}
   return {
@@ -40,7 +40,30 @@ async function getSocietySettings() {
   };
 }
 
-async function sendEmail({ to, subject, text, html }) {
+async function logEmailAttempt({ recipientEmail, recipientName, eventType, subject, body, status, providerMsgId, errorDetails, complaintId, noticeId }) {
+  try {
+    await pool.query(
+      `INSERT INTO email_logs (recipient_email, recipient_name, event_type, subject, body, status, provider_msg_id, error_details, complaint_id, notice_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        recipientEmail,
+        recipientName || null,
+        eventType || 'General Notification',
+        subject,
+        body || null,
+        status,
+        providerMsgId || null,
+        errorDetails || null,
+        complaintId || null,
+        noticeId || null,
+      ]
+    );
+  } catch (err) {
+    console.error('Failed to record email log in DB:', err);
+  }
+}
+
+async function sendEmail({ to, recipientName, subject, text, html, eventType, complaintId, noticeId }) {
   const { societyName, supportEmail } = await getSocietySettings();
   const rawSender = process.env.RESEND_FROM || process.env.SMTP_FROM || process.env.SMTP_USER || 'onboarding@resend.dev';
   let emailAddr = rawSender;
@@ -49,6 +72,8 @@ async function sendEmail({ to, subject, text, html }) {
     emailAddr = match[1];
   }
   const dynamicFrom = `${societyName} <${emailAddr}>`;
+  const recipientEmail = Array.isArray(to) ? to.join(', ') : to;
+  const emailBody = text || (html ? html.replace(/<[^>]+>/g, '') : '');
 
   // Option 1: Direct Resend API Key support
   if (process.env.RESEND_API_KEY) {
@@ -71,12 +96,48 @@ async function sendEmail({ to, subject, text, html }) {
       const data = await resendRes.json();
       if (!resendRes.ok) {
         console.error('Resend API error:', data);
-        return { error: data };
+        const errMsg = typeof data === 'object' ? JSON.stringify(data) : String(data);
+        await logEmailAttempt({
+          recipientEmail,
+          recipientName,
+          eventType,
+          subject,
+          body: emailBody,
+          status: 'Failed',
+          errorDetails: errMsg,
+          complaintId,
+          noticeId,
+        });
+        return { success: false, error: data };
       }
-      return data;
+
+      const resendId = data && data.id ? data.id : null;
+      await logEmailAttempt({
+        recipientEmail,
+        recipientName,
+        eventType,
+        subject,
+        body: emailBody,
+        status: 'Sent',
+        providerMsgId: resendId,
+        complaintId,
+        noticeId,
+      });
+      return { success: true, data };
     } catch (resendErr) {
       console.error('Resend HTTP request failed:', resendErr.message);
-      return { error: resendErr.message };
+      await logEmailAttempt({
+        recipientEmail,
+        recipientName,
+        eventType,
+        subject,
+        body: emailBody,
+        status: 'Failed',
+        errorDetails: resendErr.message,
+        complaintId,
+        noticeId,
+      });
+      return { success: false, error: resendErr.message };
     }
   }
 
@@ -91,16 +152,50 @@ async function sendEmail({ to, subject, text, html }) {
         text,
         html: html || `<p>${text}</p>`,
       });
-      return info;
+      const smtpMsgId = info && info.messageId ? info.messageId : null;
+      await logEmailAttempt({
+        recipientEmail,
+        recipientName,
+        eventType,
+        subject,
+        body: emailBody,
+        status: 'Sent',
+        providerMsgId: smtpMsgId,
+        complaintId,
+        noticeId,
+      });
+      return { success: true, info };
     } catch (err) {
       console.error('Email send failed:', err.message);
-      return { error: err.message };
+      await logEmailAttempt({
+        recipientEmail,
+        recipientName,
+        eventType,
+        subject,
+        body: emailBody,
+        status: 'Failed',
+        errorDetails: err.message,
+        complaintId,
+        noticeId,
+      });
+      return { success: false, error: err.message };
     }
   }
 
   // Option 3: Fallback console mock mode
-  console.log(`[email:mock] From: ${dynamicFrom} | Reply-To: ${supportEmail} | To: ${to} | Subject: ${subject}\n${text}`);
-  return { mocked: true };
+  console.log(`[email:mock] From: ${dynamicFrom} | Reply-To: ${supportEmail} | To: ${recipientEmail} | Subject: ${subject}\n${text}`);
+  await logEmailAttempt({
+    recipientEmail,
+    recipientName,
+    eventType,
+    subject,
+    body: emailBody,
+    status: 'Mocked',
+    errorDetails: 'Console mock mode active (No RESEND_API_KEY or SMTP configured)',
+    complaintId,
+    noticeId,
+  });
+  return { success: true, mocked: true };
 }
 
 function complaintStatusChangeEmail({ residentName, complaintId, category, oldStatus, newStatus, note, societyName }) {

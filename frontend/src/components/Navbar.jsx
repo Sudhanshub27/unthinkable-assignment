@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import SVGIcon from './SVGIcon';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar({ onToggleSidebar }) {
   const { user } = useAuth();
@@ -18,7 +19,9 @@ export default function Navbar({ onToggleSidebar }) {
         </button>
       </div>
 
-      <div className="header-right">
+      <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <NotificationBell />
+
         <div className="header-user-badge">
           <div className="header-avatar">
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}

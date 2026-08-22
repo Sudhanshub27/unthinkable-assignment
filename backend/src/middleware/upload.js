@@ -77,6 +77,8 @@ function isValidImageBuffer(buffer) {
   }
 
   return false;
+}
+
 const pool = require('../db/pool');
 
 async function getMaxUploadSizeMb() {

@@ -285,6 +285,25 @@ router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
 
     await client.query('COMMIT');
 
+    // In-app notification trigger for complaint owner
+    if (statusChanged && existing.resident_id) {
+      try {
+        await pool.query(
+          `INSERT INTO notifications (user_id, type, title, message, complaint_id)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            existing.resident_id,
+            'complaint_status',
+            `Complaint #${req.params.id} ${newStatus}`,
+            `Your complaint "${existing.category}" status has changed from "${oldStatus}" to "${newStatus}".`,
+            req.params.id,
+          ]
+        );
+      } catch (notifErr) {
+        console.error('Failed to create in-app notification:', notifErr);
+      }
+    }
+
     // Non-blocking email trigger on status change (respects admin email_notifications setting)
     if (statusChanged && existing.resident_email) {
       try {
@@ -299,10 +318,17 @@ router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
             newStatus,
             note: hasNote ? noteText : undefined,
           });
-          sendEmail({ to: existing.resident_email, subject, text }).catch(() => {});
+          sendEmail({
+            to: existing.resident_email,
+            recipientName: existing.resident_name,
+            subject,
+            text,
+            eventType: 'Complaint Status Update',
+            complaintId: req.params.id,
+          }).catch((e) => console.error('Background sendEmail error:', e));
         }
       } catch (emailErr) {
-        console.error('Email notification error check failed:', emailErr);
+        console.error('Email notification check failed:', emailErr);
       }
     }
 

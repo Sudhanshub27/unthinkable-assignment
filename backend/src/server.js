@@ -9,6 +9,8 @@ const complaintsRoutes = require('./routes/complaints');
 const noticesRoutes = require('./routes/notices');
 const dashboardRoutes = require('./routes/dashboard');
 const settingsRoutes = require('./routes/settings');
+const notificationsRoutes = require('./routes/notifications');
+const emailLogsRoutes = require('./routes/emailLogs');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -61,6 +63,8 @@ app.use('/api/complaints', complaintsRoutes);
 app.use('/api/notices', noticesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/email-logs', emailLogsRoutes);
 
 // Multer and general error middleware
 app.use((err, req, res, next) => {

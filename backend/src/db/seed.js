@@ -8,6 +8,8 @@ async function seed() {
     await pool.query('DELETE FROM complaint_history');
     await pool.query('DELETE FROM complaints');
     await pool.query('DELETE FROM notices');
+    await pool.query('DELETE FROM notifications');
+    await pool.query('DELETE FROM email_logs');
     await pool.query('DELETE FROM users');
 
     // Admin Demo Account

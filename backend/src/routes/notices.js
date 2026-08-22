@@ -50,17 +50,42 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
     if (notice.is_important) {
       setImmediate(async () => {
         try {
-          const residents = await pool.query(`SELECT name, email FROM users WHERE role = 'resident'`);
+          const residents = await pool.query(`SELECT id, name, email FROM users WHERE role = 'resident'`);
           for (const resident of residents.rows) {
+            // Create in-app notification for resident
+            try {
+              await pool.query(
+                `INSERT INTO notifications (user_id, type, title, message, notice_id)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [
+                  resident.id,
+                  'important_notice',
+                  `Important Notice: ${notice.title}`,
+                  `A new important notice has been posted: "${notice.title}".`,
+                  notice.id,
+                ]
+              );
+            } catch (notifErr) {
+              console.error('Failed to create in-app notification for notice:', notifErr);
+            }
+
+            // Dispatch transactional email
             const { subject, text } = importantNoticeEmail({
               residentName: resident.name,
               title: notice.title,
               body: notice.body,
             });
-            sendEmail({ to: resident.email, subject, text }).catch(() => {});
+            sendEmail({
+              to: resident.email,
+              recipientName: resident.name,
+              subject,
+              text,
+              eventType: 'Important Notice',
+              noticeId: notice.id,
+            }).catch((e) => console.error('Background notice email error:', e));
           }
         } catch (emailErr) {
-          console.error('Async notice email broadcast error:', emailErr);
+          console.error('Async notice notification & email broadcast error:', emailErr);
         }
       });
     }

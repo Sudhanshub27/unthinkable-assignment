@@ -61,3 +61,36 @@ CREATE TABLE IF NOT EXISTS settings (
 
 INSERT INTO settings (key, value) VALUES ('overdue_threshold_days', '5')
 ON CONFLICT (key) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id              SERIAL PRIMARY KEY,
+    user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type            VARCHAR(50) NOT NULL,
+    title           VARCHAR(200) NOT NULL,
+    message         TEXT NOT NULL,
+    complaint_id    INTEGER REFERENCES complaints(id) ON DELETE SET NULL,
+    notice_id       INTEGER REFERENCES notices(id) ON DELETE SET NULL,
+    is_read         BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(is_read);
+
+CREATE TABLE IF NOT EXISTS email_logs (
+    id              SERIAL PRIMARY KEY,
+    recipient_email VARCHAR(150) NOT NULL,
+    recipient_name  VARCHAR(150),
+    event_type      VARCHAR(50) NOT NULL,
+    subject         VARCHAR(255) NOT NULL,
+    body            TEXT,
+    status          VARCHAR(20) NOT NULL,
+    provider_msg_id VARCHAR(100),
+    error_details   TEXT,
+    complaint_id    INTEGER REFERENCES complaints(id) ON DELETE SET NULL,
+    notice_id       INTEGER REFERENCES notices(id) ON DELETE SET NULL,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_logs_status ON email_logs(status);
+CREATE INDEX IF NOT EXISTS idx_email_logs_created ON email_logs(created_at);

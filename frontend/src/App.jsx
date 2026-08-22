@@ -10,6 +10,7 @@ import ResidentComplaints from './pages/ResidentComplaints';
 import AdminComplaints from './pages/AdminComplaints';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminSettings from './pages/AdminSettings';
+import AdminEmailLogs from './pages/AdminEmailLogs';
 import NoticeBoard from './pages/NoticeBoard';
 import Profile from './pages/Profile';
 import { ToastProvider } from './context/ToastContext';
@@ -132,6 +133,16 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
           <ProtectedRoute adminOnly>
             <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
               <AdminSettings />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/emails"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+              <AdminEmailLogs />
             </AppLayout>
           </ProtectedRoute>
         }
