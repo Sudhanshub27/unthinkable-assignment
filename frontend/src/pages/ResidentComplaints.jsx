@@ -17,7 +17,7 @@ export default function ResidentComplaints() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
 
-  const [category, setCategory] = useState(CATEGORIES[0].name);
+  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -58,6 +58,10 @@ export default function ResidentComplaints() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    if (!category) {
+      setError('Please select an issue category.');
+      return;
+    }
     if (!description.trim()) {
       setError('Please provide a detailed description of the maintenance issue.');
       return;
@@ -73,6 +77,7 @@ export default function ResidentComplaints() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      setCategory('');
       setDescription('');
       setPhoto(null);
       setPhotoPreview(null);
@@ -115,6 +120,9 @@ export default function ResidentComplaints() {
           <div className="form-group">
             <label>Issue Category</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="" disabled>
+                -- Select Issue Category --
+              </option>
               {CATEGORIES.map((c) => (
                 <option key={c.name} value={c.name}>
                   {c.icon} {c.name}

@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 require('dotenv').config();
 
@@ -27,11 +27,7 @@ if (isPgRequested) {
   };
 } else {
   const dbPath = path.join(__dirname, '..', '..', 'society_tracker.db');
-  const sqliteDb = new Database(dbPath);
-  sqliteDb.pragma('journal_mode = WAL');
-  sqliteDb.pragma('foreign_keys = ON');
-
-  sqliteDb.function('now', () => new Date().toISOString());
+  const sqliteDb = new sqlite3.Database(dbPath);
 
   function transformSql(sql) {
     let clean = sql
@@ -46,71 +42,61 @@ if (isPgRequested) {
   }
 
   function executeSqliteQuery(sql, params = []) {
-    const cleanSql = transformSql(sql);
-    const trimmed = cleanSql.trim();
+    return new Promise((resolve, reject) => {
+      const cleanSql = transformSql(sql);
+      const trimmed = cleanSql.trim();
 
-    // Multi-statement DDL scripts
-    if (trimmed.includes(';') && (trimmed.toLowerCase().includes('create table') || trimmed.toLowerCase().includes('create index'))) {
-      const statements = cleanSql
-        .split(';')
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-      sqliteDb.transaction(() => {
-        for (const stmt of statements) {
-          sqliteDb.prepare(stmt).run();
-        }
-      })();
-      return { rows: [] };
-    }
-
-    const isSelect = trimmed.toLowerCase().startsWith('select');
-    const isInsert = trimmed.toLowerCase().startsWith('insert');
-    const isUpdate = trimmed.toLowerCase().startsWith('update');
-    const isDelete = trimmed.toLowerCase().startsWith('delete');
-
-    if (isSelect || (cleanSql.toLowerCase().includes('returning') && (isInsert || isUpdate || isDelete))) {
-      try {
-        const stmt = sqliteDb.prepare(cleanSql);
-        const rows = stmt.all(...params);
-        return { rows };
-      } catch (err) {
-        const queryWithoutReturning = cleanSql.replace(/RETURNING .*/gi, '');
-        const stmt = sqliteDb.prepare(queryWithoutReturning);
-        const info = stmt.run(...params);
-        return { rows: [{ id: info.lastInsertRowid }] };
+      // Multi-statement DDL scripts
+      if (trimmed.includes(';') && (trimmed.toLowerCase().includes('create table') || trimmed.toLowerCase().includes('create index'))) {
+        sqliteDb.exec(cleanSql, (err) => {
+          if (err) return reject(err);
+          resolve({ rows: [] });
+        });
+        return;
       }
-    } else {
-      const stmt = sqliteDb.prepare(cleanSql);
-      const info = stmt.run(...params);
-      return { rows: [], lastInsertRowid: info.lastInsertRowid, changes: info.changes };
-    }
+
+      const isSelect = trimmed.toLowerCase().startsWith('select');
+      const isInsert = trimmed.toLowerCase().startsWith('insert');
+      const isUpdate = trimmed.toLowerCase().startsWith('update');
+      const isDelete = trimmed.toLowerCase().startsWith('delete');
+
+      if (isSelect || (cleanSql.toLowerCase().includes('returning') && (isInsert || isUpdate || isDelete))) {
+        sqliteDb.all(cleanSql, params, (err, rows) => {
+          if (err) {
+            const queryWithoutReturning = cleanSql.replace(/RETURNING .*/gi, '');
+            sqliteDb.run(queryWithoutReturning, params, function (runErr) {
+              if (runErr) return reject(runErr);
+              resolve({ rows: [{ id: this.lastID }] });
+            });
+          } else {
+            resolve({ rows: rows || [] });
+          }
+        });
+      } else {
+        sqliteDb.run(cleanSql, params, function (err) {
+          if (err) return reject(err);
+          resolve({ rows: [], lastInsertRowid: this.lastID, changes: this.changes });
+        });
+      }
+    });
   }
 
   poolInstance = {
     isPg: false,
-    query: async (text, params) => executeSqliteQuery(text, params),
+    query: (text, params) => executeSqliteQuery(text, params),
     connect: async () => {
       return {
-        query: async (text, params) => {
-          if (text === 'BEGIN') {
-            executeSqliteQuery('BEGIN IMMEDIATE');
-            return { rows: [] };
-          }
-          if (text === 'COMMIT') {
-            executeSqliteQuery('COMMIT');
-            return { rows: [] };
-          }
-          if (text === 'ROLLBACK') {
-            executeSqliteQuery('ROLLBACK');
-            return { rows: [] };
-          }
+        query: (text, params) => {
+          if (text === 'BEGIN') return executeSqliteQuery('BEGIN TRANSACTION');
+          if (text === 'COMMIT') return executeSqliteQuery('COMMIT');
+          if (text === 'ROLLBACK') return executeSqliteQuery('ROLLBACK');
           return executeSqliteQuery(text, params);
         },
         release: () => {},
       };
     },
-    end: async () => {
-      sqliteDb.close();
+    end: () => {
+      return new Promise((resolve) => sqliteDb.close(() => resolve()));
     },
   };
 }
