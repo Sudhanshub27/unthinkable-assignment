@@ -18,7 +18,7 @@ export default {
         teal: { 50: '#E6F0EF', 400: '#2F6E6A', 500: '#1F4A47' },
         plum: { 400: '#7A4A5C' },
         paper: { DEFAULT: '#FBF6EC', card: '#FFFFFF', hover: '#F5EEE0' },
-        ink: { DEFAULT: '#2B2620', secondary: '#5B5346', muted: '#857C6C' },
+        ink: { DEFAULT: '#2B2620', secondary: '#5B5346', muted: '#635A4D' },
         line: { DEFAULT: '#E7DCC6', dark: '#D2C4A3' },
       },
       borderRadius: { sm: '4px', DEFAULT: '8px', lg: '12px', xl: '16px' },

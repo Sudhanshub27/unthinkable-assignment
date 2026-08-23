@@ -45,6 +45,7 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
+    document.title = 'Admin Analytics — Angan';
     loadDashboardData(true);
   }, []);
 

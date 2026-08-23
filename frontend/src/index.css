@@ -2,10 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply font-sans bg-paper text-ink;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans bg-paper text-ink overflow-x-hidden antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
 }
 
-h1,h2,h3,h4,h5,h6 {
-  @apply font-display;
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-in {
+  animation: pageFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

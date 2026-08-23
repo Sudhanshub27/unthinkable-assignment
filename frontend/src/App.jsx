@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Topbar from './components/Topbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
@@ -26,10 +26,11 @@ export default function App() {
 }
 
 function AppLayout({ children }) {
+  const location = useLocation();
   return (
     <div className="min-h-screen bg-paper text-ink flex flex-col">
       <Topbar />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6">
+      <main key={location.pathname} className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6 animate-page-in">
         {children}
       </main>
     </div>
@@ -40,22 +41,8 @@ function AppShell() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route
-        path="/login"
-        element={
-          <div className="auth-standalone-wrapper">
-            <Login />
-          </div>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <div className="auth-standalone-wrapper">
-            <Register />
-          </div>
-        }
-      />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route
         path="/dashboard"
         element={

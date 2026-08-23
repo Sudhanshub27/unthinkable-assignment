@@ -22,6 +22,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = 'Sign In — Angan';
     const paramRole = searchParams.get('role');
     if (paramRole === 'admin' || paramRole === 'resident') {
       setActiveRoleTab(paramRole);

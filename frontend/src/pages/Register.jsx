@@ -24,6 +24,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = 'Create Account — Angan';
     const paramRole = searchParams.get('role');
     if (paramRole === 'admin' || paramRole === 'resident') {
       setActiveRoleTab(paramRole);

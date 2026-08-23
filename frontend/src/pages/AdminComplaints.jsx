@@ -51,6 +51,7 @@ export default function AdminComplaints() {
   }
 
   useEffect(() => {
+    document.title = 'Complaints Management — Angan';
     loadComplaints();
   }, []);
 

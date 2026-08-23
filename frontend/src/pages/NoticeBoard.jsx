@@ -40,6 +40,7 @@ export default function NoticeBoard() {
   }
 
   useEffect(() => {
+    document.title = 'Notice Board — Angan';
     loadNotices();
   }, []);
 

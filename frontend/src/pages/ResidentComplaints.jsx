@@ -60,6 +60,7 @@ export default function ResidentComplaints() {
   }
 
   useEffect(() => {
+    document.title = 'My Complaints — Angan';
     loadData();
   }, []);
 

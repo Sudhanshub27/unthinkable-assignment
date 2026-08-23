@@ -74,6 +74,7 @@ export default function ResidentDashboard() {
   }
 
   useEffect(() => {
+    document.title = 'Dashboard — Angan';
     loadDashboardData();
   }, []);
 

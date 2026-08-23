@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import PageHeader from '../components/PageHeader';
@@ -7,6 +8,10 @@ import { User, Mail, Building, Shield, Lock, Phone } from 'lucide-react';
 export default function Profile() {
   const { user } = useAuth();
   const { settings } = useSettings();
+
+  useEffect(() => {
+    document.title = 'Profile Settings — Angan';
+  }, []);
 
   if (!user) return null;
 
