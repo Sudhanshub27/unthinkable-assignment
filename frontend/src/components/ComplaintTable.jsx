@@ -4,6 +4,7 @@ import { formatFlatNumber, getCategoryIconName, formatDate } from '../utils/form
 import { SkeletonTable } from './Skeletons';
 import EmptyState from './EmptyState';
 import { ErrorState } from './UIComponents';
+import emptyComplaintsIllustration from '../assets/empty-complaints.png';
 
 export default function ComplaintTable({
   complaints = [],
@@ -16,6 +17,7 @@ export default function ComplaintTable({
   onSelectComplaint,
   mode = 'admin',
   onRetry,
+  illustration,
 }) {
   if (loading) {
     return <SkeletonTable rows={5} cols={7} />;
@@ -34,6 +36,7 @@ export default function ComplaintTable({
   if (!complaints || complaints.length === 0) {
     return (
       <EmptyState
+        illustration={illustration || emptyComplaintsIllustration}
         icon="clipboard"
         title={emptyMessage}
         description={emptyDescription}

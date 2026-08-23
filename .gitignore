@@ -13,16 +13,21 @@ node_modules/
 dist/
 **/dist/
 build/
+**/build/
+.output/
 
-# Database files
+# Database & SQLite files
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
+*.sqlite
+*.sqlite3
 **/*.db
 **/*.db-journal
 **/*.db-wal
 **/*.db-shm
+**/*.sqlite
 
 # Uploads directory contents (preserve .gitkeep)
 uploads/*
@@ -37,9 +42,22 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 .vscode/
 .idea/
 
-# Zip Archives
+# Raw asset dumps in root
+ChatGPT Image *.png
+ChatGPT Image *.jpg
+
+# Cache & Testing Coverage
+.cache/
+.vite/
+.eslintcache
+coverage/
+.nyc_output/
+
+# Archives & Backups
 *.zip
+*.tar.gz
 society-maintenance-tracker.zip

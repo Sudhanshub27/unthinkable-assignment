@@ -7,6 +7,7 @@ import NoticeCard from '../components/NoticeCard';
 import EmptyState from '../components/EmptyState';
 import SVGIcon from '../components/SVGIcon';
 import { SkeletonCard } from '../components/Skeletons';
+import emptyNoticesIllustration from '../assets/empty-notices.png';
 
 export default function NoticeBoard() {
   const { user } = useAuth();
@@ -127,6 +128,7 @@ export default function NoticeBoard() {
         <SkeletonCard count={3} />
       ) : sortedNotices.length === 0 ? (
         <EmptyState
+          illustration={emptyNoticesIllustration}
           icon="megaphone"
           title="No notices yet"
           description="Society announcements will appear here."

@@ -12,6 +12,7 @@ import EmptyState from '../components/EmptyState';
 import PhotoUpload from '../components/PhotoUpload';
 import SVGIcon from '../components/SVGIcon';
 import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
+import emptyComplaintsIllustration from '../assets/empty-complaints.png';
 
 const CATEGORIES = [
   'Plumbing',
@@ -262,6 +263,7 @@ export default function ResidentDashboard() {
             <SkeletonTable rows={3} cols={6} />
           ) : complaints.length === 0 ? (
             <EmptyState
+              illustration={emptyComplaintsIllustration}
               icon="clipboard"
               title="No complaints yet"
               description="Raise a maintenance complaint to track an issue with your society."

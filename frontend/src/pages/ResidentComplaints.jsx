@@ -8,6 +8,7 @@ import ComplaintTable from '../components/ComplaintTable';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import PhotoUpload from '../components/PhotoUpload';
 import SVGIcon from '../components/SVGIcon';
+import { SkeletonCard } from '../components/Skeletons';
 
 const CATEGORIES = [
   'Plumbing',
@@ -161,12 +162,18 @@ export default function ResidentComplaints() {
       />
 
       {/* 2. STAT CARDS */}
-      <div className="kpi-grid" style={{ marginBottom: 24 }}>
-        <StatCard label="Total Complaints" value={totalCount} icon="clipboard" variant="primary" />
-        <StatCard label="Open" value={openCount} icon="clock" variant="danger" />
-        <StatCard label="In Progress" value={progressCount} icon="clock" variant="warning" />
-        <StatCard label="Resolved" value={resolvedCount} icon="check-circle" variant="success" />
-      </div>
+      {loading ? (
+        <div style={{ marginBottom: 24 }}>
+          <SkeletonCard count={4} />
+        </div>
+      ) : (
+        <div className="kpi-grid" style={{ marginBottom: 24 }}>
+          <StatCard label="Total Complaints" value={totalCount} icon="clipboard" color="blue" variant="primary" />
+          <StatCard label="Open" value={openCount} icon="clock" color="red" variant="danger" />
+          <StatCard label="In Progress" value={progressCount} icon="clock" color="orange" variant="warning" />
+          <StatCard label="Resolved" value={resolvedCount} icon="check-circle" color="green" variant="success" />
+        </div>
+      )}
 
       {/* 3. SEARCH & FILTER BAR */}
       <div className="content-card filter-card" style={{ marginBottom: 20 }}>

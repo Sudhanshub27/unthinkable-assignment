@@ -9,6 +9,8 @@ import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import EmptyState from '../components/EmptyState';
 import SVGIcon from '../components/SVGIcon';
 import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
+import emptyComplaintsIllustration from '../assets/empty-complaints.png';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
 export default function AdminDashboard() {
   const { addToast } = useToast();
@@ -111,6 +113,7 @@ export default function AdminDashboard() {
             label="Total Complaints"
             value={total}
             icon="clipboard"
+            color="blue"
             variant="primary"
             onClick={() => navigate('/admin')}
           />
@@ -118,6 +121,7 @@ export default function AdminDashboard() {
             label="Open"
             value={openCount}
             icon="clock"
+            color="red"
             variant="danger"
             onClick={() => navigate('/admin')}
           />
@@ -125,6 +129,7 @@ export default function AdminDashboard() {
             label="In Progress"
             value={progressCount}
             icon="clock"
+            color="orange"
             variant="warning"
             onClick={() => navigate('/admin')}
           />
@@ -132,6 +137,7 @@ export default function AdminDashboard() {
             label="Resolved"
             value={resolvedCount}
             icon="check-circle"
+            color="green"
             variant="success"
             onClick={() => navigate('/admin')}
           />
@@ -139,12 +145,67 @@ export default function AdminDashboard() {
             label="Overdue"
             value={overdueCount}
             icon="alert-triangle"
+            color="red"
             variant="danger"
             alert={overdueCount > 0}
             onClick={() => navigate('/admin')}
           />
         </div>
       )}
+
+      {/* 2.5. DASHBOARD STATUS CHART */}
+      <div className="content-card dashboard-chart-card" style={{ marginBottom: 24 }}>
+        <div className="card-header-row" style={{ marginBottom: 16 }}>
+          <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <SVGIcon name="layout-dashboard" size={18} color="var(--primary)" />
+            <span>Complaint Status Breakdown</span>
+          </h3>
+        </div>
+
+        {loading ? (
+          <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span className="text-muted">Loading chart data...</span>
+          </div>
+        ) : (
+          <div className="chart-container" style={{ width: '100%', height: 260 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Open', value: openCount, color: '#DC2626' },
+                    { name: 'In Progress', value: progressCount, color: '#D97706' },
+                    { name: 'Resolved', value: resolvedCount, color: '#166534' },
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={65}
+                  outerRadius={95}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {[
+                    { name: 'Open', value: openCount, color: '#DC2626' },
+                    { name: 'In Progress', value: progressCount, color: '#D97706' },
+                    { name: 'Resolved', value: resolvedCount, color: '#166534' },
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    borderColor: 'var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    boxShadow: 'var(--shadow-md)',
+                    fontSize: '0.875rem',
+                  }}
+                />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
 
       {/* 3. OVERDUE / ACTION REQUIRED SECTION */}
       <div className="content-card overdue-section-card" style={{ marginBottom: 24 }}>
@@ -169,6 +230,7 @@ export default function AdminDashboard() {
           <SkeletonTable rows={2} cols={8} />
         ) : overdueComplaints.length === 0 ? (
           <EmptyState
+            illustration={emptyComplaintsIllustration}
             icon="check-circle"
             title="No overdue complaints"
             description="All complaints are currently within the configured SLA."
@@ -202,6 +264,7 @@ export default function AdminDashboard() {
             <SkeletonTable rows={3} cols={8} />
           ) : recentComplaints.length === 0 ? (
             <EmptyState
+              illustration={emptyComplaintsIllustration}
               icon="clipboard"
               title="No complaints recorded yet"
               description="New resident complaints will appear here automatically."

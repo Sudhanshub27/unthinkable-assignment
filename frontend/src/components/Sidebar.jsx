@@ -40,10 +40,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       <aside className={`app-sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-brand">
-            <div className="brand-logo-icon">
-              <SVGIcon name="clipboard" size={22} color="#2563EB" />
-            </div>
+          <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/logo.png" alt="Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
             <div className="brand-text">
               <div className="brand-name" style={{ fontSize: '0.9375rem', fontWeight: 700, lineHeight: 1.2, color: '#ffffff' }}>
                 {settings.society_name || 'Society Notebook'}

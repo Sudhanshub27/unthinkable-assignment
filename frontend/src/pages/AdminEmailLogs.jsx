@@ -4,6 +4,8 @@ import PageHeader from '../components/PageHeader';
 import SVGIcon from '../components/SVGIcon';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import StatCard from '../components/StatCard';
+import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
 import { formatDateTime } from '../utils/formatters';
 
 export default function AdminEmailLogs() {
@@ -38,7 +40,7 @@ export default function AdminEmailLogs() {
   const mockedLogs = logs.filter((l) => l.status === 'Mocked').length;
 
   return (
-    <div className="admin-email-logs-page" style={{ padding: '24px 0' }}>
+    <div className="page-container admin-email-logs-container">
       <PageHeader
         title="Email Activity & Audit Logs"
         subtitle="Real-time transparency into transactional notification emails and delivery status"
@@ -57,38 +59,21 @@ export default function AdminEmailLogs() {
       />
 
       {/* Audit Stats Grid */}
-      <div
-        className="stats-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
-        <div className="stat-card" style={{ background: 'var(--bg-card)', padding: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Email Requests</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', marginTop: 4 }}>{totalLogs}</div>
+      {loading ? (
+        <div style={{ marginBottom: 24 }}>
+          <SkeletonCard count={4} />
         </div>
-
-        <div className="stat-card" style={{ background: 'var(--bg-card)', padding: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#059669', textTransform: 'uppercase' }}>Successfully Sent</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#059669', marginTop: 4 }}>{sentLogs}</div>
+      ) : (
+        <div className="kpi-grid" style={{ marginBottom: 24 }}>
+          <StatCard label="Total Email Requests" value={totalLogs} icon="mail" color="blue" variant="primary" />
+          <StatCard label="Successfully Sent" value={sentLogs} icon="check-circle" color="green" variant="success" />
+          <StatCard label="Delivery Failures" value={failedLogs} icon="alert-triangle" color="red" variant="danger" alert={failedLogs > 0} />
+          <StatCard label="Console Mock Mode" value={mockedLogs} icon="clock" color="orange" variant="warning" />
         </div>
-
-        <div className="stat-card" style={{ background: 'var(--bg-card)', padding: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#DC2626', textTransform: 'uppercase' }}>Delivery Failures</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#DC2626', marginTop: 4 }}>{failedLogs}</div>
-        </div>
-
-        <div className="stat-card" style={{ background: 'var(--bg-card)', padding: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#2563EB', textTransform: 'uppercase' }}>Console Mock Mode</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#2563EB', marginTop: 4 }}>{mockedLogs}</div>
-        </div>
-      </div>
+      )}
 
       {/* Main Activity Table Card */}
-      <div className="card" style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+      <div className="content-card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: 'var(--text-main)' }}>Email Dispatch Audit Table</h3>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Showing last 100 entries</span>
@@ -101,8 +86,8 @@ export default function AdminEmailLogs() {
         )}
 
         {loading ? (
-          <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-            Loading email logs...
+          <div style={{ padding: 20 }}>
+            <SkeletonTable rows={5} cols={7} />
           </div>
         ) : logs.length === 0 ? (
           <EmptyState

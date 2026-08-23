@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ResidentDashboard from './pages/ResidentDashboard';
@@ -43,14 +44,7 @@ function AppLayout({ sidebarOpen, setSidebarOpen, children }) {
 function AppShell({ sidebarOpen, setSidebarOpen }) {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <div className="auth-standalone-wrapper">
-            <Login />
-          </div>
-        }
-      />
+      <Route path="/" element={<Landing />} />
       <Route
         path="/login"
         element={
@@ -147,7 +141,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
