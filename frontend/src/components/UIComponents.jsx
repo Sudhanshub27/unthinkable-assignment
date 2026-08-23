@@ -54,7 +54,18 @@ export function Button({
   if (targetHref) {
     if (targetHref.startsWith('#')) {
       return (
-        <a href={targetHref} className={combinedClassName} {...props}>
+        <a
+          href={targetHref}
+          className={combinedClassName}
+          onClick={(e) => {
+            e.preventDefault();
+            if (props.onClick) props.onClick(e);
+            const id = targetHref.replace('#', '');
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+          {...props}
+        >
           {content}
         </a>
       );
