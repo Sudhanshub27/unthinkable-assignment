@@ -1,6 +1,8 @@
 export function formatFlatNumber(flatNumber) {
   if (!flatNumber) return 'Flat not specified';
-  return `Flat ${flatNumber}`;
+  const str = String(flatNumber).trim();
+  if (str.toLowerCase().startsWith('flat')) return str;
+  return `Flat ${str}`;
 }
 
 export function getCategoryIconName(category) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Lock, RotateCcw } from 'lucide-react';
+import { X, Lock, RotateCcw, ChevronDown, History, AlignLeft, Image as ImageIcon, User, Calendar } from 'lucide-react';
 import Timeline from './Timeline';
 import { StatusBadge, PriorityBadge, OverdueBadge } from './Badges';
 import { Button } from './UIComponents';
@@ -21,6 +21,7 @@ export default function ComplaintDetailModal({
   const [submitting, setSubmitting] = useState(false);
   const [photoError, setPhotoError] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
 
   const [showReopenConfirm, setShowReopenConfirm] = useState(false);
   const [reopenReason, setReopenReason] = useState('');
@@ -39,6 +40,7 @@ export default function ComplaintDetailModal({
       setReopenReason('');
       setReopening(false);
       setLightboxOpen(false);
+      setShowTimeline(false);
     }
   }, [complaint]);
 
@@ -115,7 +117,7 @@ export default function ComplaintDetailModal({
         aria-labelledby="complaint-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* Modal Top Bar */}
         <div className="px-6 py-4 border-b border-line flex items-center justify-between bg-paper-card">
           <div className="flex items-center gap-2">
             <span className="font-mono text-sm font-semibold text-ink-muted">#{complaint.id}</span>
@@ -133,55 +135,72 @@ export default function ComplaintDetailModal({
         </div>
 
         {/* Scrollable Body */}
-        <div className="px-6 py-5 overflow-y-auto space-y-5 flex-1">
-          {/* Header Row: Category / Badges */}
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-base text-ink">{complaint.category}</span>
-              {complaint.flat_number && (
-                <span className="text-xs px-2 py-0.5 rounded bg-paper-hover font-medium text-ink-secondary">
-                  Flat {formatFlatNumber(complaint.flat_number)}
-                </span>
-              )}
+        <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1">
+          {/* SECTION 1: HEADER & METADATA */}
+          <div className="space-y-2 pb-1 border-b border-line/60">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="font-display font-bold text-lg text-ink">{complaint.category}</span>
+                {complaint.flat_number && (
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-paper-hover font-semibold text-ink border border-line">
+                    {formatFlatNumber(complaint.flat_number)}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <StatusBadge status={complaint.status} />
+                <PriorityBadge priority={complaint.priority} />
+                {complaint.is_overdue && <OverdueBadge ageDays={complaint.age_days} />}
+              </div>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <StatusBadge status={complaint.status} />
-              <PriorityBadge priority={complaint.priority} />
-              {complaint.is_overdue && <OverdueBadge ageDays={complaint.age_days} />}
+
+            {/* Submitter details */}
+            <div className="flex items-center gap-3 text-xs text-ink-muted flex-wrap pt-0.5">
+              <span className="flex items-center gap-1">
+                <User className="w-3.5 h-3.5 text-ink-muted" />
+                Submitted by <strong className="font-semibold text-ink ml-0.5">{complaint.user_name || 'Resident'}</strong>
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-ink-muted" />
+                {formatDateTime(complaint.created_at)}
+              </span>
             </div>
           </div>
 
-          {/* User & Date info */}
-          <div className="text-xs text-ink-muted">
-            Submitted by <span className="font-medium text-ink">{complaint.user_name || 'Resident'}</span> on{' '}
-            {formatDateTime(complaint.created_at)}
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1">
-            <div className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Description</div>
-            <p className="text-sm text-ink-secondary leading-relaxed whitespace-pre-wrap">
+          {/* SECTION 2: ISSUE DESCRIPTION */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5 border-b border-line/50 pb-1.5">
+              <AlignLeft className="w-3.5 h-3.5 text-terracotta-400 shrink-0" />
+              <span>Issue Description</span>
+            </h3>
+            <p className="text-sm md:text-[15px] text-ink font-sans leading-relaxed whitespace-pre-wrap pt-1 pl-0.5">
               {complaint.description}
             </p>
           </div>
 
-          {/* Photo attachment with Lightbox preview */}
+          {/* SECTION 3: ATTACHED PHOTO */}
           {photoFullUrl && !photoError && (
-            <div className="space-y-1.5">
-              <div className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Attached Photo</div>
-              <div className="bg-paper-hover/40 p-2.5 rounded-xl border border-line inline-flex items-center justify-center max-w-full sm:max-w-md">
+            <div className="space-y-2 pt-1">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5 border-b border-line/50 pb-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-terracotta-400 shrink-0" />
+                <span>Attached Photo</span>
+              </h3>
+              <div className="inline-block group cursor-zoom-in pt-1" onClick={() => setLightboxOpen(true)}>
                 <img
                   src={photoFullUrl}
                   alt={`Attachment for complaint #${complaint.id}`}
-                  className="rounded-lg max-h-64 max-w-full object-contain cursor-zoom-in hover:opacity-95 transition-opacity"
-                  onClick={() => setLightboxOpen(true)}
+                  className="rounded-xl border border-line max-h-64 max-w-full object-contain shadow-card hover:shadow-lifted transition-all duration-150"
                   onError={() => setPhotoError(true)}
                 />
+                <div className="mt-1.5 text-xs text-terracotta-400 font-medium group-hover:underline">
+                  Click to enlarge photo
+                </div>
               </div>
             </div>
           )}
 
-          {/* Full Screen Lightbox Overlay */}
+          {/* Lightbox Overlay */}
           {lightboxOpen && photoFullUrl && (
             <div
               className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 cursor-zoom-out"
@@ -202,34 +221,48 @@ export default function ComplaintDetailModal({
             </div>
           )}
 
-          {/* Divider */}
-          <div className="border-t border-line my-4" />
+          <div className="border-t border-line my-5" />
 
-          {/* History & Admin Operations Section */}
+          {/* SECTION 4: AUDIT HISTORY & TIMELINE */}
           {mode === 'admin' ? (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-              {/* History Timeline */}
-              <div className="lg:col-span-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-muted mb-3">
-                  History & Audit Log
-                </h4>
-                {loadingHistory ? (
-                  <div className="flex items-center gap-2 text-sm text-ink-muted py-4">
-                    <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
-                    <span>Loading audit history...</span>
+              {/* History Timeline Side */}
+              <div className="lg:col-span-3 space-y-3">
+                <div className="flex items-center justify-between gap-2 border-b border-line/50 pb-1.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5">
+                    <History className="w-3.5 h-3.5 text-terracotta-400 shrink-0" />
+                    <span>Audit History</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowTimeline(!showTimeline)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-paper-hover hover:bg-terracotta-50 hover:text-terracotta-500 border border-line text-xs font-semibold text-ink transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>{showTimeline ? 'Hide Timeline' : 'View Timeline'}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showTimeline ? 'rotate-180 text-terracotta-500' : ''}`} />
+                  </button>
+                </div>
+
+                {showTimeline && (
+                  <div className="pt-2">
+                    {loadingHistory ? (
+                      <div className="flex items-center gap-2 text-xs text-ink-muted py-4">
+                        <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
+                        <span>Loading audit history...</span>
+                      </div>
+                    ) : (
+                      <Timeline history={history} />
+                    )}
                   </div>
-                ) : (
-                  <Timeline history={history} />
                 )}
               </div>
 
-              {/* Admin Triage Controls */}
-              <div className="lg:col-span-2 bg-paper-hover/50 rounded-xl p-4 border border-line h-fit">
-                <h4 className="text-sm font-semibold uppercase tracking-wide text-ink mb-3">
+              {/* Admin Triage Controls Side */}
+              <div className="lg:col-span-2 bg-paper-hover/40 rounded-xl p-4 border border-line h-fit">
+                <h4 className="text-xs font-bold uppercase tracking-wide text-ink mb-3">
                   Triage Operations
                 </h4>
                 <form onSubmit={handleSubmitTriage} className="space-y-4">
-                  {/* Status Select */}
                   <div>
                     <label
                       htmlFor="triage-status"
@@ -277,7 +310,7 @@ export default function ComplaintDetailModal({
                         </Button>
                       ) : (
                         <div className="p-3 border border-mustard-400/40 rounded-lg bg-mustard-50/50 space-y-2">
-                          <p className="text-xs font-semibold text-mustard-500">Confirm Reopening Complaint?</p>
+                          <p className="text-xs font-semibold text-mustard-600">Confirm Reopening Complaint?</p>
                           <input
                             type="text"
                             className="w-full rounded-lg border border-line bg-paper px-3 py-1.5 text-xs text-ink focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400"
@@ -313,7 +346,6 @@ export default function ComplaintDetailModal({
                     </div>
                   )}
 
-                  {/* Priority Select */}
                   <div>
                     <label htmlFor="triage-priority" className="block text-xs font-semibold text-ink-muted mb-1">
                       Priority Level
@@ -330,7 +362,6 @@ export default function ComplaintDetailModal({
                     </select>
                   </div>
 
-                  {/* Flag as Overdue Checkbox */}
                   <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-ink-secondary">
                     <input
                       type="checkbox"
@@ -341,7 +372,6 @@ export default function ComplaintDetailModal({
                     <span>Flag as Overdue (SLA Breach)</span>
                   </label>
 
-                  {/* Audit Note Input */}
                   <div>
                     <label htmlFor="triage-note" className="block text-xs font-semibold text-ink-muted mb-1">
                       Audit Note (Optional)
@@ -368,17 +398,38 @@ export default function ComplaintDetailModal({
               </div>
             </div>
           ) : (
-            <div className="w-full space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-muted mb-3">
-                History & Audit Log
-              </h4>
-              {loadingHistory ? (
-                <div className="flex items-center gap-2 text-sm text-ink-muted py-4">
-                  <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
-                  <span>Loading audit history...</span>
+            /* Resident Mode: Distinct Section Header + Action Button */
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2 flex-wrap border-b border-line/50 pb-1.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5">
+                  <History className="w-3.5 h-3.5 text-terracotta-400 shrink-0" />
+                  <span>Audit History & Activity Log</span>
+                  <span className="text-[11px] font-mono text-ink-muted ml-1 font-normal">
+                    ({history.length} {history.length === 1 ? 'event' : 'events'})
+                  </span>
+                </h3>
+
+                <button
+                  type="button"
+                  onClick={() => setShowTimeline(!showTimeline)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-paper-hover hover:bg-terracotta-50 hover:text-terracotta-500 border border-line text-xs font-semibold text-ink transition-all cursor-pointer shadow-xs"
+                >
+                  <span>{showTimeline ? 'Hide History Timeline' : 'View Audit History Timeline'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showTimeline ? 'rotate-180 text-terracotta-500' : ''}`} />
+                </button>
+              </div>
+
+              {showTimeline && (
+                <div className="pt-2">
+                  {loadingHistory ? (
+                    <div className="flex items-center gap-2 text-xs text-ink-muted py-4">
+                      <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
+                      <span>Loading audit history...</span>
+                    </div>
+                  ) : (
+                    <Timeline history={history} />
+                  )}
                 </div>
-              ) : (
-                <Timeline history={history} />
               )}
             </div>
           )}

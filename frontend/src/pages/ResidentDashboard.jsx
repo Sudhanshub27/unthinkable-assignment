@@ -162,7 +162,7 @@ export default function ResidentDashboard() {
     <div className="space-y-6 pb-20 md:pb-6">
       {/* 1. HEADER */}
       <PageHeader
-        title={`${getGreeting()}, ${user?.name || 'Resident'} 👋`}
+        title={`${getGreeting()}, ${user?.name || 'Resident'}`}
         subtitle="Here's what's happening around your society."
         actionText="Raise Complaint"
         onAction={() => {

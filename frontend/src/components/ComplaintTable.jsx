@@ -7,21 +7,21 @@ import { ErrorState } from './UIComponents';
 import emptyComplaintsIllustration from '../assets/empty-complaints-new.png';
 
 const CATEGORIES_COLOR_MAP = {
-  Plumbing: { border: 'border-terracotta-400', text: 'text-terracotta-400' },
-  Electrical: { border: 'border-mustard-400', text: 'text-mustard-400' },
-  Cleaning: { border: 'border-teal-400', text: 'text-teal-400' },
-  Security: { border: 'border-olive-400', text: 'text-olive-400' },
-  Lift: { border: 'border-plum-400', text: 'text-plum-400' },
-  Parking: { border: 'border-terracotta-400', text: 'text-terracotta-400' },
-  Other: { border: 'border-teal-400', text: 'text-teal-400' },
+  Plumbing: { border: 'border-terracotta-400', text: 'text-terracotta-500' },
+  Electrical: { border: 'border-mustard-400', text: 'text-mustard-600' },
+  Cleaning: { border: 'border-teal-400', text: 'text-teal-600' },
+  Security: { border: 'border-olive-400', text: 'text-olive-600' },
+  Lift: { border: 'border-plum-400', text: 'text-plum-600' },
+  Parking: { border: 'border-terracotta-400', text: 'text-terracotta-500' },
+  Other: { border: 'border-teal-400', text: 'text-teal-600' },
 };
 
 const COLOR_PALETTE = [
-  { border: 'border-terracotta-400', text: 'text-terracotta-400' },
-  { border: 'border-olive-400', text: 'text-olive-400' },
-  { border: 'border-mustard-400', text: 'text-mustard-400' },
-  { border: 'border-teal-400', text: 'text-teal-400' },
-  { border: 'border-plum-400', text: 'text-plum-400' },
+  { border: 'border-terracotta-400', text: 'text-terracotta-500' },
+  { border: 'border-olive-400', text: 'text-olive-600' },
+  { border: 'border-mustard-400', text: 'text-mustard-600' },
+  { border: 'border-teal-400', text: 'text-teal-600' },
+  { border: 'border-plum-400', text: 'text-plum-600' },
 ];
 
 function getCategoryStyle(category, index) {
@@ -45,7 +45,7 @@ export default function ComplaintTable({
   illustration,
 }) {
   if (loading) {
-    return <SkeletonTable rows={5} cols={7} />;
+    return <SkeletonTable rows={4} cols={4} />;
   }
 
   if (error) {
@@ -72,7 +72,7 @@ export default function ComplaintTable({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
       {complaints.map((c, index) => {
         const catStyle = getCategoryStyle(c.category, index);
 
@@ -80,46 +80,44 @@ export default function ComplaintTable({
           <div
             key={c.id}
             onClick={() => onSelectComplaint && onSelectComplaint(c)}
-            className={`bg-paper-card rounded-xl border border-line shadow-card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-150 p-4 border-l-4 ${catStyle.border} cursor-pointer flex flex-col justify-between`}
+            className={`bg-paper-card rounded-xl border border-line shadow-card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-200 p-4 border-l-4 ${catStyle.border} cursor-pointer flex flex-col justify-between space-y-3 group`}
           >
-            {/* Top Row */}
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${catStyle.text}`}>
-                    {c.category}
+            {/* Top Row: Category + ID + Flat + Status */}
+            <div className="flex items-center justify-between gap-2 border-b border-line/60 pb-2.5">
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-paper-hover border border-line/50 ${catStyle.text}`}>
+                  {c.category}
+                </span>
+                <span className="text-xs text-ink-muted font-mono font-medium">#{c.id}</span>
+                {c.flat_number && (
+                  <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-paper-hover text-ink-secondary">
+                    {formatFlatNumber(c.flat_number)}
                   </span>
-                  <span className="text-xs text-ink-muted font-mono font-medium">#{c.id}</span>
-                  {c.flat_number && (
-                    <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-paper-hover text-ink-secondary">
-                      {formatFlatNumber(c.flat_number)}
-                    </span>
-                  )}
-                </div>
-                <StatusBadge status={c.status} />
-              </div>
-
-              {/* Middle Row (Description + Photo Thumbnail) */}
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <p className="text-sm text-ink-secondary line-clamp-2 flex-1">
-                  {c.description}
-                </p>
-                {c.photo_url && (
-                  <img
-                    src={getPhotoUrl(c.photo_url)}
-                    alt="Attachment"
-                    className="w-11 h-11 rounded-lg object-cover border border-line shrink-0"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
                 )}
               </div>
+              <StatusBadge status={c.status} />
             </div>
 
-            {/* Bottom Row */}
-            <div className="flex items-center justify-between text-xs text-ink-muted pt-3 border-t border-line mt-auto">
-              <div className="flex items-center gap-1.5 min-w-0">
+            {/* Middle Row: Description + Photo Attachment */}
+            <div className="flex items-start justify-between gap-3 flex-1 py-1">
+              <p className="text-xs md:text-sm text-ink-secondary line-clamp-2 leading-relaxed font-sans flex-1">
+                {c.description}
+              </p>
+              {c.photo_url && (
+                <img
+                  src={getPhotoUrl(c.photo_url)}
+                  alt="Attachment"
+                  className="w-12 h-12 rounded-lg object-cover border border-line shrink-0 shadow-xs group-hover:border-terracotta-400/40 transition-colors"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Bottom Row: Date + Priority + Overdue */}
+            <div className="flex items-center justify-between text-xs text-ink-muted pt-2.5 border-t border-line/60 mt-auto">
+              <div className="flex items-center gap-1.5 min-w-0 text-ink-muted">
                 <Calendar className="w-3.5 h-3.5 shrink-0 text-ink-muted" />
                 <span className="truncate">{formatDate(c.created_at)}</span>
                 {mode === 'admin' && c.user_name && (
@@ -129,7 +127,7 @@ export default function ComplaintTable({
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5 flex-wrap justify-end shrink-0 ml-2">
+              <div className="flex items-center gap-1.5 flex-wrap justify-end shrink-0">
                 <PriorityBadge priority={c.priority} />
                 {c.is_overdue && <OverdueBadge ageDays={c.age_days} />}
               </div>
