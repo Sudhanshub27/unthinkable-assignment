@@ -169,7 +169,7 @@ export default function AdminDashboard() {
       {/* 3. TWO CHARTS SIDE BY SIDE */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Status Breakdown Donut */}
-        <div className="bg-paper-card rounded-xl shadow-card p-5 border border-line space-y-4">
+        <div className="bg-paper-card rounded-xl shadow-card p-5 border border-line space-y-4 h-full flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
               <PieIcon className="w-4 h-4 text-terracotta-400" />
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
           </div>
 
           {loading ? (
-            <div className="h-56 flex items-center justify-center text-xs text-ink-muted">
+            <div className="h-60 flex items-center justify-center text-xs text-ink-muted">
               Loading chart...
             </div>
           ) : (
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Category Breakdown Horizontal Bars */}
-        <div className="bg-paper-card rounded-xl shadow-card p-5 border border-line space-y-4">
+        <div className="bg-paper-card rounded-xl shadow-card p-5 border border-line space-y-4 h-full flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-olive-500" />
@@ -225,11 +225,11 @@ export default function AdminDashboard() {
           </div>
 
           {loading ? (
-            <div className="h-56 flex items-center justify-center text-xs text-ink-muted">
+            <div className="h-60 flex-1 flex items-center justify-center text-xs text-ink-muted">
               Loading chart...
             </div>
           ) : byCategory.length === 0 ? (
-            <div className="h-56 flex items-center justify-center text-xs text-ink-muted">
+            <div className="h-60 flex-1 flex items-center justify-center text-xs text-ink-muted">
               No category data available
             </div>
           ) : (
