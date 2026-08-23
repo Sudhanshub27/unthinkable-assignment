@@ -1,52 +1,107 @@
-# 🏢 Society Maintenance Tracker
+<div align="center">
+  <img src="frontend/public/logo.png" alt="Angan Logo" width="110" />
+  <h1>Angan — Society Maintenance Tracker</h1>
+  <p><i>The digital courtyard for modern housing societies</i></p>
+</div>
 
-A full-stack apartment society maintenance platform that allows residents to raise and track complaints while enabling administrators to manage priorities, SLA breaches, notices, and complete audit history. Built with Node.js, Express, React (Vite), and dual SQLite/PostgreSQL database compatibility.
+A production-ready, full-stack housing society management platform designed to streamline maintenance complaint triage, resolution tracking, official announcements, and community governance. Built with **Node.js**, **Express**, **React (Vite)**, and dual **SQLite / PostgreSQL** database compatibility.
 
 ---
 
 ## 🌐 Live Production Links
 
-* **Live Web Application (Vercel)**: [https://unthinkable-assignment-sudhanshu.vercel.app](https://unthinkable-assignment-sudhanshu.vercel.app)
-* **Live REST API (Render)**: [https://unthinkable-assignment-vcj0.onrender.com/api](https://unthinkable-assignment-vcj0.onrender.com/api)
-* **API Health Status**: [https://unthinkable-assignment-vcj0.onrender.com/api/health](https://unthinkable-assignment-vcj0.onrender.com/api/health)
+* **Live Web Application**: [https://unthinkable-assignment-sudhanshu.vercel.app](https://unthinkable-assignment-sudhanshu.vercel.app)
+* **Live REST API Endpoint**: [https://unthinkable-assignment-vcj0.onrender.com/api](https://unthinkable-assignment-vcj0.onrender.com/api)
+* **API Health Check**: [https://unthinkable-assignment-vcj0.onrender.com/api/health](https://unthinkable-assignment-vcj0.onrender.com/api/health)
+* **GitHub Repository**: [https://github.com/Sudhanshub27/unthinkable-assignment](https://github.com/Sudhanshub27/unthinkable-assignment)
 
 ---
 
-## 🌟 Features
+## 🗝️ Demo Credentials
 
-### 👤 Resident Capabilities
-* **Account Registration & Authentication**: Secure sign-up with flat number designation and JWT token session management.
-* **Complaint Submission**: Create maintenance requests across categories (Plumbing, Electrical, Cleaning, Security, Lift, Parking, Other) with detailed descriptions and optional photo attachments.
-* **Secure Photo Uploads**: Multipart image uploading with binary magic-byte validation and instant preview lightbox.
-* **Live Complaint Tracking**: Monitor real-time status (`Open`, `In Progress`, `Resolved`), priority levels, and SLA age.
-* **Audit History Timeline**: Transparent, read-only inspection of every status transition, priority change, and admin note.
-* **Community Notice Board**: Stay informed with society announcements and pinned high-priority updates.
-* **User Profile**: View account parameters, flat number assignment, and role designations.
+For quick evaluation, use the pre-configured credentials below or register a new resident account:
 
-### 🛡️ Admin Capabilities
-* **Operations Console Dashboard**: Real-time KPI dashboard featuring total queue counts, open/in-progress/resolved metrics, SLA breach alerts, and dynamic category breakdown charts.
-* **Complaint Queue Management**: Comprehensive list view of all resident complaints across the society.
-* **Multi-Filter & Search Engine**: Real-time filtering by category, status, priority level, date range, search query (ID, resident name, flat number), and SLA breach flag.
-* **Atomic Triage Operations**: Update complaint status, priority level, manual overdue flag, and audit notes simultaneously within an isolated database transaction.
-* **Configurable Overdue SLA**: Modify society SLA threshold parameters (in days) dynamically without code redeployment.
-* **Notice Board Administration**: Create standard or important announcements with automatic email broadcast triggers.
-* **Automated & Manual Overdue System**: Surface complaints exceeding configurable SLA thresholds automatically at the top of the admin queue.
-* **Email Notification System**: Asynchronous, non-blocking email alerts sent to residents on status changes and important community announcements.
+| Role | Email | Password | Access & Capabilities |
+|---|---|---|---|
+| 🛡️ **Admin** | `admin@society.com` | `Admin@123` | KPI Dashboard, Complaint Triage Queue, SLA Threshold Settings, Notice Posting |
+| 👤 **Resident** | `resident@society.com` | `Resident@123` | Submit Complaints with Photos, Track Resolution Timeline, View Notice Board |
 
 ---
 
-## 🛠️ Tech Stack
+## 📌 Executive Summary & Problem Scope
 
-* **Frontend**: React 18, Vite, React Router v6, Axios, Modern HSL Vanilla CSS Design System.
-* **Backend**: Node.js, Express.js.
-* **Database**: Dual Compatibility Layer — SQLite (`sqlite3`) for zero-config local development, PostgreSQL (`pg`) for cloud production.
-* **Authentication**: JSON Web Tokens (JWT) with HTTP Bearer authorization headers and `bcryptjs` password hashing.
-* **Email Service**: Nodemailer with SMTP configuration and safe mock console fallback.
-* **File Upload & Validation**: Multer with disk storage, file extension filtering, and binary magic-byte header inspection.
+Apartment societies process a continuous volume of maintenance issues (plumbing leaks, electrical outages, security concerns, elevator repairs). Without a structured digital management platform:
+1. **Management** lacks visibility into unresolved issues, overdue SLAs, and recurring problem categories.
+2. **Residents** face uncertainty without real-time updates or history tracking for raised issues.
+
+**Angan** resolves these challenges by introducing:
+* An **immutable append-only audit trail** for every complaint transition.
+* A **dynamic overdue SLA engine** that automatically highlights delayed issues.
+* A **role-based operations console** for administrators to triage queues, adjust priorities, and publish announcements.
+* An **asynchronous email notification pipeline** keeping residents updated at every step.
 
 ---
 
-## 🏗️ Architecture
+## 🗺️ Application Journey & Operational Route
+
+```
+                                  +-----------------------+
+                                  |   Angan Landing Page  |
+                                  |  (Overview & Portals) |
+                                  +-----------+-----------+
+                                              |
+                        +---------------------+---------------------+
+                        |                                           |
+             +----------v----------+                     +----------v----------+
+             |   Resident Portal   |                     |     Admin Portal    |
+             +----------+----------+                     +----------+----------+
+                        |                                           |
+     +------------------+------------------+     +------------------+------------------+
+     |                  |                  |     |                  |                  |
++----v-----+      +-----v----+      +------v---+ |      +-----------v--+   +-------------v+   +-------------v+
+| Submit   |      | Track    |      | Digital  | |      | Operations   |   | Triage Queue |   | Society      |
+| Issue    |      | Status & |      | Notice   | |      | KPI          |   | (Filters,    |   | Settings &   |
+| (Photos) |      | Timeline |      | Board    | |      | Dashboard    |   | SLA Flags)   |   | SLA Config   |
++----------+      +----------+      +----------+ |      +--------------+   +--------------+   +--------------+
+                                                 |
+                                     +-----------v-----------+
+                                     | Notice Board Admin    |
+                                     | (Important/Pinned)    |
+                                     +-----------------------+
+```
+
+### 1. Resident Workflow
+1. **Authentication**: Sign up with name, email, password, and flat number assignment, or log in via JWT session.
+2. **Raise Maintenance Request**: Submit issues selecting from structured categories (*Plumbing, Electrical, Cleaning, Security, Lift, Parking, Other*), detailed descriptions, and optional photo attachments.
+3. **Live Track & Audit Timeline**: Monitor real-time status (`Open` ➔ `In Progress` ➔ `Resolved`), priority levels, and inspect an append-only timeline log detailing every admin note and status change.
+4. **Community Notice Board**: Read general society notices and pinned high-priority announcements.
+
+### 2. Admin Operations Workflow
+1. **Executive Dashboard**: Monitor real-time KPI metrics including total complaints, active issues by status, category breakdown distributions, and count of overdue complaints.
+2. **Complaint Triage & Queue Management**: Filter and search complaints by status, category, priority, date range, resident name, flat number, or SLA breach status.
+3. **Atomic State Updates**: Modify complaint status, priority level (`Low`, `Medium`, `High`), manual overdue flags, and operational audit notes simultaneously within an isolated SQL transaction.
+4. **Dynamic SLA Governance**: Configure society overdue threshold parameters (in days) dynamically from the Settings UI without restarting the application.
+5. **Notice Broadcasting**: Create standard or pinned announcements with automated email notifications dispatched to residents.
+
+---
+
+## 🌟 Feature Checklist (Requirement Parity)
+
+| Category | Feature Requirement | Status | Implementation Details |
+|---|---|---|---|
+| **Input** | Resident Complaint with Category & Description | ✅ Complete | Express validation & parameterized SQL insertion |
+| **Input** | Optional Photo Attachment | ✅ Complete | Multer disk storage + Binary magic-byte header inspection |
+| **Input** | Admin Status & Priority Updates | ✅ Complete | Atomic `PATCH /api/complaints/:id` transaction |
+| **Input** | Admin Notice Board Posting | ✅ Complete | Pinned important notices with email broadcast trigger |
+| **Output** | Tracked Complaints with Full History Log | ✅ Complete | Append-only `complaint_history` audit table |
+| **Output** | Digital Notice Board | ✅ Complete | `GET /api/notices` with pinned importance sorting |
+| **Output** | Automated Overdue SLA Escalation | ✅ Complete | Dynamic read-time calculation + manual override flag |
+| **Output** | Email Notifications | ✅ Complete | Asynchronous Resend API / Nodemailer worker with mock fallback |
+| **Dashboard**| KPI Counters & Category Analytics | ✅ Complete | Operational aggregates via `GET /api/dashboard` |
+
+---
+
+## 🏗️ Architecture & System Design
 
 ### System Architecture Diagram
 
@@ -68,7 +123,7 @@ flowchart TD
         end
         
         ComplaintRoute --> UploadMW[Multer + Magic-Byte Upload Filter]
-        ComplaintRoute --> EmailUtil[Nodemailer Async Worker]
+        ComplaintRoute --> EmailUtil[Asynchronous Email Worker]
         NoticeRoute --> EmailUtil
     end
 
@@ -79,31 +134,34 @@ flowchart TD
     end
 ```
 
-### Complaint Lifecycle & Triage Workflow
+### Complaint Lifecycle & State Machine
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Open: Resident Raises Complaint (Photo Uploaded)
-    Open --> InProgress: Admin Triages & Dispatches Work (Note Logged)
-    InProgress --> Resolved: Admin Marks Resolved (Timestamp Stamped)
+    [*] --> Open: Resident Submits Complaint (Optional Photo Uploaded)
     
     state Open {
         [*] --> NormalAge
-        NormalAge --> SLA_Breached: Age > Overdue Threshold Days
-        NormalAge --> Manually_Flagged: Admin Overdue Flag Checked
+        NormalAge --> SLA_Breached: Age > Threshold Days
+        NormalAge --> Manually_Flagged: Admin Overdue Toggle Checked
     }
+    
+    Open --> InProgress: Admin Triages & Dispatches Work (Audit Note Logged)
     
     state InProgress {
         [*] --> InProgNormal
         InProgNormal --> InProgBreached: Exceeds SLA Threshold
     }
+    
+    InProgress --> Resolved: Admin Marks Resolved (Timestamp Stamped)
+    Resolved --> [*]: Complaint Closed
 ```
 
 ---
 
-## 🗄️ Database Design
+## 🗄️ Database Design & Audit History Model
 
-The system utilizes a relational schema supporting foreign key constraints, explicit indexing, and append-only audit tracking.
+The application utilizes a relational schema supporting foreign key constraints, explicit indexing, and append-only audit history.
 
 ```mermaid
 erDiagram
@@ -164,101 +222,36 @@ erDiagram
     }
 ```
 
-### Why `complaint_history` exists as a separate table
-Storing only the current status in `complaints` loses critical operational visibility into when changes occurred, who authorized them, and what notes were attached. Storing status transitions as an **append-only history log** in `complaint_history` provides:
-1. **Immutable Auditability**: A complete timeline of every status transition, priority change, and overdue override.
-2. **Actor Accountability**: Tracks the exact `actor_id` and `actor_role` (Resident vs. Admin) for every action.
-3. **Decoupled Data**: Keeps the primary `complaints` table lean for fast list queries while maintaining a detailed history log available on demand via indexed `WHERE complaint_id = ?` queries.
+### Why `complaint_history` exists as an Append-Only Table
+Storing only the current status in `complaints` loses operational context regarding when changes occurred, who authorized them, and what notes were attached. Storing status transitions as an **append-only history log** in `complaint_history` guarantees:
+1. **Immutable Audit Trail**: Every status transition, priority adjustment, and manual overdue flag is recorded with timestamped precision.
+2. **Actor Accountability**: Explicitly records `actor_id` and `actor_role` (*Resident* vs. *Admin*).
+3. **Decoupled Read Performance**: Keeps the primary `complaints` table lightweight for fast list/filter queries while serving audit history on demand via indexed `WHERE complaint_id = ?` queries.
 
 ---
 
-## 🔄 Complaint Lifecycle
+## 💡 Key Technical Decisions
 
-1. **Status Transition Flow**:
-   - `Open` (Default state upon creation by a resident)
-   - `In Progress` (Admin acknowledges request and dispatches maintenance personnel)
-   - `Resolved` (Issue is remediated; `resolved_at` timestamp is permanently recorded)
-
-2. **Priority Classification**:
-   - `Low` (Routine non-urgent tasks, e.g., general query)
-   - `Medium` (Standard maintenance, e.g., minor pipe leak)
-   - `High` (Urgent hazards, e.g., main lift failure, main electrical outage)
-
-3. **Overdue SLA Determination**:
-   $$\text{Age (Days)} = \left\lfloor \frac{\text{Current Time} - \text{Created Time}}{86400\text{ seconds}} \right\rfloor$$
-   $$\text{Is Overdue} = (\text{Status} \neq \text{"Resolved"}) \land (\text{Age} \ge \text{SLA Threshold} \lor \text{Manual Overdue Flag} = \text{true})$$
-
-4. **Atomic Admin Triage Operations**:
-   When an admin updates a complaint, status changes, priority shifts, overdue flags, and audit notes are sent in a single `PATCH /api/complaints/:id` request. The backend executes all modifications inside an explicit database transaction (`BEGIN ... COMMIT`), guaranteeing that either **all updates and history records persist successfully or none do**.
+1. **Atomic Triage Updates**: When an admin updates a complaint, status changes, priority shifts, overdue flags, and audit notes are executed inside a single database transaction (`BEGIN ... COMMIT`), preventing partial updates or state drift.
+2. **Derivation-Based Overdue Detection**: Rather than running brittle background cron jobs to flip database booleans, overdue status is calculated dynamically at read time (`status != 'Resolved' AND age > threshold_days`). This guarantees that overdue calculations are always 100% accurate and immediate.
+3. **Secure Binary Header Image Inspection**: Uploaded files are inspected for binary magic-byte signatures (`89 50 4E 47` for PNG, `FF D8 FF` for JPEG) in memory. This prevents MIME-type spoofing and malicious file execution.
+4. **Dual SQLite & PostgreSQL Compatibility**: The custom `pool.js` database abstraction layer automatically seamlessly detects environment parameters, executing SQLite for zero-config local development and PostgreSQL for cloud production hosting.
+5. **Asynchronous Non-Blocking Email Pipeline**: Outbound notification dispatches execute as un-awaited background tasks, ensuring user API responses remain fast and sub-50ms regardless of external mail server latency.
 
 ---
 
-## 🔒 Security Architecture
+## 🛠️ Tech Stack & Engineering Specifications
 
-* **JWT Authentication**: Stateless, signed tokens issued upon login containing `id`, `email`, `name`, and `role` with 7-day expiration.
-* **Password Hashing**: Secure salted password storage using `bcryptjs` (salt factor 10).
-* **Role-Based Authorization (RBAC)**: Backend `requireAdmin` middleware checks JWT payload and returns `403 Forbidden` if a resident attempts to access administrative endpoints.
-* **Strict Production Fail-Safe**: The JWT utility enforces a fatal server exit (`process.exit(1)`) if `JWT_SECRET` is missing in production environments.
-* **Parameterized SQL Queries**: All queries use parameterized placeholders (`$1, $2` or `?`) via the `pool.js` abstraction layer to prevent SQL injection vulnerabilities.
-* **Image Binary Inspection**: Image uploads inspect magic byte signatures in memory (`isValidImageBuffer`) to ensure uploaded files are valid PNG, JPEG, GIF, or WebP images, preventing MIME-type spoofing.
-* **CORS Policy Enforcement**: Configured CORS origin validation restricting API access to authorized frontend domains.
-* **Client-Side Route Protection**: React Router `ProtectedRoute` guards restrict UI access based on authentication status and user roles.
+* **Frontend**: React 18, Vite, React Router v6, Axios, Lucide React, HSL Color Token CSS Design System.
+* **Backend**: Node.js, Express.js.
+* **Database**: Dual Adapter (`sqlite3` for local dev, `pg` for cloud PostgreSQL).
+* **Authentication**: JSON Web Tokens (JWT) with HTTP Bearer authorization headers and `bcryptjs` password hashing (salt rounds = 10).
+* **File Upload & Inspection**: Multer with disk storage, file extension filtering, and binary magic-byte header inspection.
+* **Email Service**: Resend API integration with Nodemailer SMTP fallback and safe console logging mode.
 
 ---
 
-## 🖼️ Photo Upload Handling
-
-Relying solely on HTTP `Content-Type` headers or file extensions is insecure because malicious files can be renamed (e.g., `shell.php` renamed to `shell.png`).
-
-### Upload Pipeline
-```
-Client (FormData) 
-  ➔ Multipart HTTP POST Request 
-  ➔ Multer Storage Engine (disk write with randomized filename) 
-  ➔ Extension Filter Check 
-  ➔ Binary Magic-Byte Inspection (fs.readSync checks header bytes: 89 50 4E 47...) 
-  ➔ Safe Storage in /uploads/ 
-  ➔ Relative Path stored in database (/uploads/filename.png)
-```
-If binary header validation fails, the uploaded file is unlinked immediately from disk and an HTTP 400 error is returned.
-
----
-
-## 📜 Audit History Engine
-
-Every status transition, priority modification, or manual overdue flag creates an immutable audit event in `complaint_history`:
-- `created`: Recorded when a resident submits a complaint.
-- `status_change`: Recorded when status moves between Open, In Progress, and Resolved.
-- `priority_change`: Recorded when priority is adjusted between Low, Medium, and High.
-- `overdue_flag`: Recorded when an admin manually flags or unflags SLA breach status.
-
-**Actor Identity Resolution**: The actor's identity is derived from the verified JWT payload (`req.user.id` and `req.user.role`). Audit queries execute a `LEFT JOIN users u ON u.id = h.actor_id` to dynamically attach the actor's full name to timeline views.
-
----
-
-## ⚙️ Society Governance & Settings Hub
-
-The system features an administrative **Society Governance Hub** backed by PostgreSQL key-value storage (`settings` table):
-- **Society Identity & Branding**: Configurable `society_name` rendered across the application header/sidebar.
-- **Emergency Helplines**: Dynamic `support_email` and `emergency_phone` surfaced to residents on their Profile and help screens.
-- **Dynamic SLA Threshold**: Configurable `overdue_threshold_days` (default 5 days) dynamically evaluated across all complaint listings.
-- **Dynamic Upload Size Limit**: Configurable `max_upload_size_mb` enforced on client dropzones and server-side Multer validation.
-- **Email Notification Toggle**: Admin setting (`email_notifications`) allowing instant enabling or suppressing of outbound status emails.
-
----
-
-## 📧 Email Notification System (Resend & SMTP)
-
-Implemented for asynchronous, non-blocking notifications on status transitions and important notices.
-
-### Configuration Modes
-1. **Resend API Integration (Recommended)**: Set `RESEND_API_KEY` (and optional `RESEND_FROM`) in your environment variables for instant serverless email delivery.
-2. **SMTP Integration**: Provide `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM` for custom mail server configurations.
-3. **Safe Console Mock Mode**: If neither `RESEND_API_KEY` nor `SMTP_HOST` is set, `sendEmail()` operates in mock mode, logging email payloads to the server console without failing requests.
-
----
-
-## 🚀 Local Development Setup
+## 🚀 Local Setup Guide
 
 ### Prerequisites
 - **Node.js**: v18.0.0 or higher
@@ -281,69 +274,52 @@ Implemented for asynchronous, non-blocking notifications on status transitions a
 3. **Database Migration & Seeding**:
    ```bash
    npm run migrate    # Creates database schema tables
-   npm run seed       # Seeds initial demo accounts
+   npm run seed       # Seeds initial admin & resident demo accounts
    ```
 
-4. **Start Backend Dev Server**:
+4. **Start Backend Server**:
    ```bash
-   npm run dev        # Starts Express server on http://localhost:4000
+   npm run dev        # Backend running on http://localhost:4000
    ```
 
-5. **Frontend Setup** (in a new terminal window):
+5. **Frontend Setup** (in a second terminal):
    ```bash
    cd frontend
    npm install
-   npm run dev        # Starts Vite React server on http://localhost:5173
+   npm run dev        # Frontend running on http://localhost:5173
    ```
 
-6. **Access Application**:
-   Open [http://localhost:5173](http://localhost:5173) in your web browser.
-
----
-
-## 🔑 Demo Credentials
-
-> **DISCLAIMER**: The credentials below are intended strictly for **LOCAL DEVELOPMENT & DEMONSTRATION PURPOSES**.
-
-| Role | Email | Password | Access Details |
-|---|---|---|---|
-| **Admin** | `admin@society.com` | `Admin@123` | Full access to Operations Dashboard, Triage Controls, Notices, and SLA Settings. |
-| **Resident** | `resident@society.com` | `Resident@123` | Access to Resident Portal, Raise Complaint, My Complaints, and Notices. |
-
-*(Note: The login screen includes 1-click quick-fill buttons for both Admin and Resident demo accounts).*
+6. **Open in Browser**:
+   Navigate to `http://localhost:5173` to explore the application.
 
 ---
 
 ## ⚙️ Environment Variables
 
-### Backend Configuration (`backend/.env`)
+### Backend (`backend/.env`)
 
 ```env
 # Server Configuration
 PORT=4000
 CORS_ORIGIN=http://localhost:5173
 
-# Database (PostgreSQL string; falls back to SQLite if omitted)
+# Database (PostgreSQL URL; falls back to local SQLite if omitted)
 DATABASE_URL=postgresql://user:password@localhost:5432/society_tracker
 DATABASE_SSL=false
 
 # Authentication
 JWT_SECRET=your_secure_random_jwt_secret_key
 
-# Default Seed Credentials
+# Default Seed Accounts
 SEED_ADMIN_EMAIL=admin@society.com
 SEED_ADMIN_PASSWORD=Admin@123
 
-# SMTP Configuration (Optional - logs to console if blank)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=your-email@gmail.com
+# Email Service (Optional - logs to console if omitted)
+RESEND_API_KEY=re_your_resend_api_key
+RESEND_FROM=Angan Society <notifications@angan.app>
 ```
 
-### Frontend Configuration (`frontend/.env`)
+### Frontend (`frontend/.env`)
 
 ```env
 VITE_API_URL=http://localhost:4000/api
@@ -351,53 +327,32 @@ VITE_API_URL=http://localhost:4000/api
 
 ---
 
-## 📚 API Reference Documentation
+## 📚 REST API Reference
 
-All protected endpoints require HTTP header: `Authorization: Bearer <JWT_TOKEN>`.
+All protected endpoints require header: `Authorization: Bearer <JWT_TOKEN>`.
 
-| Method | Endpoint | Auth | Role | Purpose |
+| Method | Endpoint | Auth Required | Role | Description |
 |---|---|---|---|---|
-| `POST` | `/api/auth/register` | Public | None | Register new resident account |
-| `POST` | `/api/auth/login` | Public | None | Authenticate user & return JWT token |
-| `GET` | `/api/dashboard` | Required | Admin | Get operational KPI statistics & category breakdown |
-| `GET` | `/api/complaints` | Required | Admin | Fetch all society complaints (supports filters) |
-| `GET` | `/api/complaints/mine` | Required | Resident | Fetch logged-in resident's complaints |
-| `GET` | `/api/complaints/:id` | Required | Any | Fetch single complaint details and audit timeline history |
-| `POST` | `/api/complaints` | Required | Resident | Submit complaint with optional photo (`multipart/form-data`) |
-| `PATCH` | `/api/complaints/:id` | Required | Admin | Atomic triage update (status, priority, overdue flag, note) |
-| `GET` | `/api/notices` | Required | Any | List society notices (important notices pinned to top) |
-| `POST` | `/api/notices` | Required | Admin | Publish notice (broadcasts email if `is_important: true`) |
-| `DELETE`| `/api/notices/:id` | Required | Admin | Delete notice by ID |
-| `GET` | `/api/settings/overdue-threshold` | Required | Admin | Get current overdue threshold in days |
-| `PUT` | `/api/settings/overdue-threshold` | Required | Admin | Update overdue threshold setting |
+| `POST` | `/api/auth/register` | ❌ Public | None | Register new resident account |
+| `POST` | `/api/auth/login` | ❌ Public | None | Authenticate user & return JWT token |
+| `GET` | `/api/dashboard` | ✅ Yes | Admin | Fetch operational KPI metrics & category breakdown |
+| `GET` | `/api/complaints` | ✅ Yes | Admin | List all complaints (supports search & multi-filters) |
+| `GET` | `/api/complaints/mine` | ✅ Yes | Resident | List logged-in resident's complaints |
+| `GET` | `/api/complaints/:id` | ✅ Yes | Any | Fetch single complaint details + audit timeline |
+| `POST` | `/api/complaints` | ✅ Yes | Resident | Submit new complaint (`multipart/form-data`) |
+| `PATCH` | `/api/complaints/:id` | ✅ Yes | Admin | Atomic triage update (status, priority, note, flag) |
+| `GET` | `/api/notices` | ✅ Yes | Any | List society notices (pinned notices listed first) |
+| `POST` | `/api/notices` | ✅ Yes | Admin | Publish notice (broadcasts email if `is_important: true`) |
+| `DELETE`| `/api/notices/:id` | ✅ Yes | Admin | Delete notice by ID |
+| `GET` | `/api/notifications` | ✅ Yes | Any | Fetch user's in-app notification feed & unread count |
+| `PATCH` | `/api/notifications/read-all` | ✅ Yes | Any | Mark all in-app notifications as read |
+| `PATCH` | `/api/notifications/:id/read` | ✅ Yes | Any | Mark specific notification as read |
+| `GET` | `/api/email-logs` | ✅ Yes | Admin | Audit trail of outbound email delivery logs |
+| `GET` | `/api/settings/overdue-threshold` | ✅ Yes | Admin | Retrieve active SLA threshold (in days) |
+| `PUT` | `/api/settings/overdue-threshold` | ✅ Yes | Admin | Update society SLA threshold setting |
 
 ---
 
-## 💡 Key Engineering Decisions
+## 📄 Additional Artifacts
 
-1. **Why JWT Authentication?**: Stateless authentication allows independent scaling of frontend and backend without server session state overhead.
-2. **Why Separate `complaint_history` Table?**: Storing immutable audit records in a dedicated table guarantees full historical auditability without polluting the primary complaint entity.
-3. **Why Atomic Triage Updates?**: Processing status, priority, overdue flags, and notes inside a single SQL transaction prevents partial updates and state drift.
-4. **Why Configurable SLA Threshold?**: Storing threshold days in a database `settings` table allows administrators to adjust SLA policies on the fly without code redeploys.
-5. **Why Backend Authorization in Addition to Client-Side Protection?**: Client-side `ProtectedRoute` guards enhance user experience, but server-side middleware (`requireAdmin`) is essential for actual security.
-6. **Why Binary Magic-Byte Image Validation?**: Header inspection validates true file signatures, preventing malicious file execution disguised by fake file extensions.
-7. **Why Dual SQLite & PostgreSQL Support?**: Enables zero-config local testing for developers out of the box while providing production readiness for PostgreSQL cloud hosting.
-
----
-
-## ⚠️ Known Limitations
-
-- **Local File Storage**: Uploaded complaint photos are written to local disk (`backend/uploads/`). For multi-instance cloud deployments (e.g., Kubernetes, AWS ECS), this should be transitioned to S3 or Cloudflare R2 object storage.
-- **Single-Node In-Memory Email Queue**: Email notifications process asynchronously in background promises. Highly scaled deployments should use a dedicated job queue (e.g., BullMQ with Redis).
-
----
-
-## 💬 Interview Talking Points
-
-1. **Atomic Complaint Triage**: Single-transaction PATCH route ensuring status updates and history logs commit atomically.
-2. **Immutable Audit History**: Append-only event tracking capturing actor identity, old/new values, and contextual notes.
-3. **Dynamic Overdue SLA Engine**: Read-time SLA evaluation driven by configurable database settings without cron dependency.
-4. **Secure Image Pipeline**: Binary magic-byte inspection validating JPEG, PNG, GIF, and WebP buffer headers.
-5. **Role-Based Security Architecture**: Multi-layered authorization with JWT validation, backend route guards, and safe production exit fallbacks.
-6. **Dual Database Adapter**: `pool.js` translation layer enabling zero-config SQLite local dev and PostgreSQL cloud deployment.
-7. **High-Fidelity Responsive Interface**: Automatic table-to-card transformation at mobile breakpoints ensuring accessible UX on all viewports.
+* **System Design Write-Up**: Complete 750-word architecture document available in [`SYSTEM_DESIGN.md`](./SYSTEM_DESIGN.md).

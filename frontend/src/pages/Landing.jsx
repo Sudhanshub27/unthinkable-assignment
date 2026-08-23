@@ -171,6 +171,9 @@ export default function Landing() {
             <a href="#features" onClick={scrollToSection('features')} className="hover:text-terracotta-500 transition-colors">
               Features
             </a>
+            <a href="#capabilities" onClick={scrollToSection('capabilities')} className="hover:text-terracotta-500 transition-colors">
+              Capabilities
+            </a>
             <a href="#how-it-works" onClick={scrollToSection('how-it-works')} className="hover:text-terracotta-500 transition-colors">
               Workflow
             </a>
@@ -338,8 +341,24 @@ export default function Landing() {
               </BrowserFrame>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Supporting 3 Features Row Below */}
+      {/* 4. CAPABILITIES SECTION (Platform Pillars) */}
+      <section id="capabilities" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-16 scroll-mt-16 border-t border-line/60">
+        <div className="max-w-7xl mx-auto px-6 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-olive-600 bg-olive-50 px-3 py-1 rounded-full border border-olive-100">
+              Platform Pillars
+            </span>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
+              Essential Society Management Modules
+            </h2>
+            <p className="text-ink-secondary text-base leading-relaxed">
+              Designed specifically for housing society operational excellence and resident convenience.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1: Digital Notice Board */}
             <div className="group rounded-2xl border border-line/80 bg-paper-card p-6 shadow-card hover:shadow-lifted hover:-translate-y-1.5 hover:border-olive-300/60 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden">
@@ -685,7 +704,8 @@ export default function Landing() {
 
             <div className="md:col-span-3 space-y-2 text-xs">
               <div className="font-semibold text-white uppercase tracking-wider mb-2">Navigation</div>
-              <div><a href="#features" onClick={scrollToSection('features')} className="text-white/60 hover:text-white transition-colors">Features & Capabilities</a></div>
+              <div><a href="#features" onClick={scrollToSection('features')} className="text-white/60 hover:text-white transition-colors">Core Features</a></div>
+              <div><a href="#capabilities" onClick={scrollToSection('capabilities')} className="text-white/60 hover:text-white transition-colors">Platform Capabilities</a></div>
               <div><a href="#how-it-works" onClick={scrollToSection('how-it-works')} className="text-white/60 hover:text-white transition-colors">Sequential Workflow</a></div>
               <div><a href="#previews" onClick={scrollToSection('previews')} className="text-white/60 hover:text-white transition-colors">Interface Previews</a></div>
               <div><a href="#role-selection" onClick={scrollToSection('role-selection')} className="text-white/60 hover:text-white transition-colors">Portals & Sign In</a></div>
