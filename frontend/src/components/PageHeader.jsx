@@ -1,4 +1,4 @@
-import SVGIcon from './SVGIcon';
+import { Button } from './UIComponents';
 
 export default function PageHeader({
   title,
@@ -6,26 +6,25 @@ export default function PageHeader({
   breadcrumb,
   actionText,
   onAction,
-  actionIcon = 'plus',
+  actionIcon,
   actionVariant = 'primary',
   children,
 }) {
   return (
-    <div className="page-header-container">
-      <div className="page-header-text">
-        {breadcrumb && <div className="page-header-breadcrumb">{breadcrumb}</div>}
-        <h1 className="page-header-title">{title}</h1>
-        {subtitle && <p className="page-header-subtitle">{subtitle}</p>}
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-line/50">
+      <div className="space-y-1">
+        {breadcrumb && <div className="text-xs text-ink-muted">{breadcrumb}</div>}
+        <h1 className="font-display font-bold text-2xl md:text-3xl text-ink tracking-tight">{title}</h1>
+        {subtitle && <p className="text-sm text-ink-secondary leading-relaxed">{subtitle}</p>}
       </div>
 
       {(actionText && onAction || children) && (
-        <div className="page-header-action">
+        <div className="flex items-center gap-3 shrink-0">
           {children}
           {actionText && onAction && (
-            <button className={`btn btn-${actionVariant}`} onClick={onAction}>
-              {actionIcon && <SVGIcon name={actionIcon} size={16} className="btn-icon-left" />}
-              <span>{actionText}</span>
-            </button>
+            <Button variant={actionVariant} onClick={onAction} icon={actionIcon}>
+              {actionText}
+            </Button>
           )}
         </div>
       )}

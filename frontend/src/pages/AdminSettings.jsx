@@ -3,8 +3,9 @@ import client from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
 import PageHeader from '../components/PageHeader';
-import SVGIcon from '../components/SVGIcon';
+import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
+import { Settings, Clock, Bell, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export default function AdminSettings() {
   const { addToast } = useToast();
@@ -12,8 +13,8 @@ export default function AdminSettings() {
 
   const [settings, setSettings] = useState({
     overdue_threshold_days: '5',
-    society_name: 'Unthinkable Sudhanshu Society',
-    support_email: 'office@sudhanshubatraunthinkable.com',
+    society_name: 'Angan Digital Society',
+    support_email: 'office@society.com',
     emergency_phone: '+91 98765 43210',
     email_notifications: 'enabled',
     max_upload_size_mb: '5',
@@ -79,63 +80,53 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="page-container admin-settings-container">
+    <div className="space-y-6 pb-6 max-w-4xl">
       <PageHeader
         title="Society Settings & Governance"
         subtitle="Manage society branding, SLA breach parameters, emergency contacts, and automation rules."
       />
 
       {loading ? (
-        <div style={{ maxWidth: 900 }}>
-          <SkeletonCard count={3} />
-        </div>
+        <SkeletonCard count={3} />
       ) : (
-        <form onSubmit={handleSaveSettings} style={{ maxWidth: 900 }}>
-          {error && <div className="field-error-box mb-4">{error}</div>}
+        <form onSubmit={handleSaveSettings} className="space-y-6">
+          {error && (
+            <div className="p-3 rounded-lg bg-clay-500/10 border border-clay-500/20 text-clay-500 text-xs font-medium">
+              {error}
+            </div>
+          )}
 
           {/* Section 1: Society Identity & Contacts */}
-          <div className="content-card mb-6" style={{ padding: '24px' }}>
-            <h3
-              className="card-title"
-              style={{
-                fontSize: '1.05rem',
-                fontWeight: 700,
-                marginBottom: 18,
-                borderBottom: '1px solid var(--border-color)',
-                paddingBottom: 12,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <SVGIcon name="settings" size={20} color="#2563EB" />
+          <div className="bg-paper-card rounded-xl border border-line shadow-card p-6 space-y-4">
+            <h3 className="font-display font-semibold text-base text-ink border-b border-line pb-3 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-terracotta-400" />
               <span>Society Profile & Emergency Contacts</span>
             </h3>
 
-            <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              <div className="form-group">
-                <label htmlFor="settings-society-name" className="form-label">
-                  Society Name / Association Title <span className="text-danger">*</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1 md:col-span-2">
+                <label htmlFor="settings-society-name" className="block text-xs font-semibold text-ink-muted">
+                  Society Name / Association Title <span className="text-clay-500">*</span>
                 </label>
                 <input
                   id="settings-society-name"
                   type="text"
-                  className="form-control"
+                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
                   value={settings.society_name}
                   onChange={(e) => handleChange('society_name', e.target.value)}
-                  placeholder="e.g. Green Valley Housing Co-Op"
+                  placeholder="e.g. Angan Residential Society"
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="settings-support-email" className="form-label">
-                  Management Office Email <span className="text-danger">*</span>
+              <div className="space-y-1">
+                <label htmlFor="settings-support-email" className="block text-xs font-semibold text-ink-muted">
+                  Management Office Email <span className="text-clay-500">*</span>
                 </label>
                 <input
                   id="settings-support-email"
                   type="email"
-                  className="form-control"
+                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
                   value={settings.support_email}
                   onChange={(e) => handleChange('support_email', e.target.value)}
                   placeholder="e.g. office@society.com"
@@ -143,14 +134,14 @@ export default function AdminSettings() {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="settings-emergency-phone" className="form-label">
+              <div className="space-y-1">
+                <label htmlFor="settings-emergency-phone" className="block text-xs font-semibold text-ink-muted">
                   24/7 Security Helpline Phone
                 </label>
                 <input
                   id="settings-emergency-phone"
                   type="text"
-                  className="form-control"
+                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
                   value={settings.emergency_phone}
                   onChange={(e) => handleChange('emergency_phone', e.target.value)}
                   placeholder="e.g. +91 98765 43210"
@@ -160,53 +151,38 @@ export default function AdminSettings() {
           </div>
 
           {/* Section 2: SLA & Overdue Determination Rules */}
-          <div className="content-card mb-6" style={{ padding: '24px' }}>
-            <h3
-              className="card-title"
-              style={{
-                fontSize: '1.05rem',
-                fontWeight: 700,
-                marginBottom: 18,
-                borderBottom: '1px solid var(--border-color)',
-                paddingBottom: 12,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <SVGIcon name="clock" size={20} color="#D97706" />
+          <div className="bg-paper-card rounded-xl border border-line shadow-card p-6 space-y-4">
+            <h3 className="font-display font-semibold text-base text-ink border-b border-line pb-3 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-mustard-500" />
               <span>Service Level Agreement (SLA) & Overdue Rules</span>
             </h3>
 
-            <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              <div className="form-group">
-                <label htmlFor="settings-overdue-days" className="form-label">
-                  Automatic SLA Overdue Threshold (Days) <span className="text-danger">*</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label htmlFor="settings-overdue-days" className="block text-xs font-semibold text-ink-muted">
+                  Automatic SLA Overdue Threshold (Days) <span className="text-clay-500">*</span>
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="flex items-center gap-3">
                   <input
                     id="settings-overdue-days"
                     type="number"
                     min="1"
-                    className="form-control"
+                    className="w-32 rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
                     value={settings.overdue_threshold_days}
                     onChange={(e) => handleChange('overdue_threshold_days', e.target.value)}
-                    style={{ maxWidth: 140 }}
                     required
                   />
-                  <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    days unresolved
-                  </span>
+                  <span className="text-xs text-ink-muted font-semibold">days unresolved</span>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="settings-max-upload" className="form-label">
+              <div className="space-y-1">
+                <label htmlFor="settings-max-upload" className="block text-xs font-semibold text-ink-muted">
                   Max Photo Upload Size (MB)
                 </label>
                 <select
                   id="settings-max-upload"
-                  className="form-control"
+                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
                   value={settings.max_upload_size_mb}
                   onChange={(e) => handleChange('max_upload_size_mb', e.target.value)}
                 >
@@ -217,52 +193,29 @@ export default function AdminSettings() {
               </div>
             </div>
 
-            <div
-              className="info-subtext-box mt-4"
-              style={{
-                background: 'rgba(217, 119, 6, 0.06)',
-                border: '1px solid rgba(217, 119, 6, 0.2)',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 10,
-              }}
-            >
-              <SVGIcon name="alert-triangle" size={18} color="#D97706" style={{ marginTop: 2 }} />
-              <p style={{ margin: 0, fontSize: '0.825rem', color: '#B45309', lineHeight: 1.5 }}>
-                Complaints remaining open beyond <strong>{settings.overdue_threshold_days} days</strong> automatically surface with an <code>OVERDUE</code> SLA badge on administrative dashboards.
+            <div className="bg-mustard-50/70 border border-mustard-400/30 rounded-lg p-3.5 flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-mustard-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-ink-secondary leading-relaxed">
+                Complaints remaining open beyond <strong className="text-ink font-semibold">{settings.overdue_threshold_days} days</strong> automatically surface with an <code className="bg-mustard-100 text-mustard-500 px-1 py-0.5 rounded text-[11px] font-mono">OVERDUE</code> SLA badge on administrative dashboards.
               </p>
             </div>
           </div>
 
           {/* Section 3: System Automation & Audit Security */}
-          <div className="content-card mb-6" style={{ padding: '24px' }}>
-            <h3
-              className="card-title"
-              style={{
-                fontSize: '1.05rem',
-                fontWeight: 700,
-                marginBottom: 18,
-                borderBottom: '1px solid var(--border-color)',
-                paddingBottom: 12,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <SVGIcon name="bell" size={20} color="#059669" />
+          <div className="bg-paper-card rounded-xl border border-line shadow-card p-6 space-y-4">
+            <h3 className="font-display font-semibold text-base text-ink border-b border-line pb-3 flex items-center gap-2">
+              <Bell className="w-5 h-5 text-olive-500" />
               <span>System Notifications & Security Preferences</span>
             </h3>
 
-            <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              <div className="form-group">
-                <label htmlFor="settings-email-notifications" className="form-label">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label htmlFor="settings-email-notifications" className="block text-xs font-semibold text-ink-muted">
                   Resident Email Status Notifications
                 </label>
                 <select
                   id="settings-email-notifications"
-                  className="form-control"
+                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
                   value={settings.email_notifications}
                   onChange={(e) => handleChange('email_notifications', e.target.value)}
                 >
@@ -271,36 +224,27 @@ export default function AdminSettings() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Audit Trail Logging Policy</label>
-                <div style={{ padding: '10px 14px', background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="badge badge-status-resolved" style={{ background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>Active</span>
-                  <span>Immutable Append-Only Logging</span>
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-ink-muted">Audit Trail Logging Policy</label>
+                <div className="p-2.5 bg-paper border border-line rounded-lg text-xs text-ink-secondary flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-olive-50 text-olive-600 font-semibold text-[11px]">Active</span>
+                  <span>Immutable Append-Only Audit Logging</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Form Submit Action */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginBottom: 40 }}>
-            <button
+          <div className="flex justify-end pt-2">
+            <Button
               type="submit"
-              className="btn btn-primary btn-lg"
-              disabled={saving}
-              style={{ minWidth: 180, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              variant="primary"
+              size="lg"
+              isLoading={saving}
+              icon={<CheckCircle2 className="w-4 h-4" />}
             >
-              {saving ? (
-                <>
-                  <span className="btn-spinner-inline" />
-                  Saving Settings...
-                </>
-              ) : (
-                <>
-                  <SVGIcon name="check-circle" size={18} />
-                  Save All Configurations
-                </>
-              )}
-            </button>
+              {saving ? 'Saving Settings...' : 'Save All Configurations'}
+            </Button>
           </div>
         </form>
       )}

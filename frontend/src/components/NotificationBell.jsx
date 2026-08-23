@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
-import SVGIcon from './SVGIcon';
 import { formatTimeAgo } from '../utils/formatters';
+import { Bell, Megaphone, ClipboardList } from 'lucide-react';
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const popoverRef = useRef(null);
   const navigate = useNavigate();
 
@@ -27,10 +26,7 @@ export default function NotificationBell() {
   useEffect(() => {
     fetchNotifications();
 
-    // Poll every 15 seconds for dynamic updates
     const interval = setInterval(fetchNotifications, 15000);
-
-    // Refresh when browser window regains focus
     const handleFocus = () => fetchNotifications();
     window.addEventListener('focus', handleFocus);
 
@@ -40,7 +36,6 @@ export default function NotificationBell() {
     };
   }, []);
 
-  // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (popoverRef.current && !popoverRef.current.contains(e.target)) {
@@ -88,97 +83,28 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="notification-bell-container" ref={popoverRef} style={{ position: 'relative' }}>
+    <div className="relative" ref={popoverRef}>
       <button
         type="button"
-        className="notification-bell-btn"
+        className="w-9 h-9 rounded-lg border border-line bg-paper-card text-ink hover:bg-paper-hover flex items-center justify-center relative transition-colors"
         onClick={() => setIsOpen(!isOpen)}
         aria-label={`Notifications (${unreadCount} unread)`}
-        style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 'var(--radius-md)',
-          width: 38,
-          height: 38,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          color: 'var(--text-main)',
-          position: 'relative',
-          transition: 'var(--transition)',
-        }}
       >
-        <SVGIcon name="bell" size={18} />
+        <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span
-            className="bell-badge"
-            style={{
-              position: 'absolute',
-              top: -4,
-              right: -4,
-              background: '#DC2626',
-              color: '#ffffff',
-              fontSize: '0.6875rem',
-              fontWeight: 700,
-              borderRadius: '9999px',
-              minWidth: 18,
-              height: 18,
-              padding: '0 4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 0 2px var(--bg-card)',
-            }}
-          >
+          <span className="absolute -top-1 -right-1 bg-clay-500 text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center ring-2 ring-paper-card">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div
-          className="notification-popover"
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 8px)',
-            right: 0,
-            width: 340,
-            maxWidth: 'calc(100vw - 32px)',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-            zIndex: 100,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            className="popover-header"
-            style={{
-              padding: '12px 16px',
-              borderBottom: '1px solid var(--border-color)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'var(--bg-page)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                Notifications
-              </span>
+        <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-paper-card border border-line rounded-xl shadow-card z-50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-line bg-paper flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="font-display font-semibold text-sm text-ink">Notifications</span>
               {unreadCount > 0 && (
-                <span
-                  style={{
-                    background: '#2563EB',
-                    color: '#fff',
-                    fontSize: '0.75rem',
-                    padding: '2px 8px',
-                    borderRadius: '9999px',
-                    fontWeight: 600,
-                  }}
-                >
+                <span className="bg-terracotta-400 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
                   {unreadCount} new
                 </span>
               )}
@@ -187,113 +113,57 @@ export default function NotificationBell() {
               <button
                 type="button"
                 onClick={handleMarkAllAsRead}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--primary)',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: 0,
-                }}
+                className="text-xs text-terracotta-400 font-semibold hover:underline"
               >
-                Mark all as read
+                Mark all read
               </button>
             )}
           </div>
 
-          <div
-            className="popover-body"
-            style={{
-              maxHeight: 360,
-              overflowY: 'auto',
-            }}
-          >
+          <div className="max-h-80 overflow-y-auto divide-y divide-line">
             {notifications.length === 0 ? (
-              <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                <SVGIcon name="bell" size={24} color="var(--text-muted)" style={{ marginBottom: 8, opacity: 0.5 }} />
-                <div>No notifications yet</div>
+              <div className="p-6 text-center text-ink-muted text-xs space-y-1">
+                <Bell className="w-6 h-6 mx-auto opacity-40 mb-1" />
+                <p>No notifications yet</p>
               </div>
             ) : (
               notifications.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => handleNotificationClick(item)}
-                  style={{
-                    padding: '12px 16px',
-                    borderBottom: '1px solid var(--border-color)',
-                    cursor: 'pointer',
-                    background: item.is_read ? 'var(--bg-card)' : 'rgba(37, 99, 235, 0.04)',
-                    display: 'flex',
-                    gap: 12,
-                    alignItems: 'flex-start',
-                    transition: 'background 0.15s ease',
-                  }}
+                  className={`p-3 cursor-pointer flex items-start gap-3 transition-colors ${
+                    item.is_read ? 'bg-paper-card hover:bg-paper-hover' : 'bg-terracotta-50/50 hover:bg-terracotta-50'
+                  }`}
                 >
                   <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: '50%',
-                      background: item.type === 'important_notice' ? 'rgba(220, 38, 38, 0.1)' : 'rgba(37, 99, 235, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      marginTop: 2,
-                    }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                      item.type === 'important_notice'
+                        ? 'bg-mustard-50 text-mustard-500'
+                        : 'bg-terracotta-50 text-terracotta-400'
+                    }`}
                   >
-                    <SVGIcon
-                      name={item.type === 'important_notice' ? 'megaphone' : 'clipboard'}
-                      size={16}
-                      color={item.type === 'important_notice' ? '#DC2626' : '#2563EB'}
-                    />
+                    {item.type === 'important_notice' ? (
+                      <Megaphone className="w-4 h-4" />
+                    ) : (
+                      <ClipboardList className="w-4 h-4" />
+                    )}
                   </div>
 
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: '0.8125rem',
-                        fontWeight: item.is_read ? 600 : 700,
-                        color: 'var(--text-main)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: 8,
-                      }}
-                    >
-                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-xs truncate ${item.is_read ? 'font-medium text-ink' : 'font-bold text-ink'}`}>
                         {item.title}
                       </span>
                       {!item.is_read && (
-                        <span
-                          style={{
-                            width: 6,
-                            height: 6,
-                            borderRadius: '50%',
-                            background: '#2563EB',
-                            flexShrink: 0,
-                          }}
-                        />
+                        <span className="w-1.5 h-1.5 rounded-full bg-terracotta-400 shrink-0" />
                       )}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: 'var(--text-muted)',
-                        marginTop: 2,
-                        lineHeight: 1.4,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    <p className="text-xs text-ink-muted line-clamp-2 mt-0.5 leading-snug">
                       {item.message}
-                    </div>
-                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 500 }}>
+                    </p>
+                    <span className="text-[10px] text-ink-muted mt-1 block">
                       {formatTimeAgo(item.created_at)}
-                    </div>
+                    </span>
                   </div>
                 </div>
               ))

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import SVGIcon from './SVGIcon';
+import { X, Lock, RotateCcw } from 'lucide-react';
 import Timeline from './Timeline';
 import { StatusBadge, PriorityBadge, OverdueBadge } from './Badges';
-import { formatFlatNumber, getCategoryIconName, formatDateTime, getPhotoUrl } from '../utils/formatters';
+import { Button } from './UIComponents';
+import { formatFlatNumber, formatDateTime, getPhotoUrl } from '../utils/formatters';
 
 export default function ComplaintDetailModal({
   isOpen,
@@ -11,7 +12,7 @@ export default function ComplaintDetailModal({
   history = [],
   loadingHistory = false,
   mode = 'resident', // 'resident' | 'admin'
-  onUpdateStatus, // (complaintId, patchPayload) => Promise
+  onUpdateStatus,
 }) {
   const [status, setStatus] = useState('Open');
   const [priority, setPriority] = useState('Low');
@@ -19,6 +20,7 @@ export default function ComplaintDetailModal({
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [photoError, setPhotoError] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const [showReopenConfirm, setShowReopenConfirm] = useState(false);
   const [reopenReason, setReopenReason] = useState('');
@@ -36,24 +38,27 @@ export default function ComplaintDetailModal({
       setShowReopenConfirm(false);
       setReopenReason('');
       setReopening(false);
+      setLightboxOpen(false);
     }
   }, [complaint]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
-        onClose();
+        if (lightboxOpen) {
+          setLightboxOpen(false);
+        } else {
+          onClose();
+        }
       }
     };
     if (isOpen) {
       window.addEventListener('keydown', handleKeyDown);
     }
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, lightboxOpen, onClose]);
 
   if (!isOpen || !complaint) return null;
-
-  const categoryIconName = getCategoryIconName(complaint.category);
 
   async function handleSubmitTriage(e) {
     e.preventDefault();
@@ -70,7 +75,7 @@ export default function ComplaintDetailModal({
       setNote('');
       onClose();
     } catch (err) {
-      // Error handled by parent toast context
+      // Error handled by parent toast
     } finally {
       setSubmitting(false);
     }
@@ -90,7 +95,7 @@ export default function ComplaintDetailModal({
       setShowReopenConfirm(false);
       onClose();
     } catch (err) {
-      // Error handled by parent toast context
+      // Error handled by parent toast
     } finally {
       setReopening(false);
     }
@@ -99,159 +104,145 @@ export default function ComplaintDetailModal({
   const photoFullUrl = getPhotoUrl(complaint.photo_url);
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      onClick={onClose}
+    >
       <div
-        className="modal-dialog modal-lg"
+        className="bg-paper-card rounded-2xl shadow-card w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="complaint-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="modal-header">
-          <div className="modal-header-title-box">
-            <span className="modal-complaint-id">Complaint #{complaint.id}</span>
-            <h2 id="complaint-modal-title" className="modal-title">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-line flex items-center justify-between bg-paper-card">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-sm font-semibold text-ink-muted">#{complaint.id}</span>
+            <h2 id="complaint-modal-title" className="font-display font-semibold text-lg text-ink">
               {complaint.category} Request
             </h2>
           </div>
           <button
-            className="modal-close-btn"
             onClick={onClose}
+            className="p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-lg transition-colors"
             aria-label="Close dialog"
           >
-            <SVGIcon name="x" size={18} />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="modal-body modal-scrollable">
-          <div className="detail-modal-grid">
-            {/* Left Column: Complaint Specs & Audit Timeline */}
-            <div className="detail-main-col">
-              {/* Visual Progress Stepper */}
-              <div className="complaint-progress-stepper mb-4">
-                <div className={`stepper-step step-done`}>
-                  <div className="step-badge">
-                    <SVGIcon name="check-circle" size={16} />
-                  </div>
-                  <span className="step-title">Complaint Raised</span>
+        {/* Scrollable Body */}
+        <div className="px-6 py-5 overflow-y-auto space-y-5 flex-1">
+          {/* Header Row: Category / Badges */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-base text-ink">{complaint.category}</span>
+              {complaint.flat_number && (
+                <span className="text-xs px-2 py-0.5 rounded bg-paper-hover font-medium text-ink-secondary">
+                  Flat {formatFlatNumber(complaint.flat_number)}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <StatusBadge status={complaint.status} />
+              <PriorityBadge priority={complaint.priority} />
+              {complaint.is_overdue && <OverdueBadge ageDays={complaint.age_days} />}
+            </div>
+          </div>
+
+          {/* User & Date info */}
+          <div className="text-xs text-ink-muted">
+            Submitted by <span className="font-medium text-ink">{complaint.user_name || 'Resident'}</span> on{' '}
+            {formatDateTime(complaint.created_at)}
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Description</div>
+            <p className="text-sm text-ink-secondary leading-relaxed whitespace-pre-wrap">
+              {complaint.description}
+            </p>
+          </div>
+
+          {/* Photo attachment with Lightbox preview */}
+          {photoFullUrl && !photoError && (
+            <div className="space-y-1.5">
+              <div className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Attached Photo</div>
+              <img
+                src={photoFullUrl}
+                alt={`Attachment for complaint #${complaint.id}`}
+                className="rounded-lg max-h-64 object-cover cursor-zoom-in border border-line hover:opacity-95 transition-opacity"
+                onClick={() => setLightboxOpen(true)}
+                onError={() => setPhotoError(true)}
+              />
+            </div>
+          )}
+
+          {/* Full Screen Lightbox Overlay */}
+          {lightboxOpen && photoFullUrl && (
+            <div
+              className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 cursor-zoom-out"
+              onClick={() => setLightboxOpen(false)}
+            >
+              <img
+                src={photoFullUrl}
+                alt="Enlarged complaint attachment"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              />
+              <button
+                onClick={() => setLightboxOpen(false)}
+                className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Close photo preview"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+
+          {/* Divider */}
+          <div className="border-t border-line my-4" />
+
+          {/* History & Admin Operations Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* History Timeline */}
+            <div className={mode === 'admin' ? 'lg:col-span-3' : 'w-full'}>
+              <h4 className="text-sm font-semibold uppercase tracking-wide text-ink-muted mb-3">
+                History
+              </h4>
+              {loadingHistory ? (
+                <div className="flex items-center gap-2 text-sm text-ink-muted py-4">
+                  <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
+                  <span>Loading audit history...</span>
                 </div>
-
-                <div className={`stepper-line ${complaint.status === 'In Progress' || complaint.status === 'Resolved' ? 'line-done' : ''}`} />
-
-                <div className={`stepper-step ${complaint.status === 'In Progress' || complaint.status === 'Resolved' ? 'step-done' : ''} ${complaint.status === 'In Progress' ? 'step-active' : ''}`}>
-                  <div className="step-badge">
-                    <SVGIcon name={complaint.status === 'Resolved' ? 'check-circle' : 'rotate-cw'} size={16} />
-                  </div>
-                  <span className="step-title">In Progress</span>
-                </div>
-
-                <div className={`stepper-line ${complaint.status === 'Resolved' ? 'line-done' : ''}`} />
-
-                <div className={`stepper-step ${complaint.status === 'Resolved' ? 'step-done step-active' : ''}`}>
-                  <div className="step-badge">
-                    <SVGIcon name="check-circle" size={16} />
-                  </div>
-                  <span className="step-title">Resolved</span>
-                </div>
-              </div>
-
-              <div className="detail-meta-card">
-                <div className="detail-badges-row">
-                  <StatusBadge status={complaint.status} />
-                  <PriorityBadge priority={complaint.priority} />
-                  {complaint.is_overdue && <OverdueBadge ageDays={complaint.age_days} />}
-                </div>
-
-                <div className="detail-info-grid">
-                  <div className="detail-info-item">
-                    <span className="info-label">Category</span>
-                    <span className="info-value">
-                      <SVGIcon name={categoryIconName} size={14} className="cat-icon-svg" />
-                      {complaint.category}
-                    </span>
-                  </div>
-
-                  <div className="detail-info-item">
-                    <span className="info-label">Flat Number</span>
-                    <span className="info-value">{formatFlatNumber(complaint.flat_number)}</span>
-                  </div>
-
-                  {complaint.user_name && (
-                    <div className="detail-info-item">
-                      <span className="info-label">Submitted By</span>
-                      <span className="info-value">{complaint.user_name}</span>
-                    </div>
-                  )}
-
-                  <div className="detail-info-item">
-                    <span className="info-label">Submitted Date</span>
-                    <span className="info-value">{formatDateTime(complaint.created_at)}</span>
-                  </div>
-                </div>
-
-                <div className="detail-desc-box">
-                  <span className="info-label">Description</span>
-                  <p className="desc-text">{complaint.description}</p>
-                </div>
-
-                {/* Attached Photo Display */}
-                {photoFullUrl && !photoError && (
-                  <div className="detail-photo-box">
-                    <span className="info-label">Attached Photo</span>
-                    <div className="photo-attachment-card">
-                      <img
-                        src={photoFullUrl}
-                        alt={`Attachment for complaint #${complaint.id}`}
-                        className="attached-photo-img"
-                        onError={() => setPhotoError(true)}
-                      />
-                      <a
-                        href={photoFullUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="photo-view-link"
-                      >
-                        <SVGIcon name="image" size={14} />
-                        View Full Image
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Audit Timeline Section */}
-              <div className="detail-timeline-card">
-                {loadingHistory ? (
-                  <div className="loading-spinner-box">
-                    <div className="loading-spinner" />
-                    <span>Loading audit history...</span>
-                  </div>
-                ) : (
-                  <Timeline history={history} />
-                )}
-              </div>
+              ) : (
+                <Timeline history={history} />
+              )}
             </div>
 
-            {/* Right Column: Admin Triage Control Panel (Admin Mode Only) */}
+            {/* Admin Triage Controls */}
             {mode === 'admin' && (
-              <div className="detail-admin-col">
-                <form onSubmit={handleSubmitTriage} className="admin-triage-panel">
-                  <h3 className="triage-panel-title">Triage Operations</h3>
-
-                  <div className="form-group">
-                    <label htmlFor="triage-status" className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="lg:col-span-2 bg-paper-hover/50 rounded-xl p-4 border border-line h-fit">
+                <h4 className="text-sm font-semibold uppercase tracking-wide text-ink mb-3">
+                  Triage Operations
+                </h4>
+                <form onSubmit={handleSubmitTriage} className="space-y-4">
+                  {/* Status Select */}
+                  <div>
+                    <label
+                      htmlFor="triage-status"
+                      className="block text-xs font-semibold text-ink-muted mb-1 flex items-center justify-between"
+                    >
                       <span>Status</span>
                       {isResolved && (
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <SVGIcon name="lock" size={12} /> Locked (Resolved)
+                        <span className="text-[11px] text-ink-muted flex items-center gap-1 font-normal">
+                          <Lock className="w-3 h-3" /> Locked
                         </span>
                       )}
                     </label>
                     <select
                       id="triage-status"
-                      className="form-control"
+                      className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 transition-colors disabled:opacity-60"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
                       disabled={isResolved}
@@ -268,74 +259,66 @@ export default function ComplaintDetailModal({
                     </select>
                   </div>
 
+                  {/* Reopen Workflow if Resolved */}
                   {isResolved && (
-                    <div className="reopen-section">
+                    <div className="my-2">
                       {!showReopenConfirm ? (
-                        <button
+                        <Button
                           type="button"
-                          className="btn btn-outline-warning btn-block flex-center"
+                          variant="outline"
+                          size="sm"
+                          isFullWidth
+                          icon={<RotateCcw className="w-3.5 h-3.5" />}
                           onClick={() => setShowReopenConfirm(true)}
-                          style={{ marginBottom: '1rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
-                          <SVGIcon name="rotate-ccw" size={15} />
                           Reopen Complaint
-                        </button>
+                        </Button>
                       ) : (
-                        <div
-                          className="reopen-confirm-card"
-                          style={{
-                            marginBottom: '1rem',
-                            padding: '12px',
-                            border: '1px solid #f59e0b',
-                            borderRadius: '8px',
-                            background: 'rgba(245, 158, 11, 0.05)',
-                          }}
-                        >
-                          <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#d97706', marginBottom: '8px' }}>
-                            Confirm Reopening Complaint?
-                          </p>
+                        <div className="p-3 border border-mustard-400/40 rounded-lg bg-mustard-50/50 space-y-2">
+                          <p className="text-xs font-semibold text-mustard-500">Confirm Reopening Complaint?</p>
                           <input
                             type="text"
-                            className="form-control"
+                            className="w-full rounded-lg border border-line bg-paper px-3 py-1.5 text-xs text-ink focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400"
                             placeholder="Reason for reopening (optional)..."
                             value={reopenReason}
                             onChange={(e) => setReopenReason(e.target.value)}
-                            style={{ marginBottom: '8px', fontSize: '0.85rem' }}
                           />
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button
+                          <div className="flex gap-2">
+                            <Button
                               type="button"
-                              className="btn btn-warning btn-sm"
-                              style={{ flex: 1 }}
-                              disabled={reopening}
+                              variant="primary"
+                              size="xs"
+                              className="flex-1"
+                              isLoading={reopening}
                               onClick={handleConfirmReopen}
                             >
-                              {reopening ? 'Reopening...' : 'Confirm Reopen'}
-                            </button>
-                            <button
+                              Confirm Reopen
+                            </Button>
+                            <Button
                               type="button"
-                              className="btn btn-secondary btn-sm"
-                              disabled={reopening}
+                              variant="secondary"
+                              size="xs"
                               onClick={() => {
                                 setShowReopenConfirm(false);
                                 setReopenReason('');
                               }}
                             >
                               Cancel
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       )}
                     </div>
                   )}
 
-                  <div className="form-group">
-                    <label htmlFor="triage-priority" className="form-label">
+                  {/* Priority Select */}
+                  <div>
+                    <label htmlFor="triage-priority" className="block text-xs font-semibold text-ink-muted mb-1">
                       Priority Level
                     </label>
                     <select
                       id="triage-priority"
-                      className="form-control"
+                      className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 transition-colors"
                       value={priority}
                       onChange={(e) => setPriority(e.target.value)}
                     >
@@ -345,40 +328,40 @@ export default function ComplaintDetailModal({
                     </select>
                   </div>
 
-                  <div className="form-group">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={isOverdueFlag}
-                        onChange={(e) => setIsOverdueFlag(e.target.checked)}
-                      />
-                      <span>Flag as Overdue (SLA Breach)</span>
-                    </label>
-                  </div>
+                  {/* Flag as Overdue Checkbox */}
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-ink-secondary">
+                    <input
+                      type="checkbox"
+                      checked={isOverdueFlag}
+                      onChange={(e) => setIsOverdueFlag(e.target.checked)}
+                      className="rounded border-line text-terracotta-400 focus:ring-terracotta-400/40"
+                    />
+                    <span>Flag as Overdue (SLA Breach)</span>
+                  </label>
 
-                  <div className="form-group">
-                    <label htmlFor="triage-note" className="form-label">
+                  {/* Audit Note Input */}
+                  <div>
+                    <label htmlFor="triage-note" className="block text-xs font-semibold text-ink-muted mb-1">
                       Audit Note (Optional)
                     </label>
                     <textarea
                       id="triage-note"
-                      className="form-control"
                       rows={3}
+                      className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 transition-colors"
                       placeholder="Add an internal note or status update rationale..."
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
                     />
                   </div>
 
-                  <div className="triage-actions">
-                    <button
-                      type="submit"
-                      className="btn btn-primary btn-block"
-                      disabled={submitting}
-                    >
-                      {submitting ? 'Saving Changes...' : 'Save Triage Update'}
-                    </button>
-                  </div>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    isFullWidth
+                    isLoading={submitting}
+                  >
+                    Save Triage Update
+                  </Button>
                 </form>
               </div>
             )}

@@ -7,10 +7,12 @@ import StatCard from '../components/StatCard';
 import ComplaintTable from '../components/ComplaintTable';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import EmptyState from '../components/EmptyState';
-import SVGIcon from '../components/SVGIcon';
 import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
 import emptyComplaintsIllustration from '../assets/empty-complaints.png';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { AlertTriangle, ClipboardList, PieChart as PieIcon, BarChart3 } from 'lucide-react';
+
+const ANGAN_PALETTE = ['#C1502E', '#84CC16', '#EAB308', '#14B8A6', '#A855F7', '#7A2F1A', '#F5D2C0'];
 
 export default function AdminDashboard() {
   const { addToast } = useToast();
@@ -94,28 +96,38 @@ export default function AdminDashboard() {
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 5);
 
+  const statusPieData = [
+    { name: 'Open', value: openCount, color: '#C1502E' }, // terracotta-400
+    { name: 'In Progress', value: progressCount, color: '#EAB308' }, // mustard-400
+    { name: 'Resolved', value: resolvedCount, color: '#84CC16' }, // olive-400
+  ];
+
+  const categoryBarData = byCategory.map((c, i) => ({
+    category: c.category,
+    count: Number(c.count),
+    fill: ANGAN_PALETTE[i % ANGAN_PALETTE.length],
+  }));
+
   return (
-    <div className="page-container admin-dashboard-container">
+    <div className="space-y-6 pb-6">
       {/* 1. PAGE HEADER */}
       <PageHeader
-        title="Society Overview"
-        subtitle="Monitor complaints, notices and activity across your society."
+        title="Admin Dashboard"
+        subtitle="Monitor complaints, notices, SLAs and operational analytics across your society."
       />
 
       {/* 2. PRIMARY KPI ROW */}
       {loading ? (
-        <div style={{ marginBottom: 24 }}>
-          <SkeletonCard count={5} />
-        </div>
+        <SkeletonCard count={5} />
       ) : (
-        <div className="kpi-grid" style={{ marginBottom: 24 }}>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <StatCard
             label="Total Queue"
             value={total}
             icon="clipboard"
-            color="cyan"
+            color="orange"
             variant="primary"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/complaints')}
           />
           <StatCard
             label="Open"
@@ -123,7 +135,7 @@ export default function AdminDashboard() {
             icon="clock"
             color="blue"
             variant="danger"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/complaints')}
           />
           <StatCard
             label="In Progress"
@@ -131,7 +143,7 @@ export default function AdminDashboard() {
             icon="rotate-cw"
             color="purple"
             variant="warning"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/complaints')}
           />
           <StatCard
             label="Resolved"
@@ -139,7 +151,7 @@ export default function AdminDashboard() {
             icon="check-circle"
             color="green"
             variant="success"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/complaints')}
           />
           <StatCard
             label="Overdue"
@@ -148,94 +160,125 @@ export default function AdminDashboard() {
             color="red"
             variant="danger"
             alert={overdueCount > 0}
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/complaints')}
           />
         </div>
       )}
 
-      {/* 2.5. DASHBOARD STATUS CHART */}
-      <div className="content-card dashboard-chart-card" style={{ marginBottom: 24 }}>
-        <div className="card-header-row" style={{ marginBottom: 16 }}>
-          <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <SVGIcon name="layout-dashboard" size={18} color="var(--primary)" />
-            <span>Complaint Status Breakdown</span>
-          </h3>
-        </div>
-
-        {loading ? (
-          <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span className="text-muted">Loading chart data...</span>
-          </div>
-        ) : (
-          <div className="chart-container" style={{ width: '100%', height: 260 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={[
-                    { name: 'Open', value: openCount, color: '#2563EB' },
-                    { name: 'In Progress', value: progressCount, color: '#7C3AED' },
-                    { name: 'Resolved', value: resolvedCount, color: '#16A34A' },
-                  ]}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={65}
-                  outerRadius={95}
-                  paddingAngle={4}
-                  dataKey="value"
-                >
-                  {[
-                    { name: 'Open', value: openCount, color: '#2563EB' },
-                    { name: 'In Progress', value: progressCount, color: '#7C3AED' },
-                    { name: 'Resolved', value: resolvedCount, color: '#16A34A' },
-                  ].map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderColor: 'var(--border-color)',
-                    borderRadius: 'var(--radius-md)',
-                    boxShadow: 'var(--shadow-md)',
-                    fontSize: '0.875rem',
-                  }}
-                />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </div>
-
-      {/* 3. OVERDUE / ACTION REQUIRED SECTION */}
-      <div className="content-card overdue-section-card" style={{ marginBottom: 24 }}>
-        <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div>
-            <h3 className="card-title text-danger" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <SVGIcon name="alert-triangle" size={18} color="#DC2626" />
-              <span>Overdue Complaints</span>
+      {/* 3. TWO CHARTS SIDE BY SIDE */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Status Breakdown Donut */}
+        <div className="bg-paper-card rounded-xl shadow-card p-5 border border-line space-y-4">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
+              <PieIcon className="w-4 h-4 text-terracotta-400" />
+              <span>Status Breakdown</span>
             </h3>
-            <p className="card-subtitle" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-              Complaints that have exceeded the configured SLA.
-            </p>
+            <span className="text-xs text-ink-muted">{total} total</span>
           </div>
-          {overdueComplaints.length > 0 && (
-            <button className="btn btn-outline btn-xs" onClick={() => navigate('/admin')}>
-              <span>Manage Complaints →</span>
-            </button>
+
+          {loading ? (
+            <div className="h-56 flex items-center justify-center text-xs text-ink-muted">
+              Loading chart...
+            </div>
+          ) : (
+            <div className="w-full h-60">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statusPieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={88}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {statusPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#FFFFFF',
+                      borderColor: '#E2E8F0',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.75rem',
+                    }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </div>
 
+        {/* Category Breakdown Horizontal Bars */}
+        <div className="bg-paper-card rounded-xl shadow-card p-5 border border-line space-y-4">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-olive-500" />
+              <span>Category Breakdown</span>
+            </h3>
+            <span className="text-xs text-ink-muted">{byCategory.length} categories</span>
+          </div>
+
+          {loading ? (
+            <div className="h-56 flex items-center justify-center text-xs text-ink-muted">
+              Loading chart...
+            </div>
+          ) : byCategory.length === 0 ? (
+            <div className="h-56 flex items-center justify-center text-xs text-ink-muted">
+              No category data available
+            </div>
+          ) : (
+            <div className="w-full h-60">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={categoryBarData} layout="vertical" margin={{ left: 20, right: 20 }}>
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="category" type="category" width={80} tick={{ fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#FFFFFF',
+                      borderColor: '#E2E8F0',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.75rem',
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                    {categoryBarData.map((entry, index) => (
+                      <Cell key={`bar-cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 4. OVERDUE COMPLAINTS SECTION */}
+      <div className="bg-paper-card rounded-xl shadow-card p-5 border border-clay-500/20 space-y-4 bg-clay-500/5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-display font-semibold text-base text-clay-500 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              <span>Overdue Complaints</span>
+            </h3>
+            <p className="text-xs text-ink-muted mt-0.5">
+              Complaints that have exceeded the configured SLA limits.
+            </p>
+          </div>
+        </div>
+
         {loading ? (
-          <SkeletonTable rows={2} cols={8} />
+          <SkeletonTable rows={2} cols={6} />
         ) : overdueComplaints.length === 0 ? (
           <EmptyState
             illustration={emptyComplaintsIllustration}
             icon="check-circle"
             title="No overdue complaints"
-            description="All complaints are currently within the configured SLA."
-            actionText="Manage Complaints →"
-            onAction={() => navigate('/admin')}
+            description="All complaints are currently within configured SLA limits."
           />
         ) : (
           <ComplaintTable
@@ -246,106 +289,40 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* TWO-COLUMN LAYOUT: Recent Activity & Visual Analytics */}
-      <div className="dashboard-two-col-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24, marginBottom: 24 }}>
-        {/* RECENT COMPLAINTS */}
-        <div className="content-card">
-          <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <SVGIcon name="clipboard" size={18} color="#2563EB" />
-              <span>Recent Complaints</span>
-            </h3>
-            <button className="btn btn-outline btn-xs" onClick={() => navigate('/admin')}>
-              <span>View Queue →</span>
-            </button>
-          </div>
-
-          {loading ? (
-            <SkeletonTable rows={3} cols={8} />
-          ) : recentComplaints.length === 0 ? (
-            <EmptyState
-              illustration={emptyComplaintsIllustration}
-              icon="clipboard"
-              title="No complaints recorded yet"
-              description="New resident complaints will appear here automatically."
-            />
-          ) : (
-            <ComplaintTable
-              complaints={recentComplaints}
-              mode="admin"
-              onSelectComplaint={handleOpenDetail}
-            />
-          )}
+      {/* RECENT COMPLAINTS QUEUE */}
+      <div className="bg-paper-card rounded-xl shadow-card p-5 border border-line space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
+            <ClipboardList className="w-4 h-4 text-terracotta-400" />
+            <span>Recent Complaints Queue</span>
+          </h3>
+          <button
+            onClick={() => navigate('/admin/complaints')}
+            className="text-xs font-semibold text-terracotta-400 hover:underline"
+          >
+            View all →
+          </button>
         </div>
 
-        {/* STATUS & CATEGORY BREAKDOWN ANALYTICS */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
-          {/* Status Breakdown */}
-          <div className="content-card">
-            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid var(--border-color)', paddingBottom: 10 }}>
-              Status Breakdown
-            </h3>
-
-            {loading ? (
-              <SkeletonCard count={1} />
-            ) : (
-              <div className="status-bars-list" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {[
-                  { label: 'Open', count: openCount, color: '#DC2626' },
-                  { label: 'In Progress', count: progressCount, color: '#D97706' },
-                  { label: 'Resolved', count: resolvedCount, color: '#16A34A' },
-                ].map((st) => {
-                  const pct = total > 0 ? Math.round((st.count / total) * 100) : 0;
-                  return (
-                    <div key={st.label} className="status-bar-item">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', fontWeight: 600, marginBottom: 4 }}>
-                        <span style={{ color: 'var(--text-main)' }}>{st.label}</span>
-                        <span style={{ color: 'var(--text-muted)' }}>{st.count} ({pct}%)</span>
-                      </div>
-                      <div style={{ height: 8, background: 'var(--bg-page)', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ width: `${pct}%`, height: '100%', background: st.color, borderRadius: 4, transition: 'width 0.3s' }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Category Breakdown */}
-          <div className="content-card">
-            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid var(--border-color)', paddingBottom: 10 }}>
-              Category Breakdown
-            </h3>
-
-            {loading ? (
-              <SkeletonCard count={1} />
-            ) : byCategory.length === 0 ? (
-              <p className="text-muted" style={{ fontSize: '0.875rem', margin: 0 }}>No category breakdown data available.</p>
-            ) : (
-              <div className="category-bars-list" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {byCategory.map((cat) => {
-                  const count = Number(cat.count);
-                  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                  return (
-                    <div key={cat.category} className="cat-bar-item">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', fontWeight: 600, marginBottom: 4 }}>
-                        <span style={{ color: 'var(--text-main)' }}>{cat.category}</span>
-                        <span style={{ color: 'var(--text-muted)' }}>{count} ({pct}%)</span>
-                      </div>
-                      <div style={{ height: 8, background: 'var(--bg-page)', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ width: `${pct}%`, height: '100%', background: 'var(--primary)', borderRadius: 4, transition: 'width 0.3s' }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
+        {loading ? (
+          <SkeletonTable rows={3} cols={6} />
+        ) : recentComplaints.length === 0 ? (
+          <EmptyState
+            illustration={emptyComplaintsIllustration}
+            icon="clipboard"
+            title="No complaints recorded yet"
+            description="New resident complaints will appear here automatically."
+          />
+        ) : (
+          <ComplaintTable
+            complaints={recentComplaints}
+            mode="admin"
+            onSelectComplaint={handleOpenDetail}
+          />
+        )}
       </div>
 
-      {/* REUSABLE COMPLAINT DETAIL & ATOMIC TRIAGE MODAL */}
+      {/* REUSABLE COMPLAINT DETAIL & TRIAGE MODAL */}
       <ComplaintDetailModal
         isOpen={Boolean(selectedComplaint)}
         onClose={() => setSelectedComplaint(null)}

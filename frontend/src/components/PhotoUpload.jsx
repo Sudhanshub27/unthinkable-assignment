@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext';
-import SVGIcon from './SVGIcon';
+import { Image as ImageIcon, X, UploadCloud } from 'lucide-react';
 
 export default function PhotoUpload({ file, preview, onChange, onRemove, error, setError }) {
   const { settings } = useSettings();
@@ -66,41 +66,45 @@ export default function PhotoUpload({ file, preview, onChange, onRemove, error, 
   };
 
   return (
-    <div className="photo-upload-container">
+    <div className="space-y-2">
       <input
         type="file"
         ref={inputRef}
         accept="image/*"
         onChange={handleFileChange}
-        style={{ display: 'none' }}
+        className="hidden"
       />
 
       {!preview ? (
         <div
-          className={`photo-dropzone ${isDragging ? 'dragging' : ''}`}
+          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors flex flex-col items-center justify-center space-y-2 ${
+            isDragging
+              ? 'border-terracotta-400 bg-terracotta-50/50'
+              : 'border-line hover:border-terracotta-400/50 bg-paper hover:bg-paper-hover'
+          }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
-          <div className="dropzone-icon">
-            <SVGIcon name="image" size={32} color="#64748B" />
+          <div className="w-10 h-10 rounded-full bg-paper-card border border-line flex items-center justify-center text-ink-muted">
+            <UploadCloud className="w-5 h-5 text-terracotta-400" />
           </div>
-          <div className="dropzone-text">
-            <span className="dropzone-link">Click to upload photo</span> or drag & drop file here
+          <div className="text-xs text-ink">
+            <span className="font-semibold text-terracotta-400 hover:underline">Click to upload photo</span> or drag & drop file here
           </div>
-          <div className="dropzone-hint">PNG, JPG, WEBP or GIF up to {maxMb}MB (Optional)</div>
+          <div className="text-[11px] text-ink-muted">PNG, JPG, WEBP or GIF up to {maxMb}MB (Optional)</div>
         </div>
       ) : (
-        <div className="photo-preview-card">
-          <img src={preview} alt="Attachment preview" className="photo-preview-img" />
-          <div className="photo-preview-info">
-            <div className="photo-preview-name">{file ? file.name : 'Attached Photo'}</div>
-            {file && <div className="photo-preview-size">{formatSize(file.size)}</div>}
+        <div className="flex items-center gap-3 p-3 rounded-xl border border-line bg-paper-card shadow-soft">
+          <img src={preview} alt="Attachment preview" className="w-12 h-12 rounded-lg object-cover border border-line" />
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-semibold text-ink truncate">{file ? file.name : 'Attached Photo'}</div>
+            {file && <div className="text-[11px] text-ink-muted">{formatSize(file.size)}</div>}
           </div>
           <button
             type="button"
-            className="photo-preview-remove"
+            className="text-xs font-semibold text-clay-500 hover:text-clay-600 hover:bg-clay-500/10 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
             onClick={(e) => {
               e.stopPropagation();
               if (preview && preview.startsWith('blob:')) {
@@ -110,12 +114,13 @@ export default function PhotoUpload({ file, preview, onChange, onRemove, error, 
             }}
             title="Remove photo"
           >
+            <X className="w-3.5 h-3.5" />
             Remove
           </button>
         </div>
       )}
 
-      {error && <div className="field-error">{error}</div>}
+      {error && <div className="text-xs text-clay-500 font-medium">{error}</div>}
     </div>
   );
 }

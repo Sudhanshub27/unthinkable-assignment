@@ -7,8 +7,10 @@ import StatCard from '../components/StatCard';
 import ComplaintTable from '../components/ComplaintTable';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import PhotoUpload from '../components/PhotoUpload';
-import SVGIcon from '../components/SVGIcon';
+import Modal from '../components/Modal';
+import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
+import { Plus, Search, Filter } from 'lucide-react';
 
 const CATEGORIES = [
   'Plumbing',
@@ -148,7 +150,7 @@ export default function ResidentComplaints() {
   const resolvedCount = complaints.filter((c) => c.status === 'Resolved').length;
 
   return (
-    <div className="page-container resident-complaints-container">
+    <div className="space-y-6 pb-6">
       {/* 1. PAGE HEADER */}
       <PageHeader
         title="My Complaints"
@@ -158,59 +160,103 @@ export default function ResidentComplaints() {
           resetForm();
           setShowFormModal(true);
         }}
-        actionIcon="plus"
+        actionIcon={<Plus className="w-4 h-4" />}
       />
 
       {/* 2. STAT CARDS */}
       {loading ? (
-        <div style={{ marginBottom: 24 }}>
-          <SkeletonCard count={4} />
-        </div>
+        <SkeletonCard count={4} />
       ) : (
-        <div className="kpi-grid" style={{ marginBottom: 24 }}>
-          <StatCard label="Total Complaints" value={totalCount} icon="clipboard" color="blue" variant="primary" />
-          <StatCard label="Open" value={openCount} icon="clock" color="red" variant="danger" />
-          <StatCard label="In Progress" value={progressCount} icon="clock" color="orange" variant="warning" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="Total Complaints" value={totalCount} icon="clipboard" color="orange" variant="primary" />
+          <StatCard label="Open" value={openCount} icon="clock" color="blue" variant="danger" />
+          <StatCard label="In Progress" value={progressCount} icon="rotate-cw" color="purple" variant="warning" />
           <StatCard label="Resolved" value={resolvedCount} icon="check-circle" color="green" variant="success" />
         </div>
       )}
 
       {/* 3. SEARCH & FILTER BAR */}
-      <div className="content-card filter-card" style={{ marginBottom: 20 }}>
-        <div className="filter-controls-grid">
-          <div className="filter-search-box">
-            <div className="input-relative-wrapper">
-              <span className="input-icon-prefix">
-                <SVGIcon name="search" size={16} />
-              </span>
-              <input
-                type="text"
-                className="form-control input-has-icon"
-                placeholder="Search by ID, category, description..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+      <div className="bg-paper-card rounded-xl shadow-soft p-3 flex flex-wrap gap-3 items-center border border-line">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            className="w-full rounded-lg border border-line px-3 py-2 pl-9 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors placeholder:text-ink-muted"
+            placeholder="Search by ID, category, description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Filter className="w-4 h-4 text-ink-muted hidden sm:block" />
+          <select
+            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors flex-1 sm:flex-initial"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+
+          <select
+            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors flex-1 sm:flex-initial"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* 4. COMPLAINT CARDS */}
+      <ComplaintTable
+        complaints={filteredComplaints}
+        loading={loading}
+        mode="resident"
+        emptyMessage="No complaints found"
+        emptyDescription="You haven't submitted any complaints matching your filters yet. Click 'Raise Complaint' to submit a new request."
+        emptyActionText="Raise Maintenance Complaint"
+        onEmptyAction={() => {
+          resetForm();
+          setShowFormModal(true);
+        }}
+        onSelectComplaint={handleOpenDetail}
+        onRetry={loadData}
+      />
+
+      {/* RAISE COMPLAINT MODAL FORM */}
+      <Modal
+        isOpen={showFormModal}
+        onClose={() => setShowFormModal(false)}
+        title="Raise Maintenance Complaint"
+        maxWidth="560px"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && (
+            <div className="p-3 rounded-lg bg-clay-500/10 border border-clay-500/20 text-clay-500 text-xs font-medium">
+              {formError}
             </div>
-          </div>
+          )}
 
-          <div className="filter-selects-row">
+          <div className="space-y-1">
+            <label htmlFor="complaint-category" className="block text-xs font-semibold text-ink-muted">
+              Category <span className="text-clay-500">*</span>
+            </label>
             <select
-              className="form-control"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              id="complaint-category"
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-
-            <select
-              className="form-control"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
+              <option value="">Select issue category...</option>
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -218,125 +264,52 @@ export default function ResidentComplaints() {
               ))}
             </select>
           </div>
-        </div>
-      </div>
 
-      {/* 4. COMPLAINT TABLE / CARDS */}
-      <div className="content-card">
-        <ComplaintTable
-          complaints={filteredComplaints}
-          loading={loading}
-          mode="resident"
-          emptyMessage="No complaints found"
-          emptyDescription="You haven't submitted any complaints matching your filters yet. Click 'Raise Complaint' to submit a new request."
-          emptyActionText="Raise Maintenance Complaint"
-          onEmptyAction={() => {
-            resetForm();
-            setShowFormModal(true);
-          }}
-          onSelectComplaint={handleOpenDetail}
-          onRetry={loadData}
-        />
-      </div>
-
-      {/* RAISE COMPLAINT MODAL FORM */}
-      {showFormModal && (
-        <div className="modal-backdrop" onClick={() => setShowFormModal(false)}>
-          <div
-            className="modal-dialog modal-md"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="raise-modal-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <h2 id="raise-modal-title" className="modal-title">
-                Raise Maintenance Complaint
-              </h2>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowFormModal(false)}
-                aria-label="Close form"
-              >
-                <SVGIcon name="x" size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                {formError && <div className="field-error-box mb-4">{formError}</div>}
-
-                <div className="form-group">
-                  <label htmlFor="complaint-category" className="form-label">
-                    Category <span className="text-danger">*</span>
-                  </label>
-                  <select
-                    id="complaint-category"
-                    className="form-control"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                  >
-                    <option value="">Select issue category...</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="complaint-description" className="form-label">
-                    Description <span className="text-danger">*</span>
-                  </label>
-                  <textarea
-                    id="complaint-description"
-                    className="form-control"
-                    rows={4}
-                    placeholder="Describe the maintenance issue, location details, or urgency..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Photo Attachment (Optional)</label>
-                  <PhotoUpload
-                    file={photo}
-                    preview={photoPreview}
-                    onChange={(file, previewUrl) => {
-                      setPhoto(file);
-                      setPhotoPreview(previewUrl);
-                    }}
-                    onRemove={() => {
-                      if (photoPreview && photoPreview.startsWith('blob:')) {
-                        URL.revokeObjectURL(photoPreview);
-                      }
-                      setPhoto(null);
-                      setPhotoPreview(null);
-                    }}
-                    error={formError && formError.includes('image') ? formError : ''}
-                    setError={setFormError}
-                  />
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setShowFormModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Submitting...' : 'Submit Complaint'}
-                </button>
-              </div>
-            </form>
+          <div className="space-y-1">
+            <label htmlFor="complaint-description" className="block text-xs font-semibold text-ink-muted">
+              Description <span className="text-clay-500">*</span>
+            </label>
+            <textarea
+              id="complaint-description"
+              rows={4}
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+              placeholder="Describe the maintenance issue, location details, or urgency..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
-        </div>
-      )}
+
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-ink-muted">Photo Attachment (Optional)</label>
+            <PhotoUpload
+              file={photo}
+              preview={photoPreview}
+              onChange={(file, previewUrl) => {
+                setPhoto(file);
+                setPhotoPreview(previewUrl);
+              }}
+              onRemove={() => {
+                if (photoPreview && photoPreview.startsWith('blob:')) {
+                  URL.revokeObjectURL(photoPreview);
+                }
+                setPhoto(null);
+                setPhotoPreview(null);
+              }}
+              error={formError && formError.includes('image') ? formError : ''}
+              setError={setFormError}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-line">
+            <Button type="button" variant="secondary" onClick={() => setShowFormModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Complaint'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* COMPLAINT DETAIL MODAL */}
       <ComplaintDetailModal

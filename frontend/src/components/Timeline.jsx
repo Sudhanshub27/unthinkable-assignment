@@ -1,56 +1,53 @@
-import SVGIcon from './SVGIcon';
+function getDotColor(item) {
+  const status = item.new_value || item.status || (item.change_type === 'created' ? 'Open' : '');
+  if (status === 'Open' || item.change_type === 'created') return 'bg-terracotta-400';
+  if (status === 'In Progress') return 'bg-mustard-400';
+  if (status === 'Resolved') return 'bg-olive-400';
+  if (status === 'Reopened' || item.change_type === 'reopened') return 'bg-clay-500';
+  return 'bg-terracotta-400';
+}
+
+function getActionLabel(h) {
+  if (h.change_type === 'created') return 'Complaint Created';
+  if (h.change_type === 'reopened') return `Complaint Reopened (${h.old_value || 'Resolved'} → ${h.new_value})`;
+  if (h.change_type === 'status_change') return `Status changed to ${h.new_value}`;
+  if (h.change_type === 'priority_change') return `Priority updated to ${h.new_value}`;
+  if (h.change_type === 'overdue_flag') return `Overdue flag set to ${h.new_value}`;
+  if (h.change_type === 'note_added') return 'Audit Note Added';
+  return h.change_type || 'Event Logged';
+}
 
 export default function Timeline({ history }) {
   if (!history || history.length === 0) {
-    return <p className="timeline-empty">No history entries recorded yet.</p>;
+    return <p className="text-xs text-ink-muted italic py-2">No history entries recorded yet.</p>;
   }
 
-  const getEventIconName = (type) => {
-    switch (type) {
-      case 'created':
-        return 'clipboard';
-      case 'status_change':
-        return 'clock';
-      case 'reopened':
-        return 'rotate-ccw';
-      case 'priority_change':
-        return 'alert-triangle';
-      case 'overdue_flag':
-        return 'alert-triangle';
-      case 'note_added':
-        return 'file-text';
-      default:
-        return 'file-text';
-    }
-  };
-
   return (
-    <div className="timeline-container">
-      <h4 className="timeline-title">Audit History Timeline</h4>
-      <div className="timeline-list">
-        {history.map((h, idx) => (
-          <div className="timeline-item" key={h.id || idx}>
-            <div className="timeline-badge-icon">
-              <SVGIcon name={getEventIconName(h.change_type)} size={14} />
-            </div>
-            <div className="timeline-content">
-              <div className="timeline-header-row">
-                <span className="timeline-action">
-                  {h.change_type === 'created'
-                    ? 'Complaint Created'
-                    : h.change_type === 'reopened'
-                    ? `Complaint Reopened (${h.old_value || 'Resolved'} → ${h.new_value})`
-                    : h.change_type === 'status_change'
-                    ? `Status updated: ${h.old_value || 'None'} → ${h.new_value}`
-                    : h.change_type === 'priority_change'
-                    ? `Priority updated: ${h.old_value || 'Low'} → ${h.new_value}`
-                    : h.change_type === 'overdue_flag'
-                    ? `Overdue flag set to ${h.new_value}`
-                    : h.change_type === 'note_added'
-                    ? 'Audit Note Added'
-                    : h.change_type}
+    <div className="relative pl-6 space-y-0">
+      {/* Vertical Line */}
+      <div className="absolute left-2 top-1.5 bottom-1.5 w-0.5 bg-line" />
+
+      {history.map((h, idx) => {
+        const isFirst = idx === 0;
+        const dotColor = getDotColor(h);
+        const label = getActionLabel(h);
+
+        return (
+          <div className="relative pb-6 last:pb-0" key={h.id || idx}>
+            {/* Dot */}
+            <div
+              className={`absolute -left-6 top-1 w-3 h-3 rounded-full border-2 border-paper-card ${dotColor}`}
+            />
+
+            {/* Entry Content */}
+            <div className={isFirst ? 'bg-paper-hover rounded-lg p-3' : 'py-0.5'}>
+              <div className="text-sm font-semibold text-ink">{label}</div>
+              <div className="text-xs text-ink-muted mt-0.5 flex items-center gap-2 flex-wrap">
+                <span>
+                  {h.actor_name || 'System'} ({h.actor_role || 'system'})
                 </span>
-                <span className="timeline-date">
+                <span>•</span>
+                <span>
                   {new Date(h.created_at).toLocaleString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -61,20 +58,15 @@ export default function Timeline({ history }) {
                 </span>
               </div>
 
-              <div className="timeline-actor">
-                Logged by <span className="actor-name">{h.actor_name || 'System'}</span> ({h.actor_role})
-              </div>
-
               {h.note && (
-                <div className="timeline-note-box">
-                  <SVGIcon name="file-text" size={13} style={{ display: 'inline-block', marginRight: 6, verticalAlign: 'middle' }} />
+                <div className="text-sm text-ink-secondary italic mt-2 pl-3 border-l-2 border-line">
                   {h.note}
                 </div>
               )}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

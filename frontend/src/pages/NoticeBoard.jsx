@@ -5,8 +5,10 @@ import { useToast } from '../context/ToastContext';
 import PageHeader from '../components/PageHeader';
 import NoticeCard from '../components/NoticeCard';
 import EmptyState from '../components/EmptyState';
-import SVGIcon from '../components/SVGIcon';
+import Modal from '../components/Modal';
+import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
+import { Plus, Pin } from 'lucide-react';
 import emptyNoticesIllustration from '../assets/empty-notices.png';
 
 export default function NoticeBoard() {
@@ -40,17 +42,6 @@ export default function NoticeBoard() {
   useEffect(() => {
     loadNotices();
   }, []);
-
-  // Keyboard Escape listener for modal
-  useEffect(() => {
-    function handleKeyDown(e) {
-      if (e.key === 'Escape' && showCreateModal) {
-        setShowCreateModal(false);
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showCreateModal]);
 
   async function handleCreateNotice(e) {
     e.preventDefault();
@@ -113,14 +104,14 @@ export default function NoticeBoard() {
   });
 
   return (
-    <div className="page-container notice-board-container">
+    <div className="space-y-6 pb-6">
       {/* Page Header */}
       <PageHeader
         title="Notice Board"
         subtitle="Stay updated with society announcements and important information."
         actionText={user?.role === 'admin' ? 'Create Notice' : undefined}
         onAction={user?.role === 'admin' ? () => setShowCreateModal(true) : undefined}
-        actionIcon="plus"
+        actionIcon={<Plus className="w-4 h-4" />}
       />
 
       {/* Notices Feed */}
@@ -136,7 +127,7 @@ export default function NoticeBoard() {
           onAction={user?.role === 'admin' ? () => setShowCreateModal(true) : undefined}
         />
       ) : (
-        <div className="notices-grid">
+        <div className="space-y-4">
           {sortedNotices.map((n) => (
             <NoticeCard
               key={n.id}
@@ -149,91 +140,79 @@ export default function NoticeBoard() {
       )}
 
       {/* Create Notice Modal (Admin Only) */}
-      {showCreateModal && user?.role === 'admin' && (
-        <div className="modal-backdrop" onClick={() => setShowCreateModal(false)}>
-          <div
-            className="modal-dialog modal-md"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="create-notice-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <h2 id="create-notice-title" className="modal-title">
-                Create Notice
-              </h2>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowCreateModal(false)}
-                aria-label="Close modal"
-              >
-                <SVGIcon name="x" size={18} />
-              </button>
+      <Modal
+        isOpen={showCreateModal && user?.role === 'admin'}
+        onClose={() => setShowCreateModal(false)}
+        title="Create Notice"
+        maxWidth="560px"
+      >
+        <form onSubmit={handleCreateNotice} className="space-y-4">
+          {formError && (
+            <div className="p-3 rounded-lg bg-clay-500/10 border border-clay-500/20 text-clay-500 text-xs font-medium">
+              {formError}
             </div>
+          )}
 
-            <form onSubmit={handleCreateNotice}>
-              <div className="modal-body">
-                {formError && <div className="field-error-box mb-4">{formError}</div>}
-
-                <div className="form-group">
-                  <label htmlFor="notice-title" className="form-label">
-                    Notice Title <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    id="notice-title"
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Scheduled Lift Maintenance"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="notice-body" className="form-label">
-                    Announcement Content <span className="text-danger">*</span>
-                  </label>
-                  <textarea
-                    id="notice-body"
-                    className="form-control"
-                    rows={5}
-                    placeholder="Provide full details regarding the society update..."
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group mb-0">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={isImportant}
-                      onChange={(e) => setIsImportant(e.target.checked)}
-                    />
-                    <span>Mark as Important (Pins to top & broadcasts email update)</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setShowCreateModal(false)}
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Publishing...' : 'Create Notice'}
-                </button>
-              </div>
-            </form>
+          <div className="space-y-1">
+            <label htmlFor="notice-title" className="block text-xs font-semibold text-ink-muted">
+              Notice Title <span className="text-clay-500">*</span>
+            </label>
+            <input
+              id="notice-title"
+              type="text"
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors placeholder:text-ink-muted"
+              placeholder="e.g. Scheduled Lift Maintenance"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
           </div>
-        </div>
-      )}
+
+          <div className="space-y-1">
+            <label htmlFor="notice-body" className="block text-xs font-semibold text-ink-muted">
+              Announcement Content <span className="text-clay-500">*</span>
+            </label>
+            <textarea
+              id="notice-body"
+              rows={5}
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors placeholder:text-ink-muted"
+              placeholder="Provide full details regarding the society update..."
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="pt-2">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded border-line text-terracotta-400 focus:ring-terracotta-400/40"
+                checked={isImportant}
+                onChange={(e) => setIsImportant(e.target.checked)}
+              />
+              <span className="text-xs text-ink font-medium flex items-center gap-1.5">
+                <Pin className="w-3.5 h-3.5 text-mustard-500" />
+                <span>Mark as Important (Pins to top & highlights entry)</span>
+              </span>
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-line">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowCreateModal(false)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={submitting}>
+              {submitting ? 'Publishing...' : 'Create Notice'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

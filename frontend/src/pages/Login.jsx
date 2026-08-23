@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import SVGIcon from '../components/SVGIcon';
-import authIllustration from '../assets/auth-illustration.png';
+import { Button } from '../components/UIComponents';
+import { Mail, Lock, User, Shield, Eye, EyeOff } from 'lucide-react';
+import authIllustration from '../assets/auth-illustration-new.png';
 
 export default function Login() {
   const [searchParams] = useSearchParams();
   const initialRole = searchParams.get('role') === 'admin' ? 'admin' : 'resident';
-  
+
   const [activeRoleTab, setActiveRoleTab] = useState(initialRole);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +22,6 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If query param specifies role, sync role state
     const paramRole = searchParams.get('role');
     if (paramRole === 'admin' || paramRole === 'resident') {
       setActiveRoleTab(paramRole);
@@ -81,77 +81,109 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-split-container">
-      {/* Left half: Form Side */}
-      <div className="auth-form-side">
-        <div className="auth-form-wrapper">
-          {/* Header */}
-          <div className="auth-header">
-            <Link to="/" className="auth-brand-badge">
-              <img src="/logo.png" alt="Nivaas Logo" className="auth-logo-img" />
-              <div className="auth-brand-text">
-                <span className="auth-app-title">Nivaas</span>
-                <span className="auth-society-subtitle">Digital Society Portal</span>
-              </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
+      {/* Left Panel: Hero Illustration (Desktop Only) */}
+      <div className="hidden md:flex flex-col items-center justify-center p-12 bg-gradient-to-br from-olive-500 to-olive-600 relative overflow-hidden">
+        <img
+          src={authIllustration}
+          alt="Angan Portal Illustration"
+          className="max-w-md w-full object-contain relative z-10 drop-shadow-md"
+        />
+        <div className="relative z-10 text-center mt-8 space-y-2">
+          <h1 className="text-white font-display text-2xl font-bold">
+            Your courtyard, online.
+          </h1>
+          <p className="text-white/70 text-sm max-w-sm mx-auto">
+            Manage maintenance requests, notice announcements, and community affairs seamlessly.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Panel: Form Side */}
+      <div className="bg-paper flex items-center justify-center p-6 sm:p-12 overflow-y-auto">
+        <div className="max-w-sm w-full space-y-6">
+          {/* Logo & Brand */}
+          <div className="flex flex-col items-center text-center space-y-2">
+            <Link to="/" className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="Angan Logo" className="h-10 w-auto object-contain" />
+              <span className="font-display font-semibold text-2xl text-ink">Angan</span>
             </Link>
 
-            {/* Role Selection Tabs */}
-            <div className="auth-role-tabs">
+            {/* Role Pill Buttons */}
+            <div className="flex bg-paper-hover p-1 rounded-xl gap-1 w-full mt-4">
               <button
                 type="button"
-                className={`role-tab-btn ${activeRoleTab === 'resident' ? 'active-tab' : ''}`}
                 onClick={() => {
                   setActiveRoleTab('resident');
                   setError('');
                 }}
+                className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                  activeRoleTab === 'resident'
+                    ? 'bg-terracotta-400 text-white shadow-sm'
+                    : 'text-ink-secondary hover:text-ink'
+                }`}
               >
-                <SVGIcon name="user" size={16} />
+                <User className="w-3.5 h-3.5" />
                 <span>Resident</span>
               </button>
               <button
                 type="button"
-                className={`role-tab-btn ${activeRoleTab === 'admin' ? 'active-tab' : ''}`}
                 onClick={() => {
                   setActiveRoleTab('admin');
                   setError('');
                 }}
+                className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                  activeRoleTab === 'admin'
+                    ? 'bg-terracotta-400 text-white shadow-sm'
+                    : 'text-ink-secondary hover:text-ink'
+                }`}
               >
-                <SVGIcon name="shield" size={16} />
+                <Shield className="w-3.5 h-3.5" />
                 <span>Admin</span>
               </button>
             </div>
 
-            <h2 className="auth-title">
-              {activeRoleTab === 'resident' ? 'Welcome back' : 'Society Administration'}
-            </h2>
-            <p className="auth-subtitle">
-              {activeRoleTab === 'resident'
-                ? 'Sign in to your society.'
-                : 'Sign in to manage your society.'}
-            </p>
+            <div className="pt-2">
+              <h2 className="font-display text-2xl font-bold text-ink">Welcome back</h2>
+              <p className="text-xs text-ink-muted mt-1">
+                {activeRoleTab === 'resident'
+                  ? 'Sign in to access your resident portal'
+                  : 'Sign in to access society administrative operations'}
+              </p>
+            </div>
           </div>
 
-          {error && <div className="alert alert-danger">{error}</div>}
+          {error && (
+            <div className="p-3 rounded-lg bg-clay-500/10 border border-clay-500/20 text-clay-500 text-xs font-medium">
+              {error}
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label className="form-label">Email Address <span className="req">*</span></label>
-              <input
-                type="email"
-                className="form-control"
-                placeholder={activeRoleTab === 'resident' ? 'resident@society.com' : 'admin@society.com'}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email Field */}
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-ink-muted">Email Address</label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  className="w-full rounded-lg border border-line px-4 py-3 pl-10 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-all placeholder:text-ink-muted"
+                  placeholder={activeRoleTab === 'resident' ? 'resident@society.com' : 'admin@society.com'}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password <span className="req">*</span></label>
-              <div className="input-relative-wrapper">
+            {/* Password Field */}
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-ink-muted">Password</label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className="form-control"
+                  className="w-full rounded-lg border border-line px-4 py-3 pl-10 pr-10 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-all placeholder:text-ink-muted"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -159,86 +191,65 @@ export default function Login() {
                 />
                 <button
                   type="button"
-                  className="input-eye-btn"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink focus:outline-none"
                   aria-label="Toggle password visibility"
                 >
-                  <SVGIcon name="eye" size={16} />
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              className={`btn btn-block btn-lg ${activeRoleTab === 'admin' ? 'btn-navy' : 'btn-primary'}`}
-              style={activeRoleTab === 'resident' ? { background: '#6366F1', borderColor: '#6366F1' } : {}}
-              disabled={loading}
-            >
-              {loading ? 'Authenticating...' : `Sign in as ${activeRoleTab === 'admin' ? 'Admin' : 'Resident'} ➔`}
-            </button>
+            <Button variant="primary" isFullWidth size="lg" isLoading={loading} type="submit">
+              {loading ? 'Signing in...' : `Sign in as ${activeRoleTab === 'admin' ? 'Admin' : 'Resident'}`}
+            </Button>
           </form>
 
-          {/* 1-Click Demo Section */}
-          <div className="auth-demo-divider">
-            <span>1-CLICK DEMO LOGIN</span>
-          </div>
-
-          <div className="auth-demo-buttons-grid">
-            <button
-              type="button"
-              className={`btn btn-outline btn-sm ${activeRoleTab === 'resident' ? 'btn-highlight-blue' : ''}`}
-              onClick={() => handleQuickFill('resident@society.com', 'Resident@123', 'resident')}
-            >
-              <SVGIcon name="user" size={14} />
-              <span>Resident Demo</span>
-            </button>
-
-            <button
-              type="button"
-              className={`btn btn-outline btn-sm ${activeRoleTab === 'admin' ? 'btn-highlight-purple' : ''}`}
-              onClick={() => handleQuickFill('admin@society.com', 'Admin@123', 'admin')}
-            >
-              <SVGIcon name="shield" size={14} />
-              <span>Admin Demo</span>
-            </button>
-          </div>
-
-          <div className="auth-footer">
-            <div className="auth-footer-links">
-              <span>
-                Don't have an account?{' '}
-                <Link to={`/register?role=${activeRoleTab}`} className="auth-link">
-                  Register as {activeRoleTab === 'admin' ? 'Admin' : 'Resident'}
-                </Link>
-              </span>
-
-              <button
+          {/* 1-Click Demo Login */}
+          <div className="pt-4 border-t border-line space-y-2">
+            <div className="text-[11px] font-semibold text-center uppercase tracking-wider text-ink-muted">
+              1-Click Demo Sign-in
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
                 type="button"
-                className="btn btn-ghost btn-xs text-muted"
-                onClick={handleResetSession}
-                title="Purge cached session"
+                variant="outline"
+                size="xs"
+                onClick={() => handleQuickFill('resident@society.com', 'Resident@123', 'resident')}
               >
-                Reset Session
-              </button>
+                Resident Demo
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="xs"
+                onClick={() => handleQuickFill('admin@society.com', 'Admin@123', 'admin')}
+              >
+                Admin Demo
+              </Button>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Right half: Hero Illustration side */}
-      <div className="auth-hero-side">
-        <div className="auth-hero-header">
-          <Link to="/" className="auth-hero-brand">
-            <img src="/logo.png" alt="Logo" className="auth-hero-logo" />
-            <span>Nivaas</span>
-          </Link>
-        </div>
-        <div className="auth-hero-body">
-          <img src={authIllustration} alt="Digital Society Portal" className="auth-hero-illustration" />
-          <h3 className="auth-hero-title">Your Residential Society</h3>
-          <p className="auth-hero-tagline">
-            Your society, now in one place.
-          </p>
+          {/* Link to Register */}
+          <div className="text-center text-xs text-ink-secondary pt-2 space-y-2">
+            <div>
+              <span>Don't have an account? </span>
+              <Link
+                to={`/register?role=${activeRoleTab}`}
+                className="text-terracotta-400 font-semibold hover:underline"
+              >
+                Register as {activeRoleTab === 'admin' ? 'Admin' : 'Resident'}
+              </Link>
+            </div>
+
+            <button
+              type="button"
+              className="text-[11px] text-ink-muted hover:text-ink underline block mx-auto"
+              onClick={handleResetSession}
+            >
+              Clear Session
+            </button>
+          </div>
         </div>
       </div>
     </div>

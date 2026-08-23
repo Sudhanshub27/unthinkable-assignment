@@ -5,8 +5,9 @@ import PageHeader from '../components/PageHeader';
 import StatCard from '../components/StatCard';
 import ComplaintTable from '../components/ComplaintTable';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
-import SVGIcon from '../components/SVGIcon';
+import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
+import { Search, Filter, AlertTriangle, X } from 'lucide-react';
 
 const CATEGORIES = [
   'Plumbing',
@@ -124,23 +125,21 @@ export default function AdminComplaints() {
   const overdueCount = complaints.filter((c) => c.is_overdue).length;
 
   return (
-    <div className="page-container admin-complaints-container">
+    <div className="space-y-6 pb-6">
       {/* 1. PAGE HEADER */}
       <PageHeader
-        title="Complaints"
+        title="Complaints Management"
         subtitle="Review, prioritize, and resolve resident maintenance requests."
       />
 
       {/* 2. STAT CARDS */}
       {loading ? (
-        <div style={{ marginBottom: 24 }}>
-          <SkeletonCard count={5} />
-        </div>
+        <SkeletonCard count={5} />
       ) : (
-        <div className="kpi-grid" style={{ marginBottom: 24 }}>
-          <StatCard label="Total Queue" value={totalCount} icon="clipboard" color="blue" variant="primary" />
-          <StatCard label="Open" value={openCount} icon="clock" color="red" variant="danger" />
-          <StatCard label="In Progress" value={progressCount} icon="clock" color="orange" variant="warning" />
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <StatCard label="Total Queue" value={totalCount} icon="clipboard" color="orange" variant="primary" />
+          <StatCard label="Open" value={openCount} icon="clock" color="blue" variant="danger" />
+          <StatCard label="In Progress" value={progressCount} icon="rotate-cw" color="purple" variant="warning" />
           <StatCard label="Resolved" value={resolvedCount} icon="check-circle" color="green" variant="success" />
           <StatCard
             label="Overdue Alerts"
@@ -154,94 +153,89 @@ export default function AdminComplaints() {
       )}
 
       {/* 3. FILTER BAR */}
-      <div className="content-card filter-card" style={{ marginBottom: 20 }}>
-        <div className="filter-controls-grid">
-          <div className="filter-search-box">
-            <div className="input-relative-wrapper">
-              <span className="input-icon-prefix">
-                <SVGIcon name="search" size={16} />
-              </span>
-              <input
-                type="text"
-                className="form-control input-has-icon"
-                placeholder="Search by resident, flat, complaint ID, or description..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
+      <div className="bg-paper-card rounded-xl shadow-soft p-3 flex flex-wrap gap-3 items-center border border-line">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            className="w-full rounded-lg border border-line px-3 py-2 pl-9 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors placeholder:text-ink-muted"
+            placeholder="Search by resident, flat, complaint ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-          <div className="filter-selects-row">
-            <select
-              className="form-control"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <Filter className="w-4 h-4 text-ink-muted hidden lg:block" />
+          <select
+            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+
+          <select
+            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+          >
+            <option value="">All Priorities</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+          </select>
+
+          <select
+            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <Button
+            variant={overdueOnly ? 'danger' : 'secondary'}
+            size="sm"
+            onClick={() => setOverdueOnly(!overdueOnly)}
+            icon={<AlertTriangle className="w-3.5 h-3.5" />}
+          >
+            Overdue Only
+          </Button>
+
+          {isFilterActive && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearFilters}
+              icon={<X className="w-3.5 h-3.5" />}
             >
-              <option value="">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-
-            <select
-              className="form-control"
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value)}
-            >
-              <option value="">All Priorities</option>
-              <option value="High">High Priority</option>
-              <option value="Medium">Medium Priority</option>
-              <option value="Low">Low Priority</option>
-            </select>
-
-            <select
-              className="form-control"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-
-            <button
-              className={`btn ${overdueOnly ? 'btn-danger' : 'btn-outline'} btn-sm`}
-              onClick={() => setOverdueOnly(!overdueOnly)}
-            >
-              <SVGIcon name="alert-triangle" size={14} className="btn-icon-left" />
-              <span>Overdue Only</span>
-            </button>
-
-            {isFilterActive && (
-              <button
-                className="btn btn-ghost btn-sm text-muted"
-                onClick={handleClearFilters}
-              >
-                <SVGIcon name="x" size={14} className="btn-icon-left" />
-                <span>Clear Filters</span>
-              </button>
-            )}
-          </div>
+              Clear
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* 4. COMPLAINT TABLE */}
-      <div className="content-card">
-        <ComplaintTable
-          complaints={filteredComplaints}
-          loading={loading}
-          mode="admin"
-          emptyMessage="No complaints match your filters"
-          emptyDescription="Try clearing your search query or selecting different category and status filters."
-          onSelectComplaint={handleOpenDetail}
-          onRetry={loadComplaints}
-        />
-      </div>
+      {/* 4. COMPLAINT CARDS GRID */}
+      <ComplaintTable
+        complaints={filteredComplaints}
+        loading={loading}
+        mode="admin"
+        emptyMessage="No complaints match your filters"
+        emptyDescription="Try clearing your search query or selecting different category and status filters."
+        onSelectComplaint={handleOpenDetail}
+        onRetry={loadComplaints}
+      />
 
-      {/* REUSABLE COMPLAINT DETAIL & ATOMIC TRIAGE MODAL */}
+      {/* REUSABLE COMPLAINT DETAIL & TRIAGE MODAL */}
       <ComplaintDetailModal
         isOpen={Boolean(selectedComplaint)}
         onClose={() => setSelectedComplaint(null)}

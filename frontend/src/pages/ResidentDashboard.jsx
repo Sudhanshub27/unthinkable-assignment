@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -10,8 +10,10 @@ import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import NoticeCard from '../components/NoticeCard';
 import EmptyState from '../components/EmptyState';
 import PhotoUpload from '../components/PhotoUpload';
-import SVGIcon from '../components/SVGIcon';
+import Modal from '../components/Modal';
+import { Button } from '../components/UIComponents';
 import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
+import { Plus, Megaphone, ClipboardList, ArrowRight } from 'lucide-react';
 import emptyComplaintsIllustration from '../assets/empty-complaints.png';
 
 const CATEGORIES = [
@@ -47,7 +49,6 @@ export default function ResidentDashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
-  // Get greeting based on time of day
   function getGreeting() {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -148,7 +149,7 @@ export default function ResidentDashboard() {
   const progressCount = complaints.filter((c) => c.status === 'In Progress').length;
   const resolvedCount = complaints.filter((c) => c.status === 'Resolved').length;
 
-  // Important announcements
+  // Important notices
   const importantNotices = notices.filter((n) => n.is_important);
 
   // Recent complaints (last 4)
@@ -157,7 +158,7 @@ export default function ResidentDashboard() {
     .slice(0, 4);
 
   return (
-    <div className="page-container resident-dashboard-container">
+    <div className="space-y-6 pb-20 md:pb-6">
       {/* 1. HEADER */}
       <PageHeader
         title={`${getGreeting()}, ${user?.name || 'Resident'} 👋`}
@@ -167,66 +168,14 @@ export default function ResidentDashboard() {
           resetForm();
           setShowFormModal(true);
         }}
-        actionIcon="plus"
+        actionIcon={<Plus className="w-4 h-4" />}
       />
 
-      {/* QUICK ACTIONS BAR */}
-      <div className="resident-quick-actions-bar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 24 }}>
-        <button
-          type="button"
-          className="quick-action-btn action-blue"
-          onClick={() => {
-            resetForm();
-            setShowFormModal(true);
-          }}
-        >
-          <div className="action-icon-chip chip-blue">
-            <SVGIcon name="plus" size={18} />
-          </div>
-          <span>Raise Complaint</span>
-        </button>
-
-        <button
-          type="button"
-          className="quick-action-btn action-purple"
-          onClick={() => navigate('/complaints')}
-        >
-          <div className="action-icon-chip chip-purple">
-            <SVGIcon name="clipboard" size={18} />
-          </div>
-          <span>My Complaints</span>
-        </button>
-
-        <button
-          type="button"
-          className="quick-action-btn action-amber"
-          onClick={() => navigate('/notices')}
-        >
-          <div className="action-icon-chip chip-amber">
-            <SVGIcon name="megaphone" size={18} />
-          </div>
-          <span>Society Notices</span>
-        </button>
-
-        <button
-          type="button"
-          className="quick-action-btn action-green"
-          onClick={() => navigate('/profile')}
-        >
-          <div className="action-icon-chip chip-green">
-            <SVGIcon name="user" size={18} />
-          </div>
-          <span>My Profile</span>
-        </button>
-      </div>
-
-      {/* 2. SUMMARY KPI STAT CARDS */}
+      {/* 2. STATS ROW */}
       {loading ? (
-        <div style={{ marginBottom: 24 }}>
-          <SkeletonCard count={4} />
-        </div>
+        <SkeletonCard count={4} />
       ) : (
-        <div className="kpi-grid" style={{ marginBottom: 24 }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
             label="Total Complaints"
             value={totalCount}
@@ -262,34 +211,28 @@ export default function ResidentDashboard() {
         </div>
       )}
 
-      {/* TWO COLUMN GRID: Important Announcements & Recent Complaints */}
-      <div className="dashboard-two-col-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
-        {/* IMPORTANT ANNOUNCEMENTS SECTION */}
-        <div className="content-card">
-          <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <SVGIcon name="megaphone" size={18} color="#2563EB" />
-              <span>Important Announcements</span>
+      {/* 3. TWO COLUMN GRID: Important Announcements & Recent Complaints */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* IMPORTANT ANNOUNCEMENTS SECTION (1 col) */}
+        <div className="lg:col-span-1 bg-paper-card rounded-xl border border-line shadow-soft p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
+              <Megaphone className="w-4 h-4 text-olive-500" />
+              <span>Important Notices</span>
             </h3>
-            <button
-              className="btn btn-outline btn-xs"
-              onClick={() => navigate('/notices')}
-            >
-              <span>View all notices</span>
-              <SVGIcon name="file-text" size={12} className="btn-icon-right" />
-            </button>
+            <Link to="/notices" className="text-xs font-semibold text-terracotta-400 hover:underline flex items-center gap-1">
+              View all
+            </Link>
           </div>
 
           {loading ? (
             <SkeletonCard count={1} />
           ) : importantNotices.length === 0 ? (
-            <div className="empty-subtext-box" style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-page)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-              <p className="text-muted" style={{ margin: 0, fontSize: '0.875rem' }}>
-                No important announcements
-              </p>
+            <div className="p-6 text-center bg-paper rounded-lg border border-line text-xs text-ink-muted">
+              No important announcements at this time.
             </div>
           ) : (
-            <div className="notices-grid" style={{ gridTemplateColumns: '1fr' }}>
+            <div className="space-y-3">
               {importantNotices.slice(0, 2).map((notice) => (
                 <NoticeCard key={notice.id} notice={notice} isAdmin={false} />
               ))}
@@ -297,24 +240,20 @@ export default function ResidentDashboard() {
           )}
         </div>
 
-        {/* RECENT COMPLAINTS SECTION */}
-        <div className="content-card">
-          <div className="card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 className="card-title" style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <SVGIcon name="clipboard" size={18} color="#2563EB" />
+        {/* RECENT COMPLAINTS SECTION (2 cols) */}
+        <div className="lg:col-span-2 bg-paper-card rounded-xl border border-line shadow-soft p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
+              <ClipboardList className="w-4 h-4 text-terracotta-400" />
               <span>Recent Complaints</span>
             </h3>
-            <button
-              className="btn btn-outline btn-xs"
-              onClick={() => navigate('/complaints')}
-            >
-              <span>View all complaints</span>
-              <SVGIcon name="file-text" size={12} className="btn-icon-right" />
-            </button>
+            <Link to="/complaints" className="text-xs font-semibold text-terracotta-400 hover:underline flex items-center gap-1">
+              View all complaints <ArrowRight className="w-3 h-3" />
+            </Link>
           </div>
 
           {loading ? (
-            <SkeletonTable rows={3} cols={6} />
+            <SkeletonTable rows={3} cols={4} />
           ) : complaints.length === 0 ? (
             <EmptyState
               illustration={emptyComplaintsIllustration}
@@ -338,104 +277,100 @@ export default function ResidentDashboard() {
         </div>
       </div>
 
+      {/* FLOATING ACTION BUTTON ON MOBILE */}
+      <div className="fixed bottom-6 right-6 z-30 md:hidden">
+        <Button
+          variant="primary"
+          size="lg"
+          className="rounded-full shadow-lg p-4 flex items-center justify-center"
+          onClick={() => {
+            resetForm();
+            setShowFormModal(true);
+          }}
+          aria-label="Raise Complaint"
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+      </div>
+
       {/* RAISE COMPLAINT MODAL FORM */}
-      {showFormModal && (
-        <div className="modal-backdrop" onClick={() => setShowFormModal(false)}>
-          <div
-            className="modal-dialog modal-md"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dashboard-raise-modal-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <h2 id="dashboard-raise-modal-title" className="modal-title">
-                Raise Maintenance Complaint
-              </h2>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowFormModal(false)}
-                aria-label="Close form"
-              >
-                <SVGIcon name="x" size={18} />
-              </button>
+      <Modal
+        isOpen={showFormModal}
+        onClose={() => setShowFormModal(false)}
+        title="Raise Maintenance Complaint"
+        maxWidth="560px"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && (
+            <div className="p-3 rounded-lg bg-clay-500/10 border border-clay-500/20 text-clay-500 text-xs font-medium">
+              {formError}
             </div>
+          )}
 
-            <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                {formError && <div className="field-error-box mb-4">{formError}</div>}
-
-                <div className="form-group">
-                  <label htmlFor="dash-complaint-category" className="form-label">
-                    Category <span className="text-danger">*</span>
-                  </label>
-                  <select
-                    id="dash-complaint-category"
-                    className="form-control"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                  >
-                    <option value="">Select issue category...</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="dash-complaint-description" className="form-label">
-                    Description <span className="text-danger">*</span>
-                  </label>
-                  <textarea
-                    id="dash-complaint-description"
-                    className="form-control"
-                    rows={4}
-                    placeholder="Describe the maintenance issue, location details, or urgency..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Photo Attachment (Optional)</label>
-                  <PhotoUpload
-                    file={photo}
-                    preview={photoPreview}
-                    onChange={(file, previewUrl) => {
-                      setPhoto(file);
-                      setPhotoPreview(previewUrl);
-                    }}
-                    onRemove={() => {
-                      if (photoPreview && photoPreview.startsWith('blob:')) {
-                        URL.revokeObjectURL(photoPreview);
-                      }
-                      setPhoto(null);
-                      setPhotoPreview(null);
-                    }}
-                    error={formError && formError.includes('image') ? formError : ''}
-                    setError={setFormError}
-                  />
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setShowFormModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Submitting...' : 'Submit Complaint'}
-                </button>
-              </div>
-            </form>
+          <div className="space-y-1">
+            <label htmlFor="dash-complaint-category" className="block text-xs font-semibold text-ink-muted">
+              Category <span className="text-clay-500">*</span>
+            </label>
+            <select
+              id="dash-complaint-category"
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="">Select issue category...</option>
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+
+          <div className="space-y-1">
+            <label htmlFor="dash-complaint-description" className="block text-xs font-semibold text-ink-muted">
+              Description <span className="text-clay-500">*</span>
+            </label>
+            <textarea
+              id="dash-complaint-description"
+              rows={4}
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+              placeholder="Describe the maintenance issue, location details, or urgency..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-ink-muted">Photo Attachment (Optional)</label>
+            <PhotoUpload
+              file={photo}
+              preview={photoPreview}
+              onChange={(file, previewUrl) => {
+                setPhoto(file);
+                setPhotoPreview(previewUrl);
+              }}
+              onRemove={() => {
+                if (photoPreview && photoPreview.startsWith('blob:')) {
+                  URL.revokeObjectURL(photoPreview);
+                }
+                setPhoto(null);
+                setPhotoPreview(null);
+              }}
+              error={formError && formError.includes('image') ? formError : ''}
+              setError={setFormError}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-line">
+            <Button type="button" variant="secondary" onClick={() => setShowFormModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Complaint'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* COMPLAINT DETAIL MODAL */}
       <ComplaintDetailModal
