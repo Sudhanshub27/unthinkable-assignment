@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
 
 /* ==========================================================================
@@ -13,6 +14,8 @@ export function Button({
   children,
   className = '',
   disabled,
+  href,
+  to,
   ...props
 }) {
   const variantClasses = {
@@ -33,19 +36,43 @@ export function Button({
   const variantClass = variantClasses[variant] || variantClasses.primary;
   const sizeClass = sizeClasses[size] || sizeClasses.md;
   const widthClass = isFullWidth ? 'w-full' : '';
+  const combinedClassName = `inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${variantClass} ${sizeClass} ${widthClass} ${className}`.trim();
 
-  return (
-    <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${variantClass} ${sizeClass} ${widthClass} ${className}`.trim()}
-      disabled={disabled || isLoading}
-      {...props}
-    >
+  const content = (
+    <>
       {isLoading ? (
         <span className="border-2 border-current/30 border-t-current rounded-full w-4 h-4 animate-spin shrink-0" aria-hidden="true" />
       ) : icon ? (
         <span className="inline-flex items-center justify-center shrink-0">{icon}</span>
       ) : null}
       {children && <span>{children}</span>}
+    </>
+  );
+
+  const targetHref = href || to;
+
+  if (targetHref) {
+    if (targetHref.startsWith('#')) {
+      return (
+        <a href={targetHref} className={combinedClassName} {...props}>
+          {content}
+        </a>
+      );
+    }
+    return (
+      <Link to={targetHref} className={combinedClassName} {...props}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      className={combinedClassName}
+      disabled={disabled || isLoading}
+      {...props}
+    >
+      {content}
     </button>
   );
 }
