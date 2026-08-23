@@ -42,7 +42,7 @@ export default function Register() {
         role: activeRoleTab,
       });
 
-      addToast(`Welcome to Green Valley Residency, ${user.name}!`, 'success');
+      addToast(`Welcome to your society portal, ${user.name}!`, 'success');
       if (user.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } else {
@@ -67,7 +67,7 @@ export default function Register() {
               <img src="/logo.png" alt="Nivaas Logo" className="auth-logo-img" />
               <div className="auth-brand-text">
                 <span className="auth-app-title">Nivaas</span>
-                <span className="auth-society-subtitle">Green Valley Residency</span>
+                <span className="auth-society-subtitle">Digital Society Portal</span>
               </div>
             </Link>
 
@@ -96,7 +96,7 @@ export default function Register() {
             </h2>
             <p className="auth-subtitle">
               {activeRoleTab === 'resident'
-                ? 'Join your society digital portal at Green Valley Residency'
+                ? 'Join your society digital portal'
                 : 'Create an admin account to manage society operations'}
             </p>
           </div>
@@ -154,6 +154,7 @@ export default function Register() {
             <button
               type="submit"
               className={`btn btn-block btn-lg ${activeRoleTab === 'admin' ? 'btn-navy' : 'btn-primary'}`}
+              style={activeRoleTab === 'resident' ? { background: '#6366F1', borderColor: '#6366F1' } : {}}
               disabled={loading}
             >
               {loading ? 'Creating Account...' : `Register Account ➔`}
@@ -178,8 +179,8 @@ export default function Register() {
           </Link>
         </div>
         <div className="auth-hero-body">
-          <img src={authIllustration} alt="Green Valley Residency" className="auth-hero-illustration" />
-          <h3 className="auth-hero-title">Green Valley Residency</h3>
+          <img src={authIllustration} alt="Digital Society Portal" className="auth-hero-illustration" />
+          <h3 className="auth-hero-title">Your Residential Society</h3>
           <p className="auth-hero-tagline">
             Your society, now in one place.
           </p>

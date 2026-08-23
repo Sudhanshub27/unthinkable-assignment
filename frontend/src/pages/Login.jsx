@@ -42,7 +42,7 @@ export default function Login() {
 
     try {
       const loggedUser = await login(loginEmail, loginPassword);
-      addToast(`Welcome back to Green Valley Residency, ${loggedUser.name}!`, 'success');
+      addToast(`Welcome back to your society, ${loggedUser.name}!`, 'success');
 
       if (loggedUser.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
@@ -91,7 +91,7 @@ export default function Login() {
               <img src="/logo.png" alt="Nivaas Logo" className="auth-logo-img" />
               <div className="auth-brand-text">
                 <span className="auth-app-title">Nivaas</span>
-                <span className="auth-society-subtitle">Green Valley Residency</span>
+                <span className="auth-society-subtitle">Digital Society Portal</span>
               </div>
             </Link>
 
@@ -122,12 +122,12 @@ export default function Login() {
             </div>
 
             <h2 className="auth-title">
-              {activeRoleTab === 'resident' ? 'Welcome to your society' : 'Society Administration'}
+              {activeRoleTab === 'resident' ? 'Welcome back' : 'Society Administration'}
             </h2>
             <p className="auth-subtitle">
               {activeRoleTab === 'resident'
-                ? 'Sign in to access resident maintenance complaints & notices'
-                : 'Sign in to manage complaints queue, notices & society operations'}
+                ? 'Sign in to your society.'
+                : 'Sign in to manage your society.'}
             </p>
           </div>
 
@@ -171,6 +171,7 @@ export default function Login() {
             <button
               type="submit"
               className={`btn btn-block btn-lg ${activeRoleTab === 'admin' ? 'btn-navy' : 'btn-primary'}`}
+              style={activeRoleTab === 'resident' ? { background: '#6366F1', borderColor: '#6366F1' } : {}}
               disabled={loading}
             >
               {loading ? 'Authenticating...' : `Sign in as ${activeRoleTab === 'admin' ? 'Admin' : 'Resident'} ➔`}
@@ -233,8 +234,8 @@ export default function Login() {
           </Link>
         </div>
         <div className="auth-hero-body">
-          <img src={authIllustration} alt="Green Valley Residency" className="auth-hero-illustration" />
-          <h3 className="auth-hero-title">Green Valley Residency</h3>
+          <img src={authIllustration} alt="Digital Society Portal" className="auth-hero-illustration" />
+          <h3 className="auth-hero-title">Your Residential Society</h3>
           <p className="auth-hero-tagline">
             Your society, now in one place.
           </p>

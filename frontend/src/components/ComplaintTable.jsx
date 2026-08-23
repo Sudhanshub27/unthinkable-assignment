@@ -1,6 +1,6 @@
 import SVGIcon from './SVGIcon';
 import { StatusBadge, PriorityBadge, OverdueBadge } from './Badges';
-import { formatFlatNumber, getCategoryIconName, formatDate } from '../utils/formatters';
+import { formatFlatNumber, getCategoryIconName, getCategoryColor, formatDate } from '../utils/formatters';
 import { SkeletonTable } from './Skeletons';
 import EmptyState from './EmptyState';
 import { ErrorState } from './UIComponents';
@@ -67,6 +67,7 @@ export default function ComplaintTable({
           <tbody>
             {complaints.map((c) => {
               const iconName = getCategoryIconName(c.category);
+              const catColor = getCategoryColor(c.category);
               return (
                 <tr key={c.id} className={`table-row ${c.is_overdue ? 'table-row-overdue' : ''}`}>
                   <td className="font-mono font-medium">#{c.id}</td>
@@ -80,8 +81,21 @@ export default function ComplaintTable({
                     <span className="flat-badge-text">{formatFlatNumber(c.flat_number)}</span>
                   </td>
                   <td>
-                    <div className="table-cat-pill">
-                      <SVGIcon name={iconName} size={14} className="cat-icon-svg" />
+                    <div
+                      className="table-cat-pill"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '4px 10px',
+                        borderRadius: 6,
+                        background: `${catColor}15`,
+                        color: catColor,
+                        fontWeight: 600,
+                        fontSize: '0.8125rem'
+                      }}
+                    >
+                      <SVGIcon name={iconName} size={14} color={catColor} />
                       <span>{c.category}</span>
                     </div>
                   </td>

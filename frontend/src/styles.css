@@ -6,37 +6,54 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Nivaas Brand Palette */
-  --nivaas-blue: #2563EB;
-  --primary: #2563EB;
-  --primary-hover: #1D4ED8;
-  --primary-light: #EFF6FF;
-  --primary-border: #BFDBFE;
+  /* Colorful Nivaas Brand Palette */
+  --nivaas-indigo: #6366F1;
+  --nivaas-coral: #F97316;
+  --nivaas-amber: #F59E0B;
+  --nivaas-teal: #14B8A6;
+  --nivaas-green: #22C55E;
+  --nivaas-pink: #EC4899;
+  --nivaas-purple: #8B5CF6;
+  --deep-navy: #172033;
 
-  --navy: #0F172A;
-  --sidebar-bg: #0F172A;
+  /* Primary Brand Accent */
+  --primary: #6366F1;
+  --primary-hover: #4F46E5;
+  --primary-light: #EEF2FF;
+  --primary-border: #C7D2FE;
+
+  --navy: #172033;
+  --sidebar-bg: #172033;
   --sidebar-text: #94A3B8;
   --sidebar-hover: #1E293B;
-  --sidebar-active-bg: #2563EB;
+  --sidebar-active-bg: #6366F1;
   --sidebar-active-text: #FFFFFF;
 
-  /* Neutrals */
-  --bg-page: #F8FAFC;
+  /* Calming Warm Backgrounds & Neutrals */
+  --bg-page: #FFFDF8;
   --bg-card: #FFFFFF;
-  --bg-hover: #F1F5F9;
+  --bg-hover: #F8FAFC;
 
-  --text-main: #0F172A;
+  --text-main: #172033;
   --text-secondary: #475569;
   --text-muted: #64748B;
   --text-body: #334155;
 
-  --border-color: #E2E8F0;
+  --border-color: #E5E7EB;
   --border-dark: #CBD5E1;
 
-  /* Shadows - Subtle residential shadows */
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
+  /* Soft Tint Backgrounds */
+  --soft-lavender: #F5F3FF;
+  --soft-peach: #FFF7ED;
+  --soft-green: #F0FDF4;
+  --soft-teal: #F0FDFA;
+  --soft-amber: #FFFBEB;
+  --soft-indigo: #EEF2FF;
+
+  /* Shadows - Light residential depth */
+  --shadow-sm: 0 1px 3px rgba(23, 32, 51, 0.05), 0 1px 2px rgba(23, 32, 51, 0.03);
+  --shadow-md: 0 4px 14px rgba(23, 32, 51, 0.07), 0 2px 4px rgba(23, 32, 51, 0.03);
+  --shadow-lg: 0 10px 25px -5px rgba(23, 32, 51, 0.1);
 
   /* Radius Tokens */
   --radius-sm: 6px;
@@ -44,36 +61,36 @@
   --radius-lg: 14px;
   --radius-pill: 9999px;
 
-  /* Semantic Color System */
-  /* Open: Blue (#2563EB) */
-  --status-open-bg: #EFF6FF;
-  --status-open-border: #BFDBFE;
-  --status-open-text: #1D4ED8;
+  /* Semantic Status Color System */
+  /* Open: Indigo (#6366F1) */
+  --status-open-bg: #EEF2FF;
+  --status-open-border: #C7D2FE;
+  --status-open-text: #4F46E5;
 
-  /* In Progress: Purple (#7C3AED) */
+  /* In Progress: Purple (#8B5CF6) */
   --status-progress-bg: #F5F3FF;
   --status-progress-border: #DDD6FE;
-  --status-progress-text: #6D28D9;
+  --status-progress-text: #7C3AED;
 
-  /* Resolved: Green (#16A34A) */
+  /* Resolved: Green (#22C55E) */
   --status-resolved-bg: #F0FDF4;
   --status-resolved-border: #BBF7D0;
   --status-resolved-text: #15803D;
 
-  /* Overdue / High: Red (#EF4444) */
+  /* Overdue / High Priority: Red (#EF4444) */
   --status-overdue-bg: #FEF2F2;
   --status-overdue-border: #FECACA;
   --status-overdue-text: #B91C1C;
 
-  /* Pending / Medium: Amber (#F59E0B) */
+  /* Pending / Medium Priority: Amber (#F59E0B) */
   --status-pending-bg: #FFFBEB;
   --status-pending-border: #FDE68A;
   --status-pending-text: #B45309;
 
-  /* Info / Low: Cyan (#0891B2) */
-  --status-info-bg: #ECFEFF;
-  --status-info-border: #A5F3FC;
-  --status-info-text: #0E7490;
+  /* Info / Low Priority: Teal (#14B8A6) */
+  --status-info-bg: #F0FDFA;
+  --status-info-border: #99F6E4;
+  --status-info-text: #0D9488;
 
   /* Priority Badges */
   --priority-high-bg: #FEF2F2;
@@ -82,8 +99,8 @@
   --priority-medium-bg: #FFFBEB;
   --priority-medium-text: #B45309;
 
-  --priority-low-bg: #ECFEFF;
-  --priority-low-text: #0E7490;
+  --priority-low-bg: #F0FDFA;
+  --priority-low-text: #0D9488;
 
   --overdue-bg: #FEF2F2;
   --overdue-border: #FECACA;
@@ -3309,6 +3326,49 @@ textarea.form-control {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+.nivaas-entrance-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.entrance-nav-link {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.entrance-nav-link:hover {
+  color: var(--nivaas-indigo);
+}
+
+.nivaas-section-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.nivaas-section-header .section-headline {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.nivaas-section-header .section-subtext {
+  font-size: 1rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 /* Entrance Hero */

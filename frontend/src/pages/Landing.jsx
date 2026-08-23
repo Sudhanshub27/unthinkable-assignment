@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import SVGIcon from '../components/SVGIcon';
-import heroIllustration from '../assets/hero-illustration.png';
+import heroCommunityIllustration from '../assets/nivaas-hero-community.png';
 
 export default function Landing() {
   const { user, login } = useAuth();
@@ -20,7 +20,7 @@ export default function Landing() {
     setDemoLoading(roleLabel);
     try {
       const loggedUser = await login(email, password);
-      addToast(`Welcome to Green Valley Residency, ${loggedUser.name}!`, 'success');
+      addToast(`Welcome back to your society portal, ${loggedUser.name}!`, 'success');
       if (loggedUser.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } else {
@@ -36,7 +36,7 @@ export default function Landing() {
 
   return (
     <div className="nivaas-entrance-page">
-      {/* Top Society Header */}
+      {/* 1. TOP NAVBAR */}
       <header className="nivaas-entrance-navbar">
         <div className="nivaas-entrance-container nivaas-entrance-navbar-inner">
           <div className="nivaas-brand-group">
@@ -44,71 +44,289 @@ export default function Landing() {
             <div className="nivaas-brand-titles">
               <span className="nivaas-app-name">Nivaas</span>
               <span className="nivaas-society-badge">
-                <SVGIcon name="shield" size={12} />
-                <span>Green Valley Residency</span>
+                <SVGIcon name="home" size={12} />
+                <span>Digital Society Portal</span>
               </span>
             </div>
           </div>
 
-          <div className="nivaas-header-right">
-            <span className="nivaas-portal-tag">Digital Community Portal</span>
+          <div className="nivaas-entrance-nav-links">
+            <a href="#features" className="entrance-nav-link">Features</a>
+            <a href="#how-it-works" className="entrance-nav-link">How it Works</a>
+            <a href="#previews" className="entrance-nav-link">Previews</a>
+            <a href="#role-selection" className="btn btn-outline btn-sm">Sign In</a>
           </div>
         </div>
       </header>
 
-      {/* Entrance Hero Section */}
+      {/* 2. ENTRANCE HERO SECTION */}
       <section className="nivaas-hero-entrance">
         <div className="nivaas-entrance-container nivaas-hero-grid">
           <div className="nivaas-hero-text">
             <div className="nivaas-hero-pill">
               <span className="pill-dot"></span>
-              <span>Green Valley Residency Digital Portal</span>
+              <span>Your Society Portal</span>
             </div>
             <h1 className="nivaas-hero-headline">
               Your society, now in one place.
             </h1>
             <p className="nivaas-hero-subtext">
-              Welcome to the digital home of Green Valley Residency. Track maintenance complaints, read official announcements, and manage society updates seamlessly.
+              Raise maintenance complaints, track their progress, stay updated with society notices, and keep everything happening in your community organized.
             </p>
 
-            {/* Society Features Quick Strip */}
-            <div className="nivaas-features-strip">
-              <div className="strip-item">
-                <SVGIcon name="clipboard" size={16} className="text-blue" />
-                <span>Complaints</span>
-              </div>
-              <div className="strip-item">
-                <SVGIcon name="megaphone" size={16} className="text-amber" />
-                <span>Notices</span>
-              </div>
-              <div className="strip-item">
-                <SVGIcon name="bell" size={16} className="text-purple" />
-                <span>Society Updates</span>
-              </div>
-              <div className="strip-item">
-                <SVGIcon name="shield" size={16} className="text-green" />
-                <span>Role Access</span>
-              </div>
+            <div className="nivaas-hero-ctas" style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+              <a href="#role-selection" className="btn btn-primary btn-lg" style={{ background: '#6366F1', borderColor: '#6366F1' }}>
+                <span>Enter Your Society</span>
+                <SVGIcon name="arrow-right" size={18} />
+              </a>
+              <a href="#features" className="btn btn-outline btn-lg">
+                <span>Explore Features</span>
+              </a>
             </div>
           </div>
 
           <div className="nivaas-hero-visual-wrapper">
             <img
-              src={heroIllustration}
-              alt="Green Valley Residency Digital Home"
+              src={heroCommunityIllustration}
+              alt="Digital Society Community Illustration"
               className="nivaas-hero-illustration"
             />
           </div>
         </div>
       </section>
 
-      {/* Role Selection Entrance Cards */}
+      {/* 3. WHAT CAN YOU DO WITH NIVAAS? (4 COLORFUL FEATURE CARDS) */}
+      <section className="nivaas-features-section" id="features" style={{ padding: '64px 0', background: '#FFFFFF' }}>
+        <div className="nivaas-entrance-container">
+          <div className="nivaas-section-header text-center" style={{ marginBottom: 48 }}>
+            <h2 className="section-headline" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--navy)', marginBottom: 12 }}>
+              What can you do with Nivaas?
+            </h2>
+            <p className="section-subtext" style={{ fontSize: '1rem', color: 'var(--text-muted)', maxWidth: 600, margin: '0 auto' }}>
+              Everything your residential society needs to stay connected, transparent, and organized.
+            </p>
+          </div>
+
+          <div className="nivaas-features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
+            {/* Card 1: Raise a Complaint */}
+            <div className="feature-card" style={{ padding: 28, background: '#FFF7ED', border: '1px solid #FFEDD5', borderRadius: 'var(--radius-lg)' }}>
+              <div className="feature-icon-chip" style={{ width: 48, height: 48, borderRadius: 12, background: '#F97316', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                <SVGIcon name="clipboard" size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 8 }}>
+                Raise a Complaint
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Report maintenance issues with photos and descriptions, so the right people can take action.
+              </p>
+            </div>
+
+            {/* Card 2: Track Your Complaint */}
+            <div className="feature-card" style={{ padding: 28, background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 'var(--radius-lg)' }}>
+              <div className="feature-icon-chip" style={{ width: 48, height: 48, borderRadius: 12, background: '#8B5CF6', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                <SVGIcon name="clock" size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 8 }}>
+                Track Your Complaint
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Follow every update from Open to In Progress to Resolved, with a complete history timeline.
+              </p>
+            </div>
+
+            {/* Card 3: Stay Updated */}
+            <div className="feature-card" style={{ padding: 28, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 'var(--radius-lg)' }}>
+              <div className="feature-icon-chip" style={{ width: 48, height: 48, borderRadius: 12, background: '#F59E0B', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                <SVGIcon name="megaphone" size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 8 }}>
+                Stay Updated
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Never miss important society announcements, maintenance schedules, and meeting notices.
+              </p>
+            </div>
+
+            {/* Card 4: Know What's Happening */}
+            <div className="feature-card" style={{ padding: 28, background: '#F0FDFA', border: '1px solid #99F6E4', borderRadius: 'var(--radius-lg)' }}>
+              <div className="feature-icon-chip" style={{ width: 48, height: 48, borderRadius: 12, background: '#14B8A6', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                <SVGIcon name="layout-dashboard" size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 8 }}>
+                Know What's Happening
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Get a clear view of your society's latest updates, status breakdowns, and activity.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. HOW IT WORKS (3 COLORFUL STEPS) */}
+      <section className="nivaas-steps-section" id="how-it-works" style={{ padding: '64px 0', background: 'var(--bg-page)' }}>
+        <div className="nivaas-entrance-container">
+          <div className="nivaas-section-header text-center" style={{ marginBottom: 48 }}>
+            <h2 className="section-headline" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--navy)', marginBottom: 12 }}>
+              How Nivaas works
+            </h2>
+            <p className="section-subtext" style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
+              Three simple steps to manage maintenance and stay connected with your community.
+            </p>
+          </div>
+
+          <div className="nivaas-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 32 }}>
+            <div className="step-card" style={{ background: '#FFFFFF', padding: 32, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+              <div className="step-number-badge" style={{ width: 44, height: 44, borderRadius: 50, background: '#FFF7ED', color: '#F97316', fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, border: '2px solid #FFEDD5' }}>
+                01
+              </div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 8 }}>
+                Raise an issue
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Submit a maintenance complaint with specific issue details and optional photo attachment.
+              </p>
+            </div>
+
+            <div className="step-card" style={{ background: '#FFFFFF', padding: 32, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+              <div className="step-number-badge" style={{ width: 44, height: 44, borderRadius: 50, background: '#F5F3FF', color: '#8B5CF6', fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, border: '2px solid #DDD6FE' }}>
+                02
+              </div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 8 }}>
+                Track the progress
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Follow status changes, priority assignments, and updates from your society admin.
+              </p>
+            </div>
+
+            <div className="step-card" style={{ background: '#FFFFFF', padding: 32, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+              <div className="step-number-badge" style={{ width: 44, height: 44, borderRadius: 50, background: '#F0FDFA', color: '#14B8A6', fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, border: '2px solid #99F6E4' }}>
+                03
+              </div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)', marginBottom: 8 }}>
+                Stay informed
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                Receive important society notices, community updates, and meeting announcements.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. PREVIEWS SECTION: NOTICE BOARD & COMPLAINT TRACKER */}
+      <section className="nivaas-previews-section" id="previews" style={{ padding: '64px 0', background: '#FFFFFF' }}>
+        <div className="nivaas-entrance-container">
+          <div className="nivaas-section-header text-center" style={{ marginBottom: 48 }}>
+            <h2 className="section-headline" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--navy)', marginBottom: 12 }}>
+              Stay connected with your society
+            </h2>
+            <p className="section-subtext" style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
+              A preview of how notices and complaint tracking look inside the portal.
+            </p>
+          </div>
+
+          <div className="previews-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 32 }}>
+            {/* NOTICE BOARD PREVIEW CARD */}
+            <div className="preview-card" style={{ background: 'var(--bg-page)', padding: 28, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                <SVGIcon name="megaphone" size={20} color="#F59E0B" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)', margin: 0 }}>
+                  Notice Board Preview
+                </h3>
+              </div>
+
+              <div className="mock-notices-list" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: 14, borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#B45309', marginBottom: 4, textTransform: 'uppercase' }}>
+                    📌 Important Announcement
+                  </div>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--navy)', margin: '0 0 4px 0' }}>
+                    Water supply maintenance scheduled tomorrow
+                  </h4>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>
+                    Water supply will be paused from 10:00 AM to 2:00 PM for overhead tank cleaning.
+                  </p>
+                </div>
+
+                <div style={{ background: '#F0FDFA', border: '1px solid #99F6E4', padding: 14, borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0D9488', marginBottom: 4, textTransform: 'uppercase' }}>
+                    📢 Community Update
+                  </div>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--navy)', margin: '0 0 4px 0' }}>
+                    Society meeting this Sunday
+                  </h4>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>
+                    Annual general discussion on security upgrades and festival arrangements at 5 PM in the clubhouse.
+                  </p>
+                </div>
+
+                <div style={{ background: '#FFFFFF', border: '1px solid var(--border-color)', padding: 14, borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B', marginBottom: 4, textTransform: 'uppercase' }}>
+                    🔔 General Notice
+                  </div>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--navy)', margin: '0 0 4px 0' }}>
+                    New maintenance schedule available
+                  </h4>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>
+                    Monthly maintenance receipts and breakdown reports have been published.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* COMPLAINT TRACKER PREVIEW CARD */}
+            <div className="preview-card" style={{ background: 'var(--bg-page)', padding: 28, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                <SVGIcon name="clipboard" size={20} color="#8B5CF6" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)', margin: 0 }}>
+                  Complaint Tracker Preview
+                </h3>
+              </div>
+
+              <div className="mock-complaint-box" style={{ background: '#FFFFFF', padding: 20, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#14B8A6', background: '#F0FDFA', padding: '3px 8px', borderRadius: 4 }}>
+                    Plumbing
+                  </span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#B91C1C', background: '#FEF2F2', padding: '3px 8px', borderRadius: 'var(--radius-pill)' }}>
+                    HIGH PRIORITY
+                  </span>
+                </div>
+
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--navy)', margin: '0 0 6px 0' }}>
+                  Water Leakage in Main Pipe
+                </h4>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+                  Unit: Flat A-204 • Reported 2 hours ago
+                </div>
+
+                {/* Mock Stepper */}
+                <div style={{ background: '#F8FAFC', padding: 14, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 10, textTransform: 'uppercase' }}>
+                    Live Progress Timeline
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                    <div style={{ color: '#16A34A', fontWeight: 700 }}>Reported ✓</div>
+                    <div style={{ color: '#16A34A', fontWeight: 700 }}>Under Review ✓</div>
+                    <div style={{ color: '#8B5CF6', fontWeight: 700 }}>In Progress ●</div>
+                    <div style={{ color: '#94A3B8', fontWeight: 500 }}>Resolved ○</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. ROLE SELECTION ENTRANCE CARDS */}
       <section className="nivaas-role-entrance-section" id="role-selection">
         <div className="nivaas-entrance-container">
           <div className="nivaas-role-header">
             <h2 className="nivaas-role-title">How would you like to enter?</h2>
             <p className="nivaas-role-subtitle">
-              Select your portal role to access your society workspace.
+              Choose your role to access your society workspace.
             </p>
           </div>
 
@@ -124,7 +342,7 @@ export default function Landing() {
 
               <h3 className="role-title">Resident</h3>
               <p className="role-desc">
-                Access your personal society portal to log maintenance issues, view notice board updates, and track resolution.
+                Raise complaints, track issues, read notices and stay connected with your society.
               </p>
 
               <ul className="role-checklist">
@@ -140,16 +358,11 @@ export default function Landing() {
                   <SVGIcon name="check-circle" size={16} className="check-icon" />
                   <span>Read official society notices</span>
                 </li>
-                <li>
-                  <SVGIcon name="check-circle" size={16} className="check-icon" />
-                  <span>Stay updated with society activity</span>
-                </li>
               </ul>
 
               <div className="role-card-actions">
-                <Link to="/login?role=resident" className="btn btn-primary btn-block btn-lg">
-                  <span>Continue as Resident</span>
-                  <SVGIcon name="arrow-right" size={18} />
+                <Link to="/login?role=resident" className="btn btn-primary btn-block btn-lg" style={{ background: '#6366F1', borderColor: '#6366F1' }}>
+                  <span>Continue as Resident →</span>
                 </Link>
 
                 <button
@@ -174,7 +387,7 @@ export default function Landing() {
 
               <h3 className="role-title">Admin</h3>
               <p className="role-desc">
-                Access the society control center to manage complaints queue, publish announcements, and oversee society operations.
+                Manage complaints, update statuses, publish notices and monitor society activity.
               </p>
 
               <ul className="role-checklist">
@@ -190,16 +403,11 @@ export default function Landing() {
                   <SVGIcon name="check-circle" size={16} className="check-icon" />
                   <span>Monitor overdue complaints & SLAs</span>
                 </li>
-                <li>
-                  <SVGIcon name="check-circle" size={16} className="check-icon" />
-                  <span>Inspect email logs & audit trails</span>
-                </li>
               </ul>
 
               <div className="role-card-actions">
                 <Link to="/login?role=admin" className="btn btn-navy btn-block btn-lg">
-                  <span>Continue as Admin</span>
-                  <SVGIcon name="arrow-right" size={18} />
+                  <span>Continue as Admin →</span>
                 </Link>
 
                 <button
@@ -216,7 +424,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* FOOTER */}
       <footer className="nivaas-entrance-footer">
         <div className="nivaas-entrance-container">
           <div className="nivaas-footer-content">
@@ -224,11 +432,11 @@ export default function Landing() {
               <img src="/logo.png" alt="Nivaas Logo" className="nivaas-footer-logo" />
               <div>
                 <span className="nivaas-footer-title">Nivaas</span>
-                <p className="nivaas-footer-sub">Green Valley Residency • Digital Community Portal</p>
+                <p className="nivaas-footer-sub">Digital Society Portal</p>
               </div>
             </div>
             <p className="nivaas-footer-copy">
-              Your society, now in one place. Built for modern housing societies.
+              Your society, now in one place. Built for residential communities.
             </p>
           </div>
         </div>

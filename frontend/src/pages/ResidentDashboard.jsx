@@ -161,7 +161,7 @@ export default function ResidentDashboard() {
       {/* 1. HEADER */}
       <PageHeader
         title={`${getGreeting()}, ${user?.name || 'Resident'} 👋`}
-        subtitle="Here's what's happening in your society at Green Valley Residency."
+        subtitle="Here's what's happening around your society."
         actionText="Raise Complaint"
         onAction={() => {
           resetForm();
@@ -194,7 +194,7 @@ export default function ResidentDashboard() {
           <div className="action-icon-chip chip-purple">
             <SVGIcon name="clipboard" size={18} />
           </div>
-          <span>View My Complaints</span>
+          <span>My Complaints</span>
         </button>
 
         <button
@@ -231,7 +231,7 @@ export default function ResidentDashboard() {
             label="Total Complaints"
             value={totalCount}
             icon="clipboard"
-            color="cyan"
+            color="orange"
             variant="primary"
             onClick={() => navigate('/complaints')}
           />

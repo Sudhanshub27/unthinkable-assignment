@@ -98,8 +98,8 @@ export default function AdminDashboard() {
     <div className="page-container admin-dashboard-container">
       {/* 1. PAGE HEADER */}
       <PageHeader
-        title="Society Control Center"
-        subtitle="Good morning, Admin 👋 — Here's what's happening across Green Valley Residency."
+        title="Society Overview"
+        subtitle="Monitor complaints, notices and activity across your society."
       />
 
       {/* 2. PRIMARY KPI ROW */}

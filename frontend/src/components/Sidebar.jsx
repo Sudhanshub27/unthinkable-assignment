@@ -47,7 +47,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 Nivaas
               </div>
               <div className="brand-sub" style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                {settings.society_name || 'Green Valley Residency'}
+                {settings.society_name || 'My Society'}
               </div>
             </div>
           </div>

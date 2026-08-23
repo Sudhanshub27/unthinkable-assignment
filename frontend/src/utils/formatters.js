@@ -22,6 +22,25 @@ export function getCategoryIconName(category) {
   }
 }
 
+export function getCategoryColor(category) {
+  switch (category) {
+    case 'Plumbing':
+      return '#14B8A6'; // Teal
+    case 'Electrical':
+      return '#F59E0B'; // Amber
+    case 'Security':
+      return '#F97316'; // Coral / Red
+    case 'Cleaning':
+      return '#22C55E'; // Green
+    case 'Lift':
+      return '#6366F1'; // Indigo
+    case 'Parking':
+      return '#EC4899'; // Pink
+    default:
+      return '#8B5CF6'; // Purple
+  }
+}
+
 export function formatDate(dateString) {
   if (!dateString) return 'N/A';
   return new Date(dateString).toLocaleDateString('en-US', {
