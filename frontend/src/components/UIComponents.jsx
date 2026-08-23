@@ -15,32 +15,37 @@ export function Button({
   disabled,
   ...props
 }) {
-  const variantClass =
-    variant === 'primary'
-      ? 'btn-primary'
-      : variant === 'secondary'
-      ? 'btn-secondary'
-      : variant === 'outline'
-      ? 'btn-outline'
-      : variant === 'danger'
-      ? 'btn-danger'
-      : 'btn-ghost';
+  const variantClasses = {
+    primary: 'bg-terracotta-400 text-white hover:bg-terracotta-500 shadow-soft',
+    secondary: 'bg-paper-hover text-ink border border-line hover:bg-line shadow-soft',
+    outline: 'bg-transparent border-2 border-terracotta-400 text-terracotta-400 hover:bg-terracotta-50',
+    danger: 'bg-clay-500 text-white hover:bg-clay-400 shadow-soft',
+    ghost: 'bg-transparent text-ink-secondary hover:bg-paper-hover hover:text-ink',
+  };
 
-  const sizeClass = size === 'sm' ? 'btn-sm' : size === 'lg' ? 'btn-lg' : size === 'xs' ? 'btn-xs' : '';
-  const widthClass = isFullWidth ? 'btn-block' : '';
+  const sizeClasses = {
+    xs: 'px-2.5 py-1 text-xs',
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2.5 text-sm',
+    lg: 'px-6 py-3 text-base',
+  };
+
+  const variantClass = variantClasses[variant] || variantClasses.primary;
+  const sizeClass = sizeClasses[size] || sizeClasses.md;
+  const widthClass = isFullWidth ? 'w-full' : '';
 
   return (
     <button
-      className={`btn ${variantClass} ${sizeClass} ${widthClass} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${variantClass} ${sizeClass} ${widthClass} ${className}`.trim()}
       disabled={disabled || isLoading}
       {...props}
     >
       {isLoading ? (
-        <span className="btn-spinner-inline" aria-hidden="true" />
+        <span className="border-2 border-current/30 border-t-current rounded-full w-4 h-4 animate-spin shrink-0" aria-hidden="true" />
       ) : icon ? (
-        <span className="btn-icon">{icon}</span>
+        <span className="inline-flex items-center justify-center shrink-0">{icon}</span>
       ) : null}
-      <span>{children}</span>
+      {children && <span>{children}</span>}
     </button>
   );
 }

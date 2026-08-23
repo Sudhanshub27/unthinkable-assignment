@@ -1,47 +1,69 @@
-import SVGIcon from './SVGIcon';
+import { Clock, CheckCircle2, Megaphone } from 'lucide-react';
 
 export function StatusBadge({ status }) {
   const map = {
-    Open: { class: 'badge-status-open', icon: 'clock' },
-    'In Progress': { class: 'badge-status-progress', icon: 'clock' },
-    Resolved: { class: 'badge-status-resolved', icon: 'check-circle' },
+    Open: {
+      className: 'bg-terracotta-50 text-terracotta-500',
+      icon: Clock,
+    },
+    'In Progress': {
+      className: 'bg-mustard-50 text-mustard-500',
+      icon: Clock,
+    },
+    Resolved: {
+      className: 'bg-olive-50 text-olive-500',
+      icon: CheckCircle2,
+    },
+    Reopened: {
+      className: 'bg-mustard-50 text-mustard-500',
+      icon: Clock,
+    },
   };
-  const config = map[status] || { class: 'badge-status-open', icon: 'clock' };
+
+  const config = map[status] || {
+    className: 'bg-terracotta-50 text-terracotta-500',
+    icon: Clock,
+  };
+  const Icon = config.icon;
+
   return (
-    <span className={`badge ${config.class}`}>
-      <SVGIcon name={config.icon} size={12} className="badge-icon-svg" /> {status}
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.className}`}>
+      <Icon className="w-3.5 h-3.5 shrink-0" />
+      <span>{status}</span>
     </span>
   );
 }
 
 export function PriorityBadge({ priority }) {
   const map = {
-    Low: { class: 'badge-priority-low' },
-    Medium: { class: 'badge-priority-medium' },
-    High: { class: 'badge-priority-high' },
+    Low: 'bg-teal-50 text-teal-500',
+    Medium: 'bg-mustard-50 text-mustard-500',
+    High: 'bg-terracotta-50 text-clay-500',
   };
-  const config = map[priority] || { class: 'badge-priority-low' };
+
+  const className = map[priority] || 'bg-teal-50 text-teal-500';
+
   return (
-    <span className={`badge ${config.class}`}>
-      {priority} Priority
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${className}`}>
+      <span>{priority} Priority</span>
     </span>
   );
 }
 
 export function OverdueBadge({ ageDays }) {
   return (
-    <span className="badge badge-overdue">
-      <SVGIcon name="alert-triangle" size={12} className="badge-icon-svg" />
-      OVERDUE {ageDays !== undefined && ageDays !== null ? `(${ageDays}d)` : ''}
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-clay-500/10 text-clay-500">
+      <span className="w-1.5 h-1.5 rounded-full bg-clay-500 animate-pulse shrink-0" />
+      <span>OVERDUE {ageDays !== undefined && ageDays !== null ? `(${ageDays}d)` : ''}</span>
     </span>
   );
 }
 
 export function ImportantBadge() {
   return (
-    <span className="badge badge-important">
-      <SVGIcon name="megaphone" size={12} className="badge-icon-svg" />
-      IMPORTANT ANNOUNCEMENT
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-mustard-50 text-mustard-500">
+      <Megaphone className="w-3.5 h-3.5 shrink-0" />
+      <span>IMPORTANT ANNOUNCEMENT</span>
     </span>
   );
 }
