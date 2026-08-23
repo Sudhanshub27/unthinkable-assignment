@@ -15,7 +15,7 @@ import {
   Shield,
   Pin,
 } from 'lucide-react';
-import heroCommunityIllustration from '../assets/nivaas-hero-community.png';
+import heroCommunityIllustration from '../assets/hero-courtyard.png';
 
 export default function Landing() {
   const { user, login } = useAuth();

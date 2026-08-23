@@ -8,7 +8,7 @@ import ComplaintTable from '../components/ComplaintTable';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import EmptyState from '../components/EmptyState';
 import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
-import emptyComplaintsIllustration from '../assets/empty-complaints.png';
+import emptyComplaintsIllustration from '../assets/empty-complaints-new.png';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { AlertTriangle, ClipboardList, PieChart as PieIcon, BarChart3 } from 'lucide-react';
 

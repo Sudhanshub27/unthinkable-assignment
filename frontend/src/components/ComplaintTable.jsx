@@ -4,7 +4,7 @@ import { formatDate, formatFlatNumber } from '../utils/formatters';
 import { SkeletonTable } from './Skeletons';
 import EmptyState from './EmptyState';
 import { ErrorState } from './UIComponents';
-import emptyComplaintsIllustration from '../assets/empty-complaints.png';
+import emptyComplaintsIllustration from '../assets/empty-complaints-new.png';
 
 const CATEGORIES_COLOR_MAP = {
   Plumbing: { border: 'border-terracotta-400', text: 'text-terracotta-400' },

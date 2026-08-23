@@ -9,7 +9,7 @@ import Modal from '../components/Modal';
 import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
 import { Plus, Pin } from 'lucide-react';
-import emptyNoticesIllustration from '../assets/empty-notices.png';
+import emptyNoticesIllustration from '../assets/empty-notices-new.png';
 
 export default function NoticeBoard() {
   const { user } = useAuth();

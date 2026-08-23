@@ -14,7 +14,7 @@ import Modal from '../components/Modal';
 import { Button } from '../components/UIComponents';
 import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
 import { Plus, Megaphone, ClipboardList, ArrowRight } from 'lucide-react';
-import emptyComplaintsIllustration from '../assets/empty-complaints.png';
+import emptyComplaintsIllustration from '../assets/empty-complaints-new.png';
 
 const CATEGORIES = [
   'Plumbing',
