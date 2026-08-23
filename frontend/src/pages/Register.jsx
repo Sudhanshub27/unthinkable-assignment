@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import SVGIcon from '../components/SVGIcon';
 import authIllustration from '../assets/auth-illustration.png';
 
 export default function Register() {
+  const [searchParams] = useSearchParams();
+  const initialRole = searchParams.get('role') === 'admin' ? 'admin' : 'resident';
+
+  const [activeRoleTab, setActiveRoleTab] = useState(initialRole);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +20,13 @@ export default function Register() {
   const { register } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const paramRole = searchParams.get('role');
+    if (paramRole === 'admin' || paramRole === 'resident') {
+      setActiveRoleTab(paramRole);
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,10 +39,15 @@ export default function Register() {
         email: email.trim(),
         password,
         flatNumber: flatNumber.trim() || undefined,
+        role: activeRoleTab,
       });
 
-      addToast(`Account created successfully! Welcome, ${user.name}.`, 'success');
-      navigate('/complaints');
+      addToast(`Welcome to Green Valley Residency, ${user.name}!`, 'success');
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
@@ -42,18 +59,46 @@ export default function Register() {
 
   return (
     <div className="auth-split-container">
-      {/* Left half: Existing Form */}
+      {/* Left half: Form Side */}
       <div className="auth-form-side">
         <div className="auth-form-wrapper">
           <div className="auth-header">
-            <img
-              src="/logo.png"
-              alt="Society Notebook Logo"
-              className="auth-form-logo"
-              style={{ height: '40px', width: 'auto', display: 'block', margin: '0 auto 16px auto' }}
-            />
-            <h2 className="auth-title">Resident Registration</h2>
-            <p className="auth-subtitle">Join your society maintenance portal</p>
+            <Link to="/" className="auth-brand-badge">
+              <img src="/logo.png" alt="Nivaas Logo" className="auth-logo-img" />
+              <div className="auth-brand-text">
+                <span className="auth-app-title">Nivaas</span>
+                <span className="auth-society-subtitle">Green Valley Residency</span>
+              </div>
+            </Link>
+
+            {/* Role Selection Tabs */}
+            <div className="auth-role-tabs">
+              <button
+                type="button"
+                className={`role-tab-btn ${activeRoleTab === 'resident' ? 'active-tab' : ''}`}
+                onClick={() => setActiveRoleTab('resident')}
+              >
+                <SVGIcon name="user" size={16} />
+                <span>Resident</span>
+              </button>
+              <button
+                type="button"
+                className={`role-tab-btn ${activeRoleTab === 'admin' ? 'active-tab' : ''}`}
+                onClick={() => setActiveRoleTab('admin')}
+              >
+                <SVGIcon name="shield" size={16} />
+                <span>Admin</span>
+              </button>
+            </div>
+
+            <h2 className="auth-title">
+              {activeRoleTab === 'resident' ? 'Resident Registration' : 'Admin Registration'}
+            </h2>
+            <p className="auth-subtitle">
+              {activeRoleTab === 'resident'
+                ? 'Join your society digital portal at Green Valley Residency'
+                : 'Create an admin account to manage society operations'}
+            </p>
           </div>
 
           {error && <div className="alert alert-danger">{error}</div>}
@@ -88,7 +133,7 @@ export default function Register() {
               <input
                 type="text"
                 className="form-control"
-                placeholder="e.g. Tower A - Flat 301"
+                placeholder="e.g. Flat A-204"
                 value={flatNumber}
                 onChange={(e) => setFlatNumber(e.target.value)}
               />
@@ -106,14 +151,18 @@ export default function Register() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
-              {loading ? 'Creating Account...' : 'Register Account ➔'}
+            <button
+              type="submit"
+              className={`btn btn-block btn-lg ${activeRoleTab === 'admin' ? 'btn-navy' : 'btn-primary'}`}
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : `Register Account ➔`}
             </button>
           </form>
 
           <div className="auth-footer">
             Already registered?{' '}
-            <Link to="/login" className="auth-link">
+            <Link to={`/login?role=${activeRoleTab}`} className="auth-link">
               Sign In Here
             </Link>
           </div>
@@ -123,12 +172,16 @@ export default function Register() {
       {/* Right half: Hero Illustration side */}
       <div className="auth-hero-side">
         <div className="auth-hero-header">
-          <img src="/logo.png" alt="Logo" className="auth-hero-logo" />
+          <Link to="/" className="auth-hero-brand">
+            <img src="/logo.png" alt="Logo" className="auth-hero-logo" />
+            <span>Nivaas</span>
+          </Link>
         </div>
         <div className="auth-hero-body">
-          <img src={authIllustration} alt="Society Illustration" className="auth-hero-illustration" />
+          <img src={authIllustration} alt="Green Valley Residency" className="auth-hero-illustration" />
+          <h3 className="auth-hero-title">Green Valley Residency</h3>
           <p className="auth-hero-tagline">
-            Digital maintenance tracking for modern housing societies.
+            Your society, now in one place.
           </p>
         </div>
       </div>

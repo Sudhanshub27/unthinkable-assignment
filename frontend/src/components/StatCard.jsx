@@ -14,11 +14,13 @@ export default function StatCard({
 }) {
   const displayTitle = title || label;
 
-  // Resolve color prop ('blue', 'green', 'orange', 'red') or map variant to color
+  // Resolve color prop ('blue', 'green', 'orange', 'red', 'purple', 'cyan') or map variant to color
   const resolvedColor = color || (
     variant === 'danger' ? 'red' :
     variant === 'warning' ? 'orange' :
     variant === 'success' ? 'green' :
+    variant === 'purple' ? 'purple' :
+    variant === 'cyan' ? 'cyan' :
     'blue'
   );
 

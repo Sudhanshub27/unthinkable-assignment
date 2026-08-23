@@ -40,13 +40,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       <aside className={`app-sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/logo.png" alt="Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
+          <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img src="/logo.png" alt="Logo" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
             <div className="brand-text">
-              <div className="brand-name" style={{ fontSize: '0.9375rem', fontWeight: 700, lineHeight: 1.2, color: '#ffffff' }}>
-                {settings.society_name || 'Society Notebook'}
+              <div className="brand-name" style={{ fontSize: '1rem', fontWeight: 800, lineHeight: 1.2, color: '#ffffff', letterSpacing: '-0.01em' }}>
+                Nivaas
               </div>
-              <div className="brand-sub">Management Suite</div>
+              <div className="brand-sub" style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
+                {settings.society_name || 'Green Valley Residency'}
+              </div>
             </div>
           </div>
           <button className="mobile-close-btn" onClick={closeDrawer} aria-label="Close sidebar">

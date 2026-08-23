@@ -98,8 +98,8 @@ export default function AdminDashboard() {
     <div className="page-container admin-dashboard-container">
       {/* 1. PAGE HEADER */}
       <PageHeader
-        title="Society Operations"
-        subtitle="Monitor maintenance requests, SLA breaches, and resident issues."
+        title="Society Control Center"
+        subtitle="Good morning, Admin 👋 — Here's what's happening across Green Valley Residency."
       />
 
       {/* 2. PRIMARY KPI ROW */}
@@ -110,10 +110,10 @@ export default function AdminDashboard() {
       ) : (
         <div className="kpi-grid" style={{ marginBottom: 24 }}>
           <StatCard
-            label="Total Complaints"
+            label="Total Queue"
             value={total}
             icon="clipboard"
-            color="blue"
+            color="cyan"
             variant="primary"
             onClick={() => navigate('/admin')}
           />
@@ -121,15 +121,15 @@ export default function AdminDashboard() {
             label="Open"
             value={openCount}
             icon="clock"
-            color="red"
+            color="blue"
             variant="danger"
             onClick={() => navigate('/admin')}
           />
           <StatCard
             label="In Progress"
             value={progressCount}
-            icon="clock"
-            color="orange"
+            icon="rotate-cw"
+            color="purple"
             variant="warning"
             onClick={() => navigate('/admin')}
           />
@@ -172,9 +172,9 @@ export default function AdminDashboard() {
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Open', value: openCount, color: '#DC2626' },
-                    { name: 'In Progress', value: progressCount, color: '#D97706' },
-                    { name: 'Resolved', value: resolvedCount, color: '#166534' },
+                    { name: 'Open', value: openCount, color: '#2563EB' },
+                    { name: 'In Progress', value: progressCount, color: '#7C3AED' },
+                    { name: 'Resolved', value: resolvedCount, color: '#16A34A' },
                   ]}
                   cx="50%"
                   cy="50%"
@@ -184,9 +184,9 @@ export default function AdminDashboard() {
                   dataKey="value"
                 >
                   {[
-                    { name: 'Open', value: openCount, color: '#DC2626' },
-                    { name: 'In Progress', value: progressCount, color: '#D97706' },
-                    { name: 'Resolved', value: resolvedCount, color: '#166534' },
+                    { name: 'Open', value: openCount, color: '#2563EB' },
+                    { name: 'In Progress', value: progressCount, color: '#7C3AED' },
+                    { name: 'Resolved', value: resolvedCount, color: '#16A34A' },
                   ].map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}

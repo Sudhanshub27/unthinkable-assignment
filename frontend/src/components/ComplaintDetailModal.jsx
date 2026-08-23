@@ -129,6 +129,34 @@ export default function ComplaintDetailModal({
           <div className="detail-modal-grid">
             {/* Left Column: Complaint Specs & Audit Timeline */}
             <div className="detail-main-col">
+              {/* Visual Progress Stepper */}
+              <div className="complaint-progress-stepper mb-4">
+                <div className={`stepper-step step-done`}>
+                  <div className="step-badge">
+                    <SVGIcon name="check-circle" size={16} />
+                  </div>
+                  <span className="step-title">Complaint Raised</span>
+                </div>
+
+                <div className={`stepper-line ${complaint.status === 'In Progress' || complaint.status === 'Resolved' ? 'line-done' : ''}`} />
+
+                <div className={`stepper-step ${complaint.status === 'In Progress' || complaint.status === 'Resolved' ? 'step-done' : ''} ${complaint.status === 'In Progress' ? 'step-active' : ''}`}>
+                  <div className="step-badge">
+                    <SVGIcon name={complaint.status === 'Resolved' ? 'check-circle' : 'rotate-cw'} size={16} />
+                  </div>
+                  <span className="step-title">In Progress</span>
+                </div>
+
+                <div className={`stepper-line ${complaint.status === 'Resolved' ? 'line-done' : ''}`} />
+
+                <div className={`stepper-step ${complaint.status === 'Resolved' ? 'step-done step-active' : ''}`}>
+                  <div className="step-badge">
+                    <SVGIcon name="check-circle" size={16} />
+                  </div>
+                  <span className="step-title">Resolved</span>
+                </div>
+              </div>
+
               <div className="detail-meta-card">
                 <div className="detail-badges-row">
                   <StatusBadge status={complaint.status} />

@@ -6,13 +6,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Brand Palette */
-  --primary-navy: #0F172A;
+  /* Nivaas Brand Palette */
+  --nivaas-blue: #2563EB;
   --primary: #2563EB;
   --primary-hover: #1D4ED8;
   --primary-light: #EFF6FF;
   --primary-border: #BFDBFE;
 
+  --navy: #0F172A;
   --sidebar-bg: #0F172A;
   --sidebar-text: #94A3B8;
   --sidebar-hover: #1E293B;
@@ -32,46 +33,65 @@
   --border-color: #E2E8F0;
   --border-dark: #CBD5E1;
 
-  /* Shadows - Clean flat shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  /* Shadows - Subtle residential shadows */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
 
-  /* Radius Rules: 6px inputs/buttons, 8px cards/tables, 12px modals */
+  /* Radius Tokens */
   --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
   --radius-pill: 9999px;
 
-  /* Semantic Badges */
-  --status-open-bg: #FEF2F2;
-  --status-open-border: #FECACA;
-  --status-open-text: #991B1B;
+  /* Semantic Color System */
+  /* Open: Blue (#2563EB) */
+  --status-open-bg: #EFF6FF;
+  --status-open-border: #BFDBFE;
+  --status-open-text: #1D4ED8;
 
-  --status-progress-bg: #FFFBEB;
-  --status-progress-border: #FDE68A;
-  --status-progress-text: #92400E;
+  /* In Progress: Purple (#7C3AED) */
+  --status-progress-bg: #F5F3FF;
+  --status-progress-border: #DDD6FE;
+  --status-progress-text: #6D28D9;
 
+  /* Resolved: Green (#16A34A) */
   --status-resolved-bg: #F0FDF4;
   --status-resolved-border: #BBF7D0;
-  --status-resolved-text: #166534;
+  --status-resolved-text: #15803D;
 
-  --priority-low-bg: #F1F5F9;
-  --priority-low-text: #475569;
+  /* Overdue / High: Red (#EF4444) */
+  --status-overdue-bg: #FEF2F2;
+  --status-overdue-border: #FECACA;
+  --status-overdue-text: #B91C1C;
 
-  --priority-medium-bg: #EFF6FF;
-  --priority-medium-text: #1E40AF;
+  /* Pending / Medium: Amber (#F59E0B) */
+  --status-pending-bg: #FFFBEB;
+  --status-pending-border: #FDE68A;
+  --status-pending-text: #B45309;
 
-  --priority-high-bg: #FFF1F2;
-  --priority-high-text: #9F1239;
+  /* Info / Low: Cyan (#0891B2) */
+  --status-info-bg: #ECFEFF;
+  --status-info-border: #A5F3FC;
+  --status-info-text: #0E7490;
+
+  /* Priority Badges */
+  --priority-high-bg: #FEF2F2;
+  --priority-high-text: #B91C1C;
+
+  --priority-medium-bg: #FFFBEB;
+  --priority-medium-text: #B45309;
+
+  --priority-low-bg: #ECFEFF;
+  --priority-low-text: #0E7490;
 
   --overdue-bg: #FEF2F2;
   --overdue-border: #FECACA;
-  --overdue-text: #DC2626;
+  --overdue-text: #B91C1C;
 
-  --important-bg: #FEF3C7;
+  --important-bg: #FFFBEB;
   --important-border: #FDE68A;
-  --important-text: #92400E;
+  --important-text: #B45309;
 }
 
 /* Reset & Global */
@@ -3211,4 +3231,656 @@ textarea.form-control {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   NIVAAS — DIGITAL SOCIETY EXPERIENCE STYLES
+   ========================================================================== */
+
+/* Digital Society Entrance Navbar */
+.nivaas-entrance-page {
+  background-color: var(--bg-page);
+  min-height: 100vh;
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.nivaas-entrance-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.nivaas-entrance-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 0;
+}
+
+.nivaas-entrance-navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nivaas-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nivaas-entrance-logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
+.nivaas-brand-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.nivaas-app-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.nivaas-society-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--primary-border);
+  margin-top: 2px;
+}
+
+.nivaas-portal-tag {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Entrance Hero */
+.nivaas-hero-entrance {
+  padding: 64px 0 48px 0;
+}
+
+.nivaas-hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 48px;
+}
+
+.nivaas-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1D4ED8;
+  margin-bottom: 20px;
+}
+
+.nivaas-hero-pill .pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563EB;
+}
+
+.nivaas-hero-headline {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin-bottom: 16px;
+}
+
+.nivaas-hero-subtext {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  max-width: 540px;
+}
+
+.nivaas-features-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.strip-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+}
+
+.strip-item .text-blue { color: #2563EB; }
+.strip-item .text-amber { color: #F59E0B; }
+.strip-item .text-purple { color: #7C3AED; }
+.strip-item .text-green { color: #16A34A; }
+
+.nivaas-hero-visual-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.nivaas-hero-illustration {
+  max-width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(15, 23, 42, 0.08));
+}
+
+/* Role Selection Entrance Cards */
+.nivaas-role-entrance-section {
+  padding: 48px 0 80px 0;
+}
+
+.nivaas-role-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 40px auto;
+}
+
+.nivaas-role-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.nivaas-role-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.nivaas-role-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.nivaas-role-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.nivaas-role-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.role-card-resident:hover {
+  border-color: #BFDBFE;
+}
+
+.role-card-admin:hover {
+  border-color: #DDD6FE;
+}
+
+.role-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.role-icon-chip {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip-resident {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.chip-admin {
+  background: #F5F3FF;
+  color: #7C3AED;
+}
+
+.role-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tag-resident {
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+
+.tag-admin {
+  background: #F5F3FF;
+  color: #6D28D9;
+}
+
+.role-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.role-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.role-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.role-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.86rem;
+  color: var(--text-body);
+  font-weight: 500;
+}
+
+.role-checklist .check-icon {
+  color: #16A34A;
+  flex-shrink: 0;
+}
+
+.role-card-actions {
+  margin-top: auto;
+}
+
+.btn-navy {
+  background-color: var(--navy);
+  color: #FFFFFF;
+}
+
+.btn-navy:hover {
+  background-color: #1E293B;
+  color: #FFFFFF;
+}
+
+/* Footer */
+.nivaas-entrance-footer {
+  border-top: 1px solid var(--border-color);
+  background: #FFFFFF;
+  padding: 32px 0;
+}
+
+.nivaas-footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.nivaas-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nivaas-footer-logo {
+  height: 28px;
+  width: auto;
+}
+
+.nivaas-footer-title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--navy);
+}
+
+.nivaas-footer-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.nivaas-footer-copy {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* AUTH PAGES ENHANCEMENTS */
+.auth-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.auth-logo-img {
+  height: 36px;
+  width: auto;
+}
+
+.auth-brand-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.auth-app-title {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--navy);
+  line-height: 1.1;
+}
+
+.auth-society-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.auth-role-tabs {
+  display: flex;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.role-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.role-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.role-tab-btn.active-tab {
+  background: #FFFFFF;
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-hero-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.auth-hero-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+.auth-demo-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.input-relative-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-relative-wrapper .form-control {
+  padding-right: 40px;
+}
+
+.input-eye-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.input-eye-btn:hover {
+  color: var(--text-main);
+}
+
+/* RESIDENT DASHBOARD QUICK ACTIONS BAR */
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  text-align: left;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.action-blue:hover { border-color: #BFDBFE; }
+.action-purple:hover { border-color: #DDD6FE; }
+.action-amber:hover { border-color: #FDE68A; }
+.action-green:hover { border-color: #BBF7D0; }
+
+.action-icon-chip {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chip-blue { background: #EFF6FF; color: #2563EB; }
+.chip-purple { background: #F5F3FF; color: #7C3AED; }
+.chip-amber { background: #FFFBEB; color: #F59E0B; }
+.chip-green { background: #F0FDF4; color: #16A34A; }
+
+/* VISUAL PROGRESS STEPPER */
+.complaint-progress-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.step-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.step-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.stepper-step.step-done {
+  color: var(--text-main);
+}
+
+.stepper-step.step-done .step-badge {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #2563EB;
+}
+
+.stepper-step.step-active .step-badge {
+  background: #F5F3FF;
+  border-color: #DDD6FE;
+  color: #7C3AED;
+}
+
+.stepper-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color);
+  margin: 0 16px;
+}
+
+.stepper-line.line-done {
+  background: #2563EB;
+}
+
+/* StatCard colors for purple and cyan */
+.stat-card-purple {
+  border-left: 4px solid #7C3AED;
+}
+
+.stat-card-chip-purple {
+  background: #F5F3FF;
+  color: #7C3AED;
+}
+
+.stat-card-cyan {
+  border-left: 4px solid #0891B2;
+}
+
+.stat-card-chip-cyan {
+  background: #ECFEFF;
+  color: #0891B2;
+}
+
+/* Responsive adjustments for Nivaas Entrance */
+@media (max-width: 992px) {
+  .nivaas-hero-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .nivaas-hero-subtext {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .nivaas-features-strip {
+    justify-content: center;
+  }
+
+  .nivaas-role-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .nivaas-hero-headline {
+    font-size: 2rem;
+  }
+
+  .nivaas-role-card {
+    padding: 24px;
+  }
+
+  .complaint-progress-stepper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .stepper-line {
+    width: 2px;
+    height: 16px;
+    margin: 0 0 0 13px;
+  }
+}
+
 

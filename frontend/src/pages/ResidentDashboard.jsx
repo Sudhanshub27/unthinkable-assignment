@@ -160,8 +160,8 @@ export default function ResidentDashboard() {
     <div className="page-container resident-dashboard-container">
       {/* 1. HEADER */}
       <PageHeader
-        title={`${getGreeting()}, ${user?.name || 'Resident'}`}
-        subtitle="Here's an overview of your maintenance requests and society updates."
+        title={`${getGreeting()}, ${user?.name || 'Resident'} 👋`}
+        subtitle="Here's what's happening in your society at Green Valley Residency."
         actionText="Raise Complaint"
         onAction={() => {
           resetForm();
@@ -170,9 +170,59 @@ export default function ResidentDashboard() {
         actionIcon="plus"
       />
 
+      {/* QUICK ACTIONS BAR */}
+      <div className="resident-quick-actions-bar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 24 }}>
+        <button
+          type="button"
+          className="quick-action-btn action-blue"
+          onClick={() => {
+            resetForm();
+            setShowFormModal(true);
+          }}
+        >
+          <div className="action-icon-chip chip-blue">
+            <SVGIcon name="plus" size={18} />
+          </div>
+          <span>Raise Complaint</span>
+        </button>
+
+        <button
+          type="button"
+          className="quick-action-btn action-purple"
+          onClick={() => navigate('/complaints')}
+        >
+          <div className="action-icon-chip chip-purple">
+            <SVGIcon name="clipboard" size={18} />
+          </div>
+          <span>View My Complaints</span>
+        </button>
+
+        <button
+          type="button"
+          className="quick-action-btn action-amber"
+          onClick={() => navigate('/notices')}
+        >
+          <div className="action-icon-chip chip-amber">
+            <SVGIcon name="megaphone" size={18} />
+          </div>
+          <span>Society Notices</span>
+        </button>
+
+        <button
+          type="button"
+          className="quick-action-btn action-green"
+          onClick={() => navigate('/profile')}
+        >
+          <div className="action-icon-chip chip-green">
+            <SVGIcon name="user" size={18} />
+          </div>
+          <span>My Profile</span>
+        </button>
+      </div>
+
       {/* 2. SUMMARY KPI STAT CARDS */}
       {loading ? (
-        <div className="mb-6">
+        <div style={{ marginBottom: 24 }}>
           <SkeletonCard count={4} />
         </div>
       ) : (
@@ -181,6 +231,7 @@ export default function ResidentDashboard() {
             label="Total Complaints"
             value={totalCount}
             icon="clipboard"
+            color="cyan"
             variant="primary"
             onClick={() => navigate('/complaints')}
           />
@@ -188,13 +239,15 @@ export default function ResidentDashboard() {
             label="Open"
             value={openCount}
             icon="clock"
+            color="blue"
             variant="danger"
             onClick={() => navigate('/complaints')}
           />
           <StatCard
             label="In Progress"
             value={progressCount}
-            icon="clock"
+            icon="rotate-cw"
+            color="purple"
             variant="warning"
             onClick={() => navigate('/complaints')}
           />
@@ -202,6 +255,7 @@ export default function ResidentDashboard() {
             label="Resolved"
             value={resolvedCount}
             icon="check-circle"
+            color="green"
             variant="success"
             onClick={() => navigate('/complaints')}
           />
