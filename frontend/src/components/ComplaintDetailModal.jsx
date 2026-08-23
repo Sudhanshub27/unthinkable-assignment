@@ -169,13 +169,15 @@ export default function ComplaintDetailModal({
           {photoFullUrl && !photoError && (
             <div className="space-y-1.5">
               <div className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Attached Photo</div>
-              <img
-                src={photoFullUrl}
-                alt={`Attachment for complaint #${complaint.id}`}
-                className="rounded-lg max-h-64 object-cover cursor-zoom-in border border-line hover:opacity-95 transition-opacity"
-                onClick={() => setLightboxOpen(true)}
-                onError={() => setPhotoError(true)}
-              />
+              <div className="bg-paper-hover/40 p-2.5 rounded-xl border border-line inline-flex items-center justify-center max-w-full sm:max-w-md">
+                <img
+                  src={photoFullUrl}
+                  alt={`Attachment for complaint #${complaint.id}`}
+                  className="rounded-lg max-h-64 max-w-full object-contain cursor-zoom-in hover:opacity-95 transition-opacity"
+                  onClick={() => setLightboxOpen(true)}
+                  onError={() => setPhotoError(true)}
+                />
+              </div>
             </div>
           )}
 
@@ -204,24 +206,24 @@ export default function ComplaintDetailModal({
           <div className="border-t border-line my-4" />
 
           {/* History & Admin Operations Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* History Timeline */}
-            <div className={mode === 'admin' ? 'lg:col-span-3' : 'w-full'}>
-              <h4 className="text-sm font-semibold uppercase tracking-wide text-ink-muted mb-3">
-                History
-              </h4>
-              {loadingHistory ? (
-                <div className="flex items-center gap-2 text-sm text-ink-muted py-4">
-                  <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
-                  <span>Loading audit history...</span>
-                </div>
-              ) : (
-                <Timeline history={history} />
-              )}
-            </div>
+          {mode === 'admin' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+              {/* History Timeline */}
+              <div className="lg:col-span-3">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-muted mb-3">
+                  History & Audit Log
+                </h4>
+                {loadingHistory ? (
+                  <div className="flex items-center gap-2 text-sm text-ink-muted py-4">
+                    <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
+                    <span>Loading audit history...</span>
+                  </div>
+                ) : (
+                  <Timeline history={history} />
+                )}
+              </div>
 
-            {/* Admin Triage Controls */}
-            {mode === 'admin' && (
+              {/* Admin Triage Controls */}
               <div className="lg:col-span-2 bg-paper-hover/50 rounded-xl p-4 border border-line h-fit">
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-ink mb-3">
                   Triage Operations
@@ -364,8 +366,22 @@ export default function ComplaintDetailModal({
                   </Button>
                 </form>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="w-full space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-muted mb-3">
+                History & Audit Log
+              </h4>
+              {loadingHistory ? (
+                <div className="flex items-center gap-2 text-sm text-ink-muted py-4">
+                  <div className="w-4 h-4 border-2 border-terracotta-400/30 border-t-terracotta-400 rounded-full animate-spin" />
+                  <span>Loading audit history...</span>
+                </div>
+              ) : (
+                <Timeline history={history} />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

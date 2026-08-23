@@ -169,10 +169,10 @@ export default function ResidentComplaints() {
         <SkeletonCard count={4} />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Total Complaints" value={totalCount} icon="clipboard" color="orange" variant="primary" />
-          <StatCard label="Open" value={openCount} icon="clock" color="blue" variant="danger" />
-          <StatCard label="In Progress" value={progressCount} icon="rotate-cw" color="purple" variant="warning" />
-          <StatCard label="Resolved" value={resolvedCount} icon="check-circle" color="green" variant="success" />
+          <StatCard label="Total Complaints" value={totalCount} icon="clipboard" variant="primary" />
+          <StatCard label="Open" value={openCount} icon="clock" variant="danger" />
+          <StatCard label="In Progress" value={progressCount} icon="rotate-cw" variant="warning" />
+          <StatCard label="Resolved" value={resolvedCount} icon="check-circle" variant="success" />
         </div>
       )}
 

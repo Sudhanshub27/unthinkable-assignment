@@ -9,44 +9,26 @@ const ICON_MAP = {
   mail: Mail,
 };
 
+const VARIANT_STYLES = {
+  primary: 'bg-terracotta-50 text-terracotta-400',
+  danger: 'bg-clay-500/10 text-clay-500',
+  warning: 'bg-mustard-50 text-mustard-400',
+  success: 'bg-olive-50 text-olive-400',
+};
+
 export default function StatCard({
   title,
   label,
   value,
   icon,
   variant = 'primary',
-  color,
   subtitle,
   alert = false,
   onClick,
   className = '',
 }) {
   const displayTitle = title || label;
-
-  const resolvedColor =
-    color ||
-    (variant === 'danger' || variant === 'red' || variant === 'terracotta'
-      ? 'terracotta'
-      : variant === 'warning' || variant === 'orange' || variant === 'mustard'
-      ? 'mustard'
-      : variant === 'success' || variant === 'green' || variant === 'olive'
-      ? 'olive'
-      : 'teal');
-
-  const chipStyles = {
-    terracotta: 'bg-terracotta-50 text-terracotta-400',
-    red: 'bg-clay-500/10 text-clay-500',
-    olive: 'bg-olive-50 text-olive-400',
-    green: 'bg-olive-50 text-olive-400',
-    mustard: 'bg-mustard-50 text-mustard-400',
-    orange: 'bg-mustard-50 text-mustard-400',
-    teal: 'bg-teal-50 text-teal-400',
-    blue: 'bg-teal-50 text-teal-400',
-    cyan: 'bg-teal-50 text-teal-400',
-    purple: 'bg-plum-400/10 text-plum-400',
-  };
-
-  const chipClass = chipStyles[resolvedColor] || chipStyles.teal;
+  const chipClass = VARIANT_STYLES[variant] || VARIANT_STYLES.primary;
 
   const renderIcon = () => {
     if (!icon) return null;

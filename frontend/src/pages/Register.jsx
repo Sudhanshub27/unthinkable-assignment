@@ -7,8 +7,8 @@ import { Mail, Lock, User, Shield, Building, Eye, EyeOff } from 'lucide-react';
 import authIllustration from '../assets/auth-illustration-new.png';
 
 export default function Register() {
-  const [searchParams] = useSearchParams();
-  const initialRole = searchParams.get('role') === 'admin' ? 'admin' : 'resident';
+  const showDemo = import.meta.env.VITE_SHOW_DEMO === 'true';
+  const initialRole = (showDemo && searchParams.get('role') === 'admin') ? 'admin' : 'resident';
 
   const [activeRoleTab, setActiveRoleTab] = useState(initialRole);
   const [name, setName] = useState('');
@@ -26,10 +26,12 @@ export default function Register() {
   useEffect(() => {
     document.title = 'Create Account — Angan';
     const paramRole = searchParams.get('role');
-    if (paramRole === 'admin' || paramRole === 'resident') {
+    if (showDemo && (paramRole === 'admin' || paramRole === 'resident')) {
       setActiveRoleTab(paramRole);
+    } else if (!showDemo) {
+      setActiveRoleTab('resident');
     }
-  }, [searchParams]);
+  }, [searchParams, showDemo]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -89,39 +91,41 @@ export default function Register() {
               <span className="font-display font-semibold text-2xl text-ink">Angan</span>
             </Link>
 
-            {/* Role Pill Buttons */}
-            <div className="flex bg-paper-hover p-1 rounded-xl gap-1 w-full mt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveRoleTab('resident');
-                  setError('');
-                }}
-                className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                  activeRoleTab === 'resident'
-                    ? 'bg-terracotta-400 text-white shadow-sm'
-                    : 'text-ink-secondary hover:text-ink'
-                }`}
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Resident</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveRoleTab('admin');
-                  setError('');
-                }}
-                className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                  activeRoleTab === 'admin'
-                    ? 'bg-terracotta-400 text-white shadow-sm'
-                    : 'text-ink-secondary hover:text-ink'
-                }`}
-              >
-                <Shield className="w-3.5 h-3.5" />
-                <span>Admin</span>
-              </button>
-            </div>
+            {/* Role Pill Buttons (Gated behind demo flag) */}
+            {showDemo && (
+              <div className="flex bg-paper-hover p-1 rounded-xl gap-1 w-full mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveRoleTab('resident');
+                    setError('');
+                  }}
+                  className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    activeRoleTab === 'resident'
+                      ? 'bg-terracotta-400 text-white shadow-sm'
+                      : 'text-ink-secondary hover:text-ink'
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Resident</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveRoleTab('admin');
+                    setError('');
+                  }}
+                  className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    activeRoleTab === 'admin'
+                      ? 'bg-terracotta-400 text-white shadow-sm'
+                      : 'text-ink-secondary hover:text-ink'
+                  }`}
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Admin</span>
+                </button>
+              </div>
+            )}
 
             <div className="pt-2">
               <h2 className="font-display text-2xl font-bold text-ink">Create your account</h2>

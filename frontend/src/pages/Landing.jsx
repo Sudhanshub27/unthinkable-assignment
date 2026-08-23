@@ -22,6 +22,7 @@ export default function Landing() {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(null);
+  const showDemo = import.meta.env.VITE_SHOW_DEMO === 'true';
 
   // If user is already logged in, redirect to their dashboard
   if (user) {
@@ -399,15 +400,17 @@ export default function Landing() {
                 >
                   Continue as Resident
                 </Button>
-                <Button
-                  variant="secondary"
-                  isFullWidth
-                  size="sm"
-                  onClick={() => handleQuickDemo('resident@society.com', 'Resident@123', 'resident')}
-                  isLoading={demoLoading === 'resident'}
-                >
-                  {demoLoading === 'resident' ? 'Entering Resident Demo...' : '⚡ Quick Resident Demo'}
-                </Button>
+                {showDemo && (
+                  <Button
+                    variant="secondary"
+                    isFullWidth
+                    size="sm"
+                    onClick={() => handleQuickDemo('resident@society.com', 'Resident@123', 'resident')}
+                    isLoading={demoLoading === 'resident'}
+                  >
+                    {demoLoading === 'resident' ? 'Entering Resident Demo...' : '⚡ Quick Resident Demo'}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -456,15 +459,17 @@ export default function Landing() {
                 >
                   Continue as Admin
                 </Button>
-                <Button
-                  variant="secondary"
-                  isFullWidth
-                  size="sm"
-                  onClick={() => handleQuickDemo('admin@society.com', 'Admin@123', 'admin')}
-                  isLoading={demoLoading === 'admin'}
-                >
-                  {demoLoading === 'admin' ? 'Entering Admin Demo...' : '⚡ Quick Admin Demo'}
-                </Button>
+                {showDemo && (
+                  <Button
+                    variant="secondary"
+                    isFullWidth
+                    size="sm"
+                    onClick={() => handleQuickDemo('admin@society.com', 'Admin@123', 'admin')}
+                    isLoading={demoLoading === 'admin'}
+                  >
+                    {demoLoading === 'admin' ? 'Entering Admin Demo...' : '⚡ Quick Admin Demo'}
+                  </Button>
+                )}
               </div>
             </div>
           </div>

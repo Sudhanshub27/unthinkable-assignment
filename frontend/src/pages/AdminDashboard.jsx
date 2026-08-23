@@ -12,7 +12,7 @@ import emptyComplaintsIllustration from '../assets/empty-complaints-new.png';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { AlertTriangle, ClipboardList, PieChart as PieIcon, BarChart3 } from 'lucide-react';
 
-const ANGAN_PALETTE = ['#C1502E', '#84CC16', '#EAB308', '#14B8A6', '#A855F7', '#7A2F1A', '#F5D2C0'];
+const ANGAN_PALETTE = ['#C1502E', '#4B6B3E', '#D99A2B', '#2F6E6A', '#A8563F', '#7A4A5C'];
 
 export default function AdminDashboard() {
   const { addToast } = useToast();
@@ -98,9 +98,9 @@ export default function AdminDashboard() {
     .slice(0, 5);
 
   const statusPieData = [
-    { name: 'Open', value: openCount, color: '#C1502E' }, // terracotta-400
-    { name: 'In Progress', value: progressCount, color: '#EAB308' }, // mustard-400
-    { name: 'Resolved', value: resolvedCount, color: '#84CC16' }, // olive-400
+    { name: 'Open', value: openCount, color: '#C1502E' },
+    { name: 'In Progress', value: progressCount, color: '#D99A2B' },
+    { name: 'Resolved', value: resolvedCount, color: '#4B6B3E' },
   ];
 
   const categoryBarData = byCategory.map((c, i) => ({
@@ -126,7 +126,6 @@ export default function AdminDashboard() {
             label="Total Queue"
             value={total}
             icon="clipboard"
-            color="orange"
             variant="primary"
             onClick={() => navigate('/admin/complaints')}
           />
@@ -134,7 +133,6 @@ export default function AdminDashboard() {
             label="Open"
             value={openCount}
             icon="clock"
-            color="blue"
             variant="danger"
             onClick={() => navigate('/admin/complaints')}
           />
@@ -142,7 +140,6 @@ export default function AdminDashboard() {
             label="In Progress"
             value={progressCount}
             icon="rotate-cw"
-            color="purple"
             variant="warning"
             onClick={() => navigate('/admin/complaints')}
           />
@@ -150,7 +147,6 @@ export default function AdminDashboard() {
             label="Resolved"
             value={resolvedCount}
             icon="check-circle"
-            color="green"
             variant="success"
             onClick={() => navigate('/admin/complaints')}
           />
@@ -158,7 +154,6 @@ export default function AdminDashboard() {
             label="Overdue"
             value={overdueCount}
             icon="alert-triangle"
-            color="red"
             variant="danger"
             alert={overdueCount > 0}
             onClick={() => navigate('/admin/complaints')}

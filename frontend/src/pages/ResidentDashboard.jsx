@@ -181,7 +181,6 @@ export default function ResidentDashboard() {
             label="Total Complaints"
             value={totalCount}
             icon="clipboard"
-            color="orange"
             variant="primary"
             onClick={() => navigate('/complaints')}
           />
@@ -189,7 +188,6 @@ export default function ResidentDashboard() {
             label="Open"
             value={openCount}
             icon="clock"
-            color="blue"
             variant="danger"
             onClick={() => navigate('/complaints')}
           />
@@ -197,7 +195,6 @@ export default function ResidentDashboard() {
             label="In Progress"
             value={progressCount}
             icon="rotate-cw"
-            color="purple"
             variant="warning"
             onClick={() => navigate('/complaints')}
           />
@@ -205,7 +202,6 @@ export default function ResidentDashboard() {
             label="Resolved"
             value={resolvedCount}
             icon="check-circle"
-            color="green"
             variant="success"
             onClick={() => navigate('/complaints')}
           />

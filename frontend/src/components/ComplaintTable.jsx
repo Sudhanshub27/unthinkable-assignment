@@ -1,6 +1,6 @@
 import { Calendar } from 'lucide-react';
 import { StatusBadge, PriorityBadge, OverdueBadge } from './Badges';
-import { formatDate, formatFlatNumber } from '../utils/formatters';
+import { formatDate, formatFlatNumber, getPhotoUrl } from '../utils/formatters';
 import { SkeletonTable } from './Skeletons';
 import EmptyState from './EmptyState';
 import { ErrorState } from './UIComponents';
@@ -106,9 +106,12 @@ export default function ComplaintTable({
                 </p>
                 {c.photo_url && (
                   <img
-                    src={c.photo_url}
+                    src={getPhotoUrl(c.photo_url)}
                     alt="Attachment"
                     className="w-11 h-11 rounded-lg object-cover border border-line shrink-0"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
                   />
                 )}
               </div>

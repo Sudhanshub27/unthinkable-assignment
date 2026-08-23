@@ -138,15 +138,14 @@ export default function AdminComplaints() {
         <SkeletonCard count={5} />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <StatCard label="Total Queue" value={totalCount} icon="clipboard" color="orange" variant="primary" />
-          <StatCard label="Open" value={openCount} icon="clock" color="blue" variant="danger" />
-          <StatCard label="In Progress" value={progressCount} icon="rotate-cw" color="purple" variant="warning" />
-          <StatCard label="Resolved" value={resolvedCount} icon="check-circle" color="green" variant="success" />
+          <StatCard label="Total Queue" value={totalCount} icon="clipboard" variant="primary" />
+          <StatCard label="Open" value={openCount} icon="clock" variant="danger" />
+          <StatCard label="In Progress" value={progressCount} icon="rotate-cw" variant="warning" />
+          <StatCard label="Resolved" value={resolvedCount} icon="check-circle" variant="success" />
           <StatCard
             label="Overdue Alerts"
             value={overdueCount}
             icon="alert-triangle"
-            color="red"
             variant="danger"
             alert={overdueCount > 0}
           />

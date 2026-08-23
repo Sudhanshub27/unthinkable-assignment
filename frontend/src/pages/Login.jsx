@@ -81,6 +81,8 @@ export default function Login() {
     performLogin(targetEmail, targetPassword);
   }
 
+  const showDemo = import.meta.env.VITE_SHOW_DEMO === 'true';
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
       {/* Left Panel: Hero Illustration (Desktop Only) */}
@@ -207,29 +209,31 @@ export default function Login() {
           </form>
 
           {/* 1-Click Demo Login */}
-          <div className="pt-4 border-t border-line space-y-2">
-            <div className="text-[11px] font-semibold text-center uppercase tracking-wider text-ink-muted">
-              1-Click Demo Sign-in
+          {showDemo && (
+            <div className="pt-4 border-t border-line space-y-2">
+              <div className="text-[11px] font-semibold text-center uppercase tracking-wider text-ink-muted">
+                1-Click Demo Sign-in
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="xs"
+                  onClick={() => handleQuickFill('resident@society.com', 'Resident@123', 'resident')}
+                >
+                  Resident Demo
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="xs"
+                  onClick={() => handleQuickFill('admin@society.com', 'Admin@123', 'admin')}
+                >
+                  Admin Demo
+                </Button>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="xs"
-                onClick={() => handleQuickFill('resident@society.com', 'Resident@123', 'resident')}
-              >
-                Resident Demo
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="xs"
-                onClick={() => handleQuickFill('admin@society.com', 'Admin@123', 'admin')}
-              >
-                Admin Demo
-              </Button>
-            </div>
-          </div>
+          )}
 
           {/* Link to Register */}
           <div className="text-center text-xs text-ink-secondary pt-2 space-y-2">
@@ -243,13 +247,15 @@ export default function Login() {
               </Link>
             </div>
 
-            <button
-              type="button"
-              className="text-[11px] text-ink-muted hover:text-ink underline block mx-auto"
-              onClick={handleResetSession}
-            >
-              Clear Session
-            </button>
+            {showDemo && (
+              <button
+                type="button"
+                className="text-[11px] text-ink-muted hover:text-ink underline block mx-auto"
+                onClick={handleResetSession}
+              >
+                Clear Session
+              </button>
+            )}
           </div>
         </div>
       </div>
