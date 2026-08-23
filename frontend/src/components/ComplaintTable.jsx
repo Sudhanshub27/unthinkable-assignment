@@ -80,7 +80,7 @@ export default function ComplaintTable({
           <div
             key={c.id}
             onClick={() => onSelectComplaint && onSelectComplaint(c)}
-            className={`bg-paper-card rounded-xl shadow-soft hover:shadow-card transition-all p-4 border-l-4 ${catStyle.border} cursor-pointer hover:-translate-y-0.5 flex flex-col justify-between`}
+            className={`bg-paper-card rounded-xl border border-line shadow-card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-150 p-4 border-l-4 ${catStyle.border} cursor-pointer flex flex-col justify-between`}
           >
             {/* Top Row */}
             <div>

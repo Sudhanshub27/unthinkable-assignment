@@ -59,8 +59,8 @@ export default function StatCard({
 
   return (
     <div
-      className={`bg-paper-card rounded-xl border border-line shadow-card p-4 flex items-start gap-4 transition-all relative ${
-        onClick ? 'cursor-pointer hover:shadow-lifted hover:border-terracotta-400/30' : ''
+      className={`bg-paper-card rounded-xl border border-line shadow-card p-4 flex items-start gap-4 transition-all duration-150 relative ${
+        onClick ? 'cursor-pointer hover:shadow-lifted hover:-translate-y-0.5 hover:border-terracotta-400/30' : ''
       } ${className}`.trim()}
       onClick={onClick}
     >

@@ -355,7 +355,7 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Resident Card */}
-            <div className="bg-paper-card rounded-2xl shadow-card p-8 border border-line space-y-6 flex flex-col justify-between">
+            <div className="bg-paper-card rounded-2xl shadow-card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-150 p-8 border border-line space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="w-12 h-12 rounded-xl bg-terracotta-50 text-terracotta-400 border border-terracotta-100 flex items-center justify-center">
@@ -412,7 +412,7 @@ export default function Landing() {
             </div>
 
             {/* Admin Card */}
-            <div className="bg-paper-card rounded-2xl shadow-card p-8 border border-line space-y-6 flex flex-col justify-between">
+            <div className="bg-paper-card rounded-2xl shadow-card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-150 p-8 border border-line space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="w-12 h-12 rounded-xl bg-olive-50 text-olive-500 border border-olive-100 flex items-center justify-center">

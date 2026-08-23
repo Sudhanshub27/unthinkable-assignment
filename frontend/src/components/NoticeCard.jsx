@@ -8,10 +8,10 @@ export default function NoticeCard({ notice, onDelete, isAdmin }) {
 
   return (
     <div
-      className={`rounded-xl p-4 transition-shadow space-y-3 ${
+      className={`rounded-xl p-4 transition-all duration-150 space-y-3 ${
         is_important
-          ? 'bg-mustard-50/80 border border-mustard-400/30 shadow-soft'
-          : 'bg-paper-card border border-line shadow-soft hover:shadow-card'
+          ? 'bg-mustard-50/80 border border-mustard-400/30 shadow-soft hover:shadow-lifted hover:-translate-y-0.5'
+          : 'bg-paper-card border border-line shadow-card hover:shadow-lifted hover:-translate-y-0.5'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
