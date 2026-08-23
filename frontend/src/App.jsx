@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Navbar from './components/Navbar';
+import Topbar from './components/Topbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -18,30 +16,27 @@ import { ToastProvider } from './context/ToastContext';
 import { SettingsProvider } from './context/SettingsContext';
 
 export default function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
     <ToastProvider>
       <SettingsProvider>
-        <AppShell sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <AppShell />
       </SettingsProvider>
     </ToastProvider>
   );
 }
 
-function AppLayout({ sidebarOpen, setSidebarOpen, children }) {
+function AppLayout({ children }) {
   return (
-    <div className="app-layout">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-      <div className="app-main-content">
-        <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="content-viewport">{children}</main>
-      </div>
+    <div className="min-h-screen bg-paper text-ink flex flex-col">
+      <Topbar />
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6">
+        {children}
+      </main>
     </div>
   );
 }
 
-function AppShell({ sidebarOpen, setSidebarOpen }) {
+function AppShell() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
@@ -65,7 +60,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <ResidentDashboard />
             </AppLayout>
           </ProtectedRoute>
@@ -75,7 +70,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/complaints"
         element={
           <ProtectedRoute>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <ResidentComplaints />
             </AppLayout>
           </ProtectedRoute>
@@ -85,7 +80,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/notices"
         element={
           <ProtectedRoute>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <NoticeBoard />
             </AppLayout>
           </ProtectedRoute>
@@ -95,7 +90,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/profile"
         element={
           <ProtectedRoute>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <Profile />
             </AppLayout>
           </ProtectedRoute>
@@ -105,7 +100,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/admin"
         element={
           <ProtectedRoute adminOnly>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <AdminComplaints />
             </AppLayout>
           </ProtectedRoute>
@@ -115,7 +110,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/admin/dashboard"
         element={
           <ProtectedRoute adminOnly>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <AdminDashboard />
             </AppLayout>
           </ProtectedRoute>
@@ -125,7 +120,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/admin/settings"
         element={
           <ProtectedRoute adminOnly>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <AdminSettings />
             </AppLayout>
           </ProtectedRoute>
@@ -135,7 +130,7 @@ function AppShell({ sidebarOpen, setSidebarOpen }) {
         path="/admin/emails"
         element={
           <ProtectedRoute adminOnly>
-            <AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <AppLayout>
               <AdminEmailLogs />
             </AppLayout>
           </ProtectedRoute>
