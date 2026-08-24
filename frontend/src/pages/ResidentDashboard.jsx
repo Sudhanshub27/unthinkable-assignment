@@ -209,9 +209,9 @@ export default function ResidentDashboard() {
       )}
 
       {/* 3. TWO COLUMN GRID: Important Announcements & Recent Complaints */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* IMPORTANT ANNOUNCEMENTS SECTION (1 col) */}
-        <div className="lg:col-span-1 bg-paper-card rounded-xl border border-line shadow-soft p-5 space-y-4 h-full flex flex-col justify-between">
+        <div className="lg:col-span-1 bg-paper-card rounded-xl border border-line shadow-soft p-5 space-y-4 flex flex-col">
           <div className="flex items-center justify-between">
             <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
               <Megaphone className="w-4 h-4 text-olive-500" />
@@ -225,7 +225,7 @@ export default function ResidentDashboard() {
           {loading ? (
             <SkeletonCard count={1} />
           ) : importantNotices.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="py-6 flex items-center justify-center">
               <EmptyState
                 variant="compact"
                 icon="megaphone"
@@ -233,7 +233,7 @@ export default function ResidentDashboard() {
               />
             </div>
           ) : (
-            <div className="space-y-3 flex-1">
+            <div className="space-y-3">
               {importantNotices.slice(0, 2).map((notice) => (
                 <NoticeCard key={notice.id} notice={notice} isAdmin={false} />
               ))}
@@ -242,7 +242,7 @@ export default function ResidentDashboard() {
         </div>
 
         {/* RECENT COMPLAINTS SECTION (2 cols) */}
-        <div className="lg:col-span-2 bg-paper-card rounded-xl border border-line shadow-soft p-5 space-y-4 h-full flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-paper-card rounded-xl border border-line shadow-soft p-5 space-y-4 flex flex-col">
           <div className="flex items-center justify-between">
             <h3 className="font-display font-semibold text-base text-ink flex items-center gap-2">
               <ClipboardList className="w-4 h-4 text-terracotta-400" />
