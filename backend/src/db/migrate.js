@@ -9,21 +9,21 @@ async function migrate() {
   try {
     await pool.query(schema);
 
-    // Safely add missing columns if tables pre-existed in Postgres
+    // Safely add missing columns if tables pre-existed in Postgres or SQLite
     const safeAlterations = [
-      'ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_status VARCHAR(20);',
-      'ALTER TABLE users ADD COLUMN IF NOT EXISTS flat_number VARCHAR(20);',
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS body TEXT;',
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS provider_msg_id VARCHAR(100);',
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS recipient_name VARCHAR(150);',
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS error_details TEXT;',
+      'ALTER TABLE users ADD COLUMN admin_status VARCHAR(20)',
+      'ALTER TABLE users ADD COLUMN flat_number VARCHAR(20)',
+      'ALTER TABLE email_logs ADD COLUMN body TEXT',
+      'ALTER TABLE email_logs ADD COLUMN provider_msg_id VARCHAR(100)',
+      'ALTER TABLE email_logs ADD COLUMN recipient_name VARCHAR(150)',
+      'ALTER TABLE email_logs ADD COLUMN error_details TEXT',
     ];
 
     for (const sql of safeAlterations) {
       try {
         await pool.query(sql);
       } catch (e) {
-        // Fallback for drivers/DB versions without IF NOT EXISTS syntax
+        // Ignored if column already exists
       }
     }
 

@@ -16,28 +16,20 @@ async function autoMigrate() {
     }
 
     // Safely add missing columns if tables pre-existed
-    const colAlterations = [
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS body TEXT;',
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS provider_msg_id VARCHAR(100);',
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS error_details TEXT;',
-      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS recipient_name VARCHAR(150);',
-      'ALTER TABLE users ADD COLUMN IF NOT EXISTS flat_number VARCHAR(20);',
-      'ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_status VARCHAR(20);',
+    const safeAlterations = [
+      'ALTER TABLE users ADD COLUMN admin_status VARCHAR(20)',
+      'ALTER TABLE users ADD COLUMN flat_number VARCHAR(20)',
+      'ALTER TABLE email_logs ADD COLUMN body TEXT',
+      'ALTER TABLE email_logs ADD COLUMN provider_msg_id VARCHAR(100)',
+      'ALTER TABLE email_logs ADD COLUMN recipient_name VARCHAR(150)',
+      'ALTER TABLE email_logs ADD COLUMN error_details TEXT',
     ];
 
-    for (const sql of colAlterations) {
+    for (const sql of safeAlterations) {
       try {
         await pool.query(sql);
       } catch (e) {
-        // Fallback for Postgres versions without IF NOT EXISTS on ALTER TABLE
-        try {
-          const rawCol = sql.split('ADD COLUMN IF NOT EXISTS ')[1]?.split(' ')[0];
-          if (rawCol) {
-            await pool.query(`ALTER TABLE users ADD COLUMN ${rawCol} VARCHAR(20)`);
-          }
-        } catch (innerErr) {
-          // Column already exists or error ignored
-        }
+        // Ignored if column already exists
       }
     }
 
@@ -107,7 +99,7 @@ async function autoMigrate() {
 
     console.log('✅ Automated database schema & data.json sync completed successfully.');
   } catch (err) {
-    console.error('⚠️ Database auto-migration warning:', err.message);
+    console.error('Auto migration failed:', err);
   }
 }
 
