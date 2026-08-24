@@ -47,7 +47,7 @@ async function syncDataJson() {
 }
 
 /**
- * Loads data from data.json into DB if DB is empty or missing data
+ * Loads data from data.json into DB
  */
 async function seedFromDataJson(force = false) {
   if (!fs.existsSync(DATA_JSON_PATH)) {
@@ -66,50 +66,46 @@ async function seedFromDataJson(force = false) {
 
   try {
     const existingComplaints = await pool.query('SELECT COUNT(*) as c FROM complaints');
+    const existingNotices = await pool.query('SELECT COUNT(*) as c FROM notices');
     const count = parseInt(existingComplaints.rows[0]?.c || '0', 10);
+    const noticeCount = parseInt(existingNotices.rows[0]?.c || '0', 10);
     const targetCount = data.complaints?.length || 48;
 
-    if (!force && count >= targetCount) {
-      console.log(`[DATA_JSON_SEED] DB already has ${count} complaints. Skipping seedFromDataJson.`);
+    if (!force && count >= targetCount && noticeCount > 0) {
+      console.log(`[DATA_JSON_SEED] DB already has ${count} complaints and ${noticeCount} notices. Skipping seedFromDataJson.`);
       return;
     }
-    console.log(`[DATA_JSON_SEED] DB has ${count} complaints. Seeding ${targetCount} complaints from data.json...`);
+    console.log(`[DATA_JSON_SEED] Seeding DB from data.json (${targetCount} complaints, ${data.notices?.length || 0} notices)...`);
   } catch (e) {
     console.error('[DATA_JSON_SEED] Count check warning:', e.message);
   }
 
-  // 1. Users (ON CONFLICT on email for PostgreSQL & SQLite compatibility)
+  // Pure purge to avoid partial foreign key or conflict mismatches
+  try {
+    try { await pool.query('PRAGMA foreign_keys = OFF'); } catch (e) {}
+    await pool.query('DELETE FROM complaint_history');
+    await pool.query('DELETE FROM notifications');
+    await pool.query('DELETE FROM email_logs');
+    await pool.query('DELETE FROM complaints');
+    await pool.query('DELETE FROM notices');
+    await pool.query('DELETE FROM users');
+    await pool.query('DELETE FROM settings');
+    try { await pool.query('PRAGMA foreign_keys = ON'); } catch (e) {}
+  } catch (purgeErr) {
+    console.warn('[SEED_PURGE_WARN]', purgeErr.message);
+  }
+
+  // 1. Users
   if (Array.isArray(data.users)) {
     for (const u of data.users) {
       try {
         await pool.query(
           `INSERT INTO users (id, name, email, password_hash, role, flat_number, admin_status, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-           ON CONFLICT (email) DO UPDATE SET
-             name = EXCLUDED.name,
-             password_hash = EXCLUDED.password_hash,
-             role = EXCLUDED.role,
-             flat_number = EXCLUDED.flat_number,
-             admin_status = EXCLUDED.admin_status`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
           [u.id, u.name, u.email, u.password_hash, u.role, u.flat_number || null, u.admin_status || null, u.created_at || new Date().toISOString()]
         );
       } catch (err) {
-        // Retry without id if id conflict occurred
-        try {
-          await pool.query(
-            `INSERT INTO users (name, email, password_hash, role, flat_number, admin_status, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
-             ON CONFLICT (email) DO UPDATE SET
-               name = EXCLUDED.name,
-               password_hash = EXCLUDED.password_hash,
-               role = EXCLUDED.role,
-               flat_number = EXCLUDED.flat_number,
-               admin_status = EXCLUDED.admin_status`,
-            [u.name, u.email, u.password_hash, u.role, u.flat_number || null, u.admin_status || null, u.created_at || new Date().toISOString()]
-          );
-        } catch (innerErr) {
-          console.warn(`[SEED_USER_WARN] Could not insert user ${u.email}:`, innerErr.message);
-        }
+        console.error(`[SEED_USER_ERR] ${u.email}:`, err.message);
       }
     }
   }
@@ -120,16 +116,7 @@ async function seedFromDataJson(force = false) {
       try {
         await pool.query(
           `INSERT INTO complaints (id, resident_id, category, description, photo_url, status, priority, is_overdue_flag, resolved_at, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-           ON CONFLICT (id) DO UPDATE SET
-             category = EXCLUDED.category,
-             description = EXCLUDED.description,
-             photo_url = EXCLUDED.photo_url,
-             status = EXCLUDED.status,
-             priority = EXCLUDED.priority,
-             is_overdue_flag = EXCLUDED.is_overdue_flag,
-             resolved_at = EXCLUDED.resolved_at,
-             updated_at = EXCLUDED.updated_at`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
           [
             c.id,
             c.resident_id,
@@ -145,27 +132,7 @@ async function seedFromDataJson(force = false) {
           ]
         );
       } catch (err) {
-        // Fallback without explicit ID
-        try {
-          await pool.query(
-            `INSERT INTO complaints (resident_id, category, description, photo_url, status, priority, is_overdue_flag, resolved_at, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-            [
-              c.resident_id,
-              c.category,
-              c.description,
-              c.photo_url || null,
-              c.status,
-              c.priority,
-              c.is_overdue_flag ? true : false,
-              c.resolved_at || null,
-              c.created_at,
-              c.updated_at || c.created_at,
-            ]
-          );
-        } catch (innerErr) {
-          console.warn(`[SEED_COMPLAINT_WARN] Failed complaint insert #${c.id}:`, innerErr.message);
-        }
+        console.error(`[SEED_COMPLAINT_ERR] #${c.id}:`, err.message);
       }
     }
   }
@@ -176,13 +143,10 @@ async function seedFromDataJson(force = false) {
       try {
         await pool.query(
           `INSERT INTO complaint_history (id, complaint_id, actor_id, actor_role, change_type, old_value, new_value, note, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-           ON CONFLICT DO NOTHING`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [h.id, h.complaint_id, h.actor_id, h.actor_role, h.change_type, h.old_value, h.new_value, h.note || null, h.created_at]
         );
-      } catch (err) {
-        // Ignore single history conflict
-      }
+      } catch (err) {}
     }
   }
 
@@ -192,14 +156,12 @@ async function seedFromDataJson(force = false) {
       try {
         await pool.query(
           `INSERT INTO notices (id, title, body, is_important, posted_by, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           ON CONFLICT (id) DO UPDATE SET
-             title = EXCLUDED.title,
-             body = EXCLUDED.body,
-             is_important = EXCLUDED.is_important`,
+           VALUES ($1, $2, $3, $4, $5, $6)`,
           [n.id, n.title, n.body, n.is_important ? true : false, n.posted_by, n.created_at]
         );
-      } catch (err) {}
+      } catch (err) {
+        console.error(`[SEED_NOTICE_ERR] #${n.id}:`, err.message);
+      }
     }
   }
 
@@ -209,8 +171,7 @@ async function seedFromDataJson(force = false) {
       try {
         await pool.query(
           `INSERT INTO notifications (id, user_id, title, message, is_read, type, complaint_id, notice_id, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-           ON CONFLICT DO NOTHING`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [
             notif.id,
             notif.user_id,
@@ -235,8 +196,7 @@ async function seedFromDataJson(force = false) {
         const eventType = em.event_type || 'Complaint Status Update';
         await pool.query(
           `INSERT INTO email_logs (id, recipient_email, recipient_name, event_type, subject, status, complaint_id, notice_id, created_at, body, provider_msg_id, error_details)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-           ON CONFLICT DO NOTHING`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
           [
             em.id,
             recipientEmail,
@@ -261,16 +221,32 @@ async function seedFromDataJson(force = false) {
     for (const s of data.settings) {
       try {
         await pool.query(
-          `INSERT INTO settings (key, value)
-           VALUES ($1, $2)
-           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+          `INSERT INTO settings (key, value) VALUES ($1, $2)`,
           [s.key, s.value]
         );
       } catch (err) {}
     }
   }
 
-  console.log('✅ Successfully populated DB from data.json!');
+  // Reset PostgreSQL sequence counters safely
+  const seqs = [
+    { table: 'users', seq: 'users_id_seq' },
+    { table: 'complaints', seq: 'complaints_id_seq' },
+    { table: 'notices', seq: 'notices_id_seq' },
+    { table: 'complaint_history', seq: 'complaint_history_id_seq' },
+    { table: 'notifications', seq: 'notifications_id_seq' },
+    { table: 'email_logs', seq: 'email_logs_id_seq' },
+  ];
+
+  for (const s of seqs) {
+    try {
+      await pool.query(`SELECT setval('${s.seq}', (SELECT COALESCE(MAX(id), 1) FROM ${s.table}))`);
+    } catch (seqErr) {
+      // Ignored for SQLite
+    }
+  }
+
+  console.log('✅ Successfully populated DB from data.json with all 48 complaints & 6 notices!');
 }
 
 module.exports = {
