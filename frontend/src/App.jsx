@@ -94,6 +94,7 @@ function AppShell() {
           </ProtectedRoute>
         }
       />
+      <Route path="/admin/complaints" element={<Navigate to="/admin" replace />} />
       <Route
         path="/admin/dashboard"
         element={

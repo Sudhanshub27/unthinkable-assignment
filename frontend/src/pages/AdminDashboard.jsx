@@ -131,28 +131,28 @@ export default function AdminDashboard() {
             value={total}
             icon="clipboard"
             variant="primary"
-            onClick={() => navigate('/admin/complaints')}
+            onClick={() => navigate('/admin')}
           />
           <StatCard
             label="Open"
             value={openCount}
             icon="clock"
             variant="danger"
-            onClick={() => navigate('/admin/complaints')}
+            onClick={() => navigate('/admin')}
           />
           <StatCard
             label="In Progress"
             value={progressCount}
             icon="rotate-cw"
             variant="warning"
-            onClick={() => navigate('/admin/complaints')}
+            onClick={() => navigate('/admin')}
           />
           <StatCard
             label="Resolved"
             value={resolvedCount}
             icon="check-circle"
             variant="success"
-            onClick={() => navigate('/admin/complaints')}
+            onClick={() => navigate('/admin')}
           />
           <StatCard
             label="Overdue"
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
             icon="alert-triangle"
             variant="danger"
             alert={overdueCount > 0}
-            onClick={() => navigate('/admin/complaints')}
+            onClick={() => navigate('/admin')}
           />
         </div>
       )}
@@ -328,7 +328,7 @@ export default function AdminDashboard() {
             <span>Recent Complaints Queue</span>
           </h3>
           <button
-            onClick={() => navigate('/admin/complaints')}
+            onClick={() => navigate('/admin')}
             className="text-xs font-semibold text-terracotta-400 hover:underline"
           >
             View all →
