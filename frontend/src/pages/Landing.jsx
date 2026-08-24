@@ -26,7 +26,7 @@ import {
   History,
   Calendar,
 } from 'lucide-react';
-import heroCommunityIllustration from '../assets/hero-courtyard.png';
+import heroCommunityIllustration from '../assets/hero-courtyard.webp';
 
 // Sleek Browser Frame Component for product mockups
 function BrowserFrame({ url, children, title, className = '' }) {
@@ -160,7 +160,7 @@ export default function Landing() {
             }}
             className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <img src="/logo.png" alt="Angan Logo" className="h-9 w-auto object-contain transition-transform group-hover:scale-105" />
+            <img src="/logo.webp" alt="Angan Logo" className="h-9 w-auto object-contain transition-transform group-hover:scale-105" />
             <div className="flex flex-col">
               <span className="font-display font-bold text-lg text-ink leading-tight">Angan</span>
               <span className="text-[10px] text-ink-muted font-medium tracking-wide">Society Management</span>
@@ -694,7 +694,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
             <div className="md:col-span-6 space-y-3">
               <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="Angan Logo" className="h-8 w-auto object-contain brightness-200" />
+                <img src="/logo.webp" alt="Angan Logo" className="h-8 w-auto object-contain brightness-200" />
                 <span className="font-display font-bold text-xl text-white">Angan</span>
               </div>
               <p className="text-xs text-white/60 max-w-sm leading-relaxed">

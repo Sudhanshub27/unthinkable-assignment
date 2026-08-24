@@ -10,7 +10,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
 import { Plus, Pin } from 'lucide-react';
-import emptyNoticesIllustration from '../assets/empty-notices-new.png';
+import emptyNoticesIllustration from '../assets/empty-notices-new.webp';
 
 export default function NoticeBoard() {
   const { user } = useAuth();

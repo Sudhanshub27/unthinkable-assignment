@@ -84,7 +84,7 @@ export default function Topbar() {
           to={user.role === 'admin' ? '/admin/dashboard' : '/dashboard'}
           className="flex items-center gap-3 focus:outline-none"
         >
-          <img src="/logo.png" alt="Angan Logo" className="h-9 w-auto object-contain" />
+          <img src="/logo.webp" alt="Angan Logo" className="h-9 w-auto object-contain" />
           <div className="flex flex-col leading-tight">
             <span className="font-display font-semibold text-lg text-ink">Angan</span>
             <span className="text-xs text-ink-muted">

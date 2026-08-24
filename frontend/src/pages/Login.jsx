@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/UIComponents';
 import { Mail, Lock, User, Shield, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react';
-import authIllustration from '../assets/auth-illustration-new.png';
+import authIllustration from '../assets/auth-illustration-new.webp';
 
 export default function Login() {
   const [searchParams] = useSearchParams();
@@ -108,7 +108,7 @@ export default function Login() {
           {/* Logo & Brand */}
           <div className="flex flex-col items-center text-center space-y-2">
             <Link to="/" className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="Angan Logo" className="h-10 w-auto object-contain" />
+              <img src="/logo.webp" alt="Angan Logo" className="h-10 w-auto object-contain" />
               <span className="font-display font-semibold text-2xl text-ink">Angan</span>
             </Link>
 
