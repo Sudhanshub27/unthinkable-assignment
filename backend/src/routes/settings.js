@@ -14,18 +14,45 @@ const DEFAULT_SETTINGS = {
   max_upload_size_mb: '5',
 };
 
+async function ensureSettingsTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value VARCHAR(200) NOT NULL
+      )
+    `);
+    await pool.query(`
+      INSERT INTO settings (key, value) VALUES ('overdue_threshold_days', '5')
+      ON CONFLICT (key) DO NOTHING
+    `);
+  } catch (err) {
+    console.error('Failed to auto-create settings table:', err);
+  }
+}
+
 // GET /api/settings (admin/auth - returns all settings object)
 router.get('/', authenticate, async (req, res) => {
   try {
-    const result = await pool.query('SELECT key, value FROM settings');
+    let result;
+    try {
+      result = await pool.query('SELECT key, value FROM settings');
+    } catch (dbErr) {
+      console.warn('Settings table query failed, ensuring table exists...', dbErr.message);
+      await ensureSettingsTable();
+      result = await pool.query('SELECT key, value FROM settings');
+    }
+
     const settingsMap = { ...DEFAULT_SETTINGS };
-    result.rows.forEach((row) => {
-      settingsMap[row.key] = row.value;
-    });
+    if (result && result.rows) {
+      result.rows.forEach((row) => {
+        settingsMap[row.key] = row.value;
+      });
+    }
     res.json(settingsMap);
   } catch (err) {
-    console.error('Failed to fetch settings:', err);
-    res.status(500).json({ error: 'Failed to fetch settings' });
+    console.error('Failed to fetch settings, serving defaults:', err);
+    res.json(DEFAULT_SETTINGS);
   }
 });
 
@@ -43,6 +70,8 @@ router.put('/', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'overdue_threshold_days must be a positive integer (minimum 1 day)' });
     }
   }
+
+  await ensureSettingsTable();
 
   const client = await pool.connect();
   try {
@@ -86,6 +115,7 @@ router.put('/overdue-threshold', authenticate, requireAdmin, async (req, res) =>
     return res.status(400).json({ error: 'days must be a positive integer (minimum 1 day)' });
   }
   try {
+    await ensureSettingsTable();
     await pool.query(
       `INSERT INTO settings (key, value) VALUES ('overdue_threshold_days', $1)
        ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value`,

@@ -4,6 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const pool = require('./db/pool');
+const { autoMigrate } = require('./db/autoMigrate');
 const authRoutes = require('./routes/auth');
 const complaintsRoutes = require('./routes/complaints');
 const noticesRoutes = require('./routes/notices');
@@ -14,6 +15,9 @@ const emailLogsRoutes = require('./routes/emailLogs');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Run database migrations on server boot
+autoMigrate().catch((err) => console.error('Startup migration error:', err));
 
 const corsOrigin = process.env.CORS_ORIGIN;
 

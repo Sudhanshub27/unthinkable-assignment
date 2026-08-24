@@ -46,9 +46,7 @@ export default function AdminSettings() {
         setSettings((prev) => ({ ...prev, ...res.data }));
       }
     } catch (err) {
-      console.error(err);
-      setError('Failed to load society settings.');
-      addToast('Failed to load settings.', 'error');
+      console.warn('Could not fetch live settings from backend, using default configuration:', err);
     } finally {
       setLoading(false);
     }
