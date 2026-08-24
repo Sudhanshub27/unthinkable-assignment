@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 const { getJwtSecret } = require('../utils/jwt');
+const { syncDataJson } = require('../db/syncDataJson');
 
 const router = express.Router();
 
@@ -58,6 +59,7 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
     res.status(201).json({ token, user });
+    syncDataJson().catch(() => {});
   } catch (err) {
     console.error('Registration error:', err);
     res.status(500).json({ error: 'Registration failed' });

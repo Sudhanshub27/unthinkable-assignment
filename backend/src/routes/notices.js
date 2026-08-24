@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db/pool');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { sendEmail, importantNoticeEmail } = require('../utils/email');
+const { syncDataJson } = require('../db/syncDataJson');
 
 const router = express.Router();
 
@@ -46,6 +47,7 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
     };
 
     res.status(201).json(notice);
+    syncDataJson().catch(() => {});
 
     if (notice.is_important) {
       setImmediate(async () => {
@@ -102,6 +104,7 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
     const result = await pool.query('DELETE FROM notices WHERE id = $1 RETURNING id', [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Notice not found' });
     res.status(204).send();
+    syncDataJson().catch(() => {});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete notice' });

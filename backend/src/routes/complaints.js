@@ -4,6 +4,7 @@ const { authenticate, requireAdmin } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { getOverdueThresholdDays, annotateOverdue } = require('../utils/overdue');
 const { sendEmail, complaintStatusChangeEmail } = require('../utils/email');
+const { syncDataJson } = require('../db/syncDataJson');
 
 const router = express.Router();
 const CATEGORIES = ['Plumbing', 'Electrical', 'Cleaning', 'Security', 'Lift', 'Parking', 'Other'];
@@ -40,6 +41,7 @@ router.post('/', authenticate, upload.single('photo'), async (req, res) => {
 
     await client.query('COMMIT');
     res.status(201).json(complaint);
+    syncDataJson().catch(() => {});
 
     // Asynchronously notify all admins AND the resident of new complaint creation
     setImmediate(async () => {
@@ -374,6 +376,7 @@ router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
     const threshold = await getOverdueThresholdDays();
     const [annotated] = annotateOverdue(updateRes.rows, threshold);
     res.json(annotated);
+    syncDataJson().catch(() => {});
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Atomic triage update failed:', err);

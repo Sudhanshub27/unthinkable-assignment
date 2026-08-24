@@ -99,7 +99,13 @@ async function autoMigrate() {
     }
 
     migrationExecuted = true;
-    console.log('✅ Automated database schema verification completed successfully.');
+    
+    // Seed and sync from data.json for cloud/production parity
+    const { seedFromDataJson, syncDataJson } = require('./syncDataJson');
+    await seedFromDataJson();
+    await syncDataJson();
+
+    console.log('✅ Automated database schema & data.json sync completed successfully.');
   } catch (err) {
     console.error('⚠️ Database auto-migration warning:', err.message);
   }
