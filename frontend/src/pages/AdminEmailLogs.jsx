@@ -365,18 +365,18 @@ export default function AdminEmailLogs() {
           </div>
         ) : (
           <div>
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse min-w-[768px]">
+            {/* Desktop Table View (100% container width, 0 horizontal scroll) */}
+            <div className="hidden md:block w-full">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-paper-hover/80 border-b border-line text-[11px] font-bold text-ink-muted uppercase tracking-wider">
-                    <th className="pl-6 pr-3 py-3.5 whitespace-nowrap">Recipient</th>
-                    <th className="px-3 py-3.5 whitespace-nowrap">Event Type</th>
-                    <th className="px-3 py-3.5">Subject</th>
-                    <th className="px-3 py-3.5 whitespace-nowrap">Provider ID</th>
-                    <th className="px-3 py-3.5 whitespace-nowrap">Status</th>
-                    <th className="px-3 py-3.5 whitespace-nowrap">Dispatched At</th>
-                    <th className="pl-3 pr-6 py-3.5 text-right whitespace-nowrap">Action</th>
+                    <th className="pl-4 pr-2 py-3 w-[22%]">Recipient</th>
+                    <th className="px-2 py-3 w-[15%]">Event Type</th>
+                    <th className="px-2 py-3 w-[25%]">Subject</th>
+                    <th className="px-2 py-3 w-[13%]">Provider ID</th>
+                    <th className="px-2 py-3 w-[13%]">Status</th>
+                    <th className="px-2 py-3 w-[14%]">Dispatched At</th>
+                    <th className="pl-2 pr-4 py-3 text-right w-[8%]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -384,61 +384,65 @@ export default function AdminEmailLogs() {
                     const initials = getUserInitials(log.recipient_name || 'Resident');
                     return (
                       <tr key={log.id} className="hover:bg-paper-hover/60 transition-colors">
-                        <td className="pl-6 pr-3 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-terracotta-500 to-clay-600 text-white text-xs font-sans font-bold flex items-center justify-center shrink-0 shadow-xs tracking-wider">
+                        <td className="pl-4 pr-2 py-2.5">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-terracotta-500 to-clay-600 text-white text-[10px] font-sans font-bold flex items-center justify-center shrink-0 shadow-xs tracking-wider">
                               {initials}
                             </div>
-                            <div>
-                              <div className="font-semibold text-ink text-sm leading-tight">
+                            <div className="min-w-0">
+                              <div className="font-semibold text-ink text-xs leading-tight truncate" title={log.recipient_name}>
                                 {log.recipient_name || 'Resident'}
                               </div>
-                              <div className="text-xs text-ink-muted font-mono">{log.recipient_email}</div>
+                              <div className="text-[10px] text-ink-muted font-mono truncate" title={log.recipient_email}>
+                                {log.recipient_email}
+                              </div>
                             </div>
                           </div>
                         </td>
 
-                        <td className="px-3 py-3.5">
-                          <span className="font-medium text-terracotta-500 text-xs px-2.5 py-1 rounded-md bg-terracotta-50 border border-terracotta-100 whitespace-nowrap inline-block">
+                        <td className="px-2 py-2.5">
+                          <span className="font-medium text-terracotta-500 text-[10px] px-2 py-0.5 rounded bg-terracotta-50 border border-terracotta-100 whitespace-nowrap inline-block">
                             {log.event_type}
                           </span>
                         </td>
 
-                        <td className="px-3 py-3.5 max-w-[180px] lg:max-w-[240px]">
-                          <div className="text-ink font-medium text-xs truncate" title={log.subject}>
+                        <td className="px-2 py-2.5">
+                          <div className="text-ink font-medium text-xs truncate max-w-[180px] lg:max-w-[260px]" title={log.subject}>
                             {log.subject}
                           </div>
                         </td>
 
-                        <td className="px-3 py-3.5 text-xs font-mono text-ink-muted whitespace-nowrap">
+                        <td className="px-2 py-2.5 text-xs font-mono text-ink-muted">
                           {log.provider_msg_id ? (
-                            <span className="bg-paper px-2 py-0.5 rounded border border-line text-[11px]">{log.provider_msg_id}</span>
+                            <span className="bg-paper px-1.5 py-0.5 rounded border border-line text-[10px] block truncate max-w-[110px]" title={log.provider_msg_id}>
+                              {log.provider_msg_id}
+                            </span>
                           ) : (
                             <span className="text-ink-muted italic">—</span>
                           )}
                         </td>
 
-                        <td className="px-3 py-3.5 whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
+                        <td className="px-2 py-2.5 whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusInfo.badgeClass}`}>
                             {statusInfo.icon}
                             <span>{statusInfo.label}</span>
                           </span>
                         </td>
 
-                        <td className="px-3 py-3.5 text-xs text-ink-muted whitespace-nowrap">
+                        <td className="px-2 py-2.5 text-[11px] text-ink-muted whitespace-nowrap">
                           {formatDateTime(log.created_at)}
                         </td>
 
-                        <td className="pl-3 pr-6 py-3.5 text-right whitespace-nowrap">
-                          <Button
-                            variant="secondary"
-                            size="xs"
+                        <td className="pl-2 pr-4 py-2.5 text-right">
+                          <button
+                            type="button"
                             onClick={() => setSelectedLog(log)}
-                            icon={<Eye className="w-3.5 h-3.5" />}
-                            className="rounded-lg font-semibold"
+                            className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-paper-card hover:bg-paper-hover text-ink border border-line shadow-xs transition-all hover:border-terracotta-400/50"
+                            title="View log details"
                           >
-                            View
-                          </Button>
+                            <Eye className="w-3.5 h-3.5 text-terracotta-500" />
+                            <span className="hidden xl:inline">View</span>
+                          </button>
                         </td>
                       </tr>
                     );

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Topbar from './components/Topbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,6 +29,11 @@ export default function App() {
 
 function AppLayout({ children }) {
   const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
   return (
     <div className="min-h-screen bg-paper text-ink flex flex-col">
       <Topbar />

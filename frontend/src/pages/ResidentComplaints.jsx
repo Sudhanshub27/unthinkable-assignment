@@ -62,6 +62,7 @@ export default function ResidentComplaints() {
   }
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     document.title = 'My Complaints — Angan';
     loadData();
   }, []);

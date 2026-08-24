@@ -20,6 +20,22 @@ router.get('/pending-admins', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/all-admins
+router.get('/all-admins', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, name, email, flat_number, role, admin_status, created_at
+       FROM users
+       WHERE role = 'admin'
+       ORDER BY created_at DESC`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching all admins:', err);
+    res.status(500).json({ error: 'Failed to fetch all admins' });
+  }
+});
+
 // PATCH /api/admin/pending-admins/:id/approve
 router.patch('/pending-admins/:id/approve', authenticate, requireAdmin, async (req, res) => {
   const { id } = req.params;

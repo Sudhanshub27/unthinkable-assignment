@@ -276,6 +276,7 @@ export default function ResidentDashboard() {
               complaints={recentComplaints}
               loading={false}
               mode="resident"
+              paginate={false}
               onSelectComplaint={handleOpenDetail}
             />
           )}
