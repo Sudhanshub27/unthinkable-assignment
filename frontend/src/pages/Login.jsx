@@ -209,74 +209,48 @@ export default function Login() {
           </form>
 
           {/* 1-Click Demo Login Panel */}
-          <div className="pt-4 border-t border-line space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-terracotta-500" />
-                <span>1-Click Demo Accounts</span>
-              </div>
-              <span className="text-[10px] text-terracotta-600 bg-terracotta-50 font-semibold px-2 py-0.5 rounded-full border border-terracotta-100/80">
-                Quick Test Drive
-              </span>
+          <div className="pt-4 border-t border-line space-y-2.5">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink-muted text-center">
+              1-Click Demo Accounts
             </div>
 
-            <div className="grid grid-cols-1 gap-2.5">
+            <div className="grid grid-cols-2 gap-2.5">
               {/* Resident Demo Card */}
               <button
                 type="button"
                 onClick={() => handleQuickFill('resident@society.com', 'Resident@123', 'resident')}
-                className="group relative flex items-center justify-between p-3 rounded-xl border border-terracotta-200/60 bg-gradient-to-r from-terracotta-50/40 to-paper-card hover:from-terracotta-50 hover:to-terracotta-100/40 hover:border-terracotta-400 hover:shadow-card transition-all duration-200 text-left"
+                className="group flex flex-col p-2.5 rounded-xl border border-terracotta-200/70 bg-gradient-to-br from-terracotta-50/50 to-paper-card hover:from-terracotta-50 hover:to-terracotta-100/50 hover:border-terracotta-400 hover:shadow-card transition-all duration-200 text-left"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-terracotta-100/90 border border-terracotta-200/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <User className="w-4.5 h-4.5 text-terracotta-600" />
+                <div className="flex items-center justify-between w-full mb-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-ink group-hover:text-terracotta-600 transition-colors">
+                    <User className="w-3.5 h-3.5 text-terracotta-500 shrink-0" />
+                    <span>Resident Demo</span>
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs font-bold text-ink group-hover:text-terracotta-600 transition-colors">
-                        Resident Portal Demo
-                      </span>
-                      <span className="text-[9px] font-mono bg-paper px-1.5 py-0.5 rounded border border-line text-ink-muted">
-                        Pass: Resident@123
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-mono text-ink-secondary block truncate mt-0.5">
-                      resident@society.com
-                    </span>
-                  </div>
+                  <ArrowRight className="w-3 h-3 text-terracotta-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
                 </div>
-                <div className="text-terracotta-400 group-hover:text-terracotta-600 group-hover:translate-x-1 transition-all pl-2 shrink-0">
-                  <ArrowRight className="w-4 h-4" />
-                </div>
+                <span className="text-[10px] font-mono text-ink-secondary truncate w-full">resident@society.com</span>
+                <span className="text-[9px] font-mono text-ink-muted mt-1 bg-paper px-1.5 py-0.5 rounded border border-line/60 inline-block w-fit">
+                  Pass: Resident@123
+                </span>
               </button>
 
               {/* Admin Demo Card */}
               <button
                 type="button"
                 onClick={() => handleQuickFill('admin@society.com', 'Admin@123', 'admin')}
-                className="group relative flex items-center justify-between p-3 rounded-xl border border-olive-200/60 bg-gradient-to-r from-olive-50/40 to-paper-card hover:from-olive-50 hover:to-olive-100/40 hover:border-olive-400 hover:shadow-card transition-all duration-200 text-left"
+                className="group flex flex-col p-2.5 rounded-xl border border-olive-200/70 bg-gradient-to-br from-olive-50/50 to-paper-card hover:from-olive-50 hover:to-olive-100/50 hover:border-olive-400 hover:shadow-card transition-all duration-200 text-left"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-olive-100/90 border border-olive-200/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <Shield className="w-4.5 h-4.5 text-olive-600" />
+                <div className="flex items-center justify-between w-full mb-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-ink group-hover:text-olive-700 transition-colors">
+                    <Shield className="w-3.5 h-3.5 text-olive-600 shrink-0" />
+                    <span>Admin Demo</span>
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs font-bold text-ink group-hover:text-olive-700 transition-colors">
-                        Admin Control Center Demo
-                      </span>
-                      <span className="text-[9px] font-mono bg-paper px-1.5 py-0.5 rounded border border-line text-ink-muted">
-                        Pass: Admin@123
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-mono text-ink-secondary block truncate mt-0.5">
-                      admin@society.com
-                    </span>
-                  </div>
+                  <ArrowRight className="w-3 h-3 text-olive-500 group-hover:translate-x-0.5 transition-transform shrink-0" />
                 </div>
-                <div className="text-olive-500 group-hover:text-olive-700 group-hover:translate-x-1 transition-all pl-2 shrink-0">
-                  <ArrowRight className="w-4 h-4" />
-                </div>
+                <span className="text-[10px] font-mono text-ink-secondary truncate w-full">admin@society.com</span>
+                <span className="text-[9px] font-mono text-ink-muted mt-1 bg-paper px-1.5 py-0.5 rounded border border-line/60 inline-block w-fit">
+                  Pass: Admin@123
+                </span>
               </button>
             </div>
           </div>
