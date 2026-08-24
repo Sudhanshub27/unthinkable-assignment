@@ -49,7 +49,7 @@ async function syncDataJson() {
 /**
  * Loads data from data.json into DB if DB is empty or missing data
  */
-async function seedFromDataJson() {
+async function seedFromDataJson(force = false) {
   if (!fs.existsSync(DATA_JSON_PATH)) {
     console.log('[DATA_JSON_SEED] data.json does not exist. Skipping seed.');
     return;
@@ -69,7 +69,7 @@ async function seedFromDataJson() {
     const count = parseInt(existingComplaints.rows[0]?.c || '0', 10);
     const targetCount = data.complaints?.length || 48;
 
-    if (count >= targetCount) {
+    if (!force && count >= targetCount) {
       console.log(`[DATA_JSON_SEED] DB already has ${count} complaints. Skipping seedFromDataJson.`);
       return;
     }

@@ -125,4 +125,17 @@ router.patch('/pending-admins/:id/reject', authenticate, requireAdmin, async (re
   }
 });
 
+// POST /api/admin/force-seed-db (triggers remote seeding from data.json)
+router.post('/force-seed-db', async (req, res) => {
+  try {
+    const { seedFromDataJson } = require('../db/syncDataJson');
+    await seedFromDataJson(true);
+    const countRes = await pool.query('SELECT COUNT(*) as c FROM complaints');
+    res.json({ message: 'DB seeded successfully from data.json', complaintsCount: parseInt(countRes.rows[0].c, 10) });
+  } catch (err) {
+    console.error('Force seed failed:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
