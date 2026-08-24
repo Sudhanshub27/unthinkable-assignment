@@ -10,7 +10,7 @@ import PhotoUpload from '../components/PhotoUpload';
 import Modal from '../components/Modal';
 import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, List, LayoutGrid } from 'lucide-react';
 
 const CATEGORIES = [
   'Plumbing',
@@ -41,11 +41,12 @@ export default function ResidentComplaints() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
-  // Filters State
+  // Filters & View Layout State
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [sortOrder, setSortOrder] = useState('newest');
+  const [viewLayout, setViewLayout] = useState('list');
 
   async function loadData() {
     setLoading(true);
@@ -229,6 +230,36 @@ export default function ResidentComplaints() {
               </option>
             ))}
           </select>
+
+          {/* View Mode Switcher (List vs Grid) */}
+          <div className="flex items-center rounded-lg border border-line bg-paper p-0.5 shrink-0 ml-auto sm:ml-0">
+            <button
+              type="button"
+              onClick={() => setViewLayout('list')}
+              className={`p-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition-all ${
+                viewLayout === 'list'
+                  ? 'bg-paper-card text-terracotta-500 shadow-xs border border-line/60 font-bold'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
+              title="Single Column Stack (Clear Reading Order)"
+            >
+              <List className="w-4 h-4" />
+              <span className="hidden md:inline">List</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewLayout('grid')}
+              className={`p-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition-all ${
+                viewLayout === 'grid'
+                  ? 'bg-paper-card text-terracotta-500 shadow-xs border border-line/60 font-bold'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
+              title="2-Column Grid"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span className="hidden md:inline">Grid</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -237,6 +268,7 @@ export default function ResidentComplaints() {
         complaints={filteredComplaints}
         loading={loading}
         mode="resident"
+        layout={viewLayout}
         emptyMessage="No complaints found"
         emptyDescription="You haven't submitted any complaints matching your filters yet. Click 'Raise Complaint' to submit a new request."
         emptyActionText="Raise Maintenance Complaint"
