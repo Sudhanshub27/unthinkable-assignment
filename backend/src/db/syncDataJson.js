@@ -100,36 +100,44 @@ async function seedFromDataJson(force = false) {
   }
 
   // 1. Users
+  const validUserIds = new Set();
   if (Array.isArray(data.users)) {
     for (const u of data.users) {
       try {
+        const adminStatus = (u.admin_status === 'pending' || u.admin_status === 'approved' || u.admin_status === 'rejected') ? u.admin_status : null;
         await pool.query(
           `INSERT INTO users (id, name, email, password_hash, role, flat_number, admin_status, created_at)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [u.id, u.name, u.email, u.password_hash, u.role, u.flat_number || null, u.admin_status || null, u.created_at || new Date().toISOString()]
+          [u.id, u.name, u.email, u.password_hash, u.role, u.flat_number || null, adminStatus, u.created_at || new Date().toISOString()]
         );
+        validUserIds.add(u.id);
       } catch (err) {
         console.error(`[SEED_USER_ERR] ${u.email}:`, err.message);
       }
     }
   }
 
+  const defaultResidentId = validUserIds.has(5) ? 5 : Array.from(validUserIds)[0] || 1;
+  const defaultAdminId = validUserIds.has(1) ? 1 : Array.from(validUserIds)[0] || 1;
+
   // 2. Complaints
   if (Array.isArray(data.complaints)) {
     for (const c of data.complaints) {
       try {
+        const residentId = validUserIds.has(c.resident_id) ? c.resident_id : defaultResidentId;
+        const isOverdue = Boolean(c.is_overdue_flag);
         await pool.query(
           `INSERT INTO complaints (id, resident_id, category, description, photo_url, status, priority, is_overdue_flag, resolved_at, created_at, updated_at)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
           [
             c.id,
-            c.resident_id,
+            residentId,
             c.category,
             c.description,
             c.photo_url || null,
             c.status,
             c.priority,
-            c.is_overdue_flag ? true : false,
+            isOverdue,
             c.resolved_at || null,
             c.created_at,
             c.updated_at || c.created_at,
@@ -145,10 +153,11 @@ async function seedFromDataJson(force = false) {
   if (Array.isArray(data.complaint_history)) {
     for (const h of data.complaint_history) {
       try {
+        const actorId = validUserIds.has(h.actor_id) ? h.actor_id : null;
         await pool.query(
           `INSERT INTO complaint_history (id, complaint_id, actor_id, actor_role, change_type, old_value, new_value, note, created_at)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-          [h.id, h.complaint_id, h.actor_id, h.actor_role, h.change_type, h.old_value, h.new_value, h.note || null, h.created_at]
+          [h.id, h.complaint_id, actorId, h.actor_role, h.change_type, h.old_value, h.new_value, h.note || null, h.created_at]
         );
       } catch (err) {}
     }
@@ -158,10 +167,12 @@ async function seedFromDataJson(force = false) {
   if (Array.isArray(data.notices)) {
     for (const n of data.notices) {
       try {
+        const postedBy = validUserIds.has(n.posted_by) ? n.posted_by : defaultAdminId;
+        const isImportant = Boolean(n.is_important);
         await pool.query(
           `INSERT INTO notices (id, title, body, is_important, posted_by, created_at)
            VALUES ($1, $2, $3, $4, $5, $6)`,
-          [n.id, n.title, n.body, n.is_important ? true : false, n.posted_by || 1, n.created_at]
+          [n.id, n.title, n.body, isImportant, postedBy, n.created_at]
         );
       } catch (err) {
         console.error(`[SEED_NOTICE_ERR] #${n.id}:`, err.message);
@@ -173,15 +184,17 @@ async function seedFromDataJson(force = false) {
   if (Array.isArray(data.notifications)) {
     for (const notif of data.notifications) {
       try {
+        const userId = validUserIds.has(notif.user_id) ? notif.user_id : defaultResidentId;
+        const isRead = Boolean(notif.is_read);
         await pool.query(
           `INSERT INTO notifications (id, user_id, title, message, is_read, type, complaint_id, notice_id, created_at)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [
             notif.id,
-            notif.user_id,
+            userId,
             notif.title,
             notif.message,
-            notif.is_read ? true : false,
+            isRead,
             notif.type || 'info',
             notif.complaint_id || null,
             notif.notice_id || null,
