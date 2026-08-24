@@ -21,27 +21,27 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = '68
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
       onClick={onClose}
     >
       <div
-        className="bg-paper-card rounded-3xl shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto animate-modal-card"
+        className="bg-paper-card rounded-2xl sm:rounded-3xl shadow-2xl w-full max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto animate-modal-card"
         style={{ maxWidth }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
-        <div className="px-6 py-4 border-b border-line flex items-center justify-between bg-paper-card">
-          <h3 className="font-display text-lg font-bold text-ink">{title}</h3>
+        <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-line flex items-center justify-between bg-paper-card">
+          <h3 className="font-display text-base sm:text-lg font-bold text-ink truncate pr-2">{title}</h3>
           <button
-            className="p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-xl transition-colors cursor-pointer"
+            className="p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-xl transition-colors cursor-pointer shrink-0"
             onClick={onClose}
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-6 overflow-y-auto">{children}</div>
+        <div className="p-4 sm:p-6 overflow-y-auto">{children}</div>
       </div>
     </div>,
     document.body

@@ -230,9 +230,9 @@ export default function AdminDashboard() {
           ) : (
             <div className="w-full h-60">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={categoryBarData} layout="vertical" margin={{ left: 20, right: 20 }}>
+                <BarChart data={categoryBarData} layout="vertical" margin={{ left: 0, right: 15, top: 5, bottom: 5 }}>
                   <XAxis type="number" hide />
-                  <YAxis dataKey="category" type="category" width={80} tick={{ fontSize: 12 }} />
+                  <YAxis dataKey="category" type="category" width={70} tick={{ fontSize: 11 }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#FFFFFF',

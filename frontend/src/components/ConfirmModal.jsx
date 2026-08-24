@@ -63,13 +63,13 @@ export default function ConfirmModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
       onClick={() => {
         if (!isLoading) onClose();
       }}
     >
       <div
-        className="bg-paper-card rounded-3xl shadow-2xl w-full max-w-md border border-line p-6 relative overflow-hidden animate-modal-card shrink-0 my-auto"
+        className="bg-paper-card rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md border border-line p-5 sm:p-6 relative overflow-hidden animate-modal-card shrink-0 my-auto"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -77,33 +77,33 @@ export default function ConfirmModal({
         <button
           onClick={onClose}
           disabled={isLoading}
-          className="absolute top-4 right-4 p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-xl transition-colors disabled:opacity-40 cursor-pointer"
+          className="absolute top-3.5 right-3.5 p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-xl transition-colors disabled:opacity-40 cursor-pointer"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex flex-col items-center text-center space-y-4 pt-2">
+        <div className="flex flex-col items-center text-center space-y-4 pt-1">
           {/* Tinted Icon Badge */}
-          <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs ${config.badgeBg}`}>
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs ${config.badgeBg}`}>
             {config.icon}
           </div>
 
           {/* Title & Message */}
-          <div className="space-y-1.5 px-2">
-            <h3 className="font-display text-lg font-bold text-ink leading-snug">{title}</h3>
+          <div className="space-y-1.5 px-1">
+            <h3 className="font-display text-base sm:text-lg font-bold text-ink leading-snug">{title}</h3>
             <p className="text-xs text-ink-secondary leading-relaxed max-w-xs mx-auto">{message}</p>
           </div>
 
           {/* Action Footer Buttons */}
-          <div className="flex items-center gap-3 w-full pt-3">
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full pt-2 sm:pt-3">
             <Button
               type="button"
               variant="secondary"
               isFullWidth
               disabled={isLoading}
               onClick={onClose}
-              className="rounded-xl font-semibold"
+              className="rounded-xl font-semibold order-2 sm:order-1"
             >
               {cancelText}
             </Button>
@@ -113,7 +113,7 @@ export default function ConfirmModal({
               isFullWidth
               isLoading={isLoading}
               onClick={onConfirm}
-              className={`rounded-xl font-bold ${config.btnClass}`}
+              className={`rounded-xl font-bold order-1 sm:order-2 ${config.btnClass}`}
             >
               {confirmText}
             </Button>

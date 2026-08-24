@@ -41,30 +41,30 @@ export default function StatCard({
 
   return (
     <div
-      className={`bg-paper-card rounded-xl border border-line shadow-card p-4 flex items-start gap-4 transition-all duration-150 relative ${
+      className={`bg-paper-card rounded-xl border border-line shadow-card p-3 sm:p-4 flex items-start gap-2.5 sm:gap-4 transition-all duration-150 relative ${
         onClick ? 'cursor-pointer hover:shadow-lifted hover:-translate-y-0.5 hover:border-terracotta-400/30' : ''
       } ${className}`.trim()}
       onClick={onClick}
     >
       {icon && (
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${chipClass}`}>
+        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 ${chipClass}`}>
           {renderIcon()}
         </div>
       )}
 
       <div className="flex-1 min-w-0">
-        <div className="font-display text-2xl font-bold text-ink leading-tight">
+        <div className="font-display text-xl sm:text-2xl font-bold text-ink leading-tight">
           {value !== undefined && value !== null ? value : 0}
         </div>
-        <div className="text-[11px] uppercase tracking-wider text-ink-muted font-semibold mt-0.5 truncate">
+        <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-ink-muted font-semibold mt-0.5 truncate">
           {displayTitle}
         </div>
-        {subtitle && <div className="text-xs text-ink-secondary mt-1">{subtitle}</div>}
+        {subtitle && <div className="text-[11px] sm:text-xs text-ink-secondary mt-0.5 truncate">{subtitle}</div>}
       </div>
 
       {alert && (
         <span
-          className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-clay-500 animate-pulse"
+          className="absolute top-2.5 right-2.5 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-clay-500 animate-pulse"
           title="Action Required"
         />
       )}

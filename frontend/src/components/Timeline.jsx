@@ -53,7 +53,7 @@ export default function Timeline({ history }) {
   }
 
   return (
-    <div className="relative pl-7 space-y-4 pt-1 pb-1">
+    <div className="relative pl-5 sm:pl-7 space-y-4 pt-1 pb-1">
       {/* Vertical Timeline Track */}
       <div className="absolute left-2.5 top-3 bottom-3 w-0.5 bg-line" />
 
@@ -66,11 +66,11 @@ export default function Timeline({ history }) {
           <div className="relative group" key={h.id || idx}>
             {/* Timeline Node Dot */}
             <div
-              className={`absolute -left-7 top-3.5 w-3.5 h-3.5 rounded-full border-2 border-paper-card ${style.dot} transition-transform duration-150 group-hover:scale-110`}
+              className={`absolute -left-5 sm:-left-7 top-3.5 w-3.5 h-3.5 rounded-full border-2 border-paper-card ${style.dot} transition-transform duration-150 group-hover:scale-110`}
             />
 
             {/* History Card Container */}
-            <div className="bg-paper-card rounded-xl border border-line p-3.5 shadow-card hover:border-terracotta-400/30 transition-all">
+            <div className="bg-paper-card rounded-xl border border-line p-3 sm:p-3.5 shadow-card hover:border-terracotta-400/30 transition-all">
               {/* Event Header Row */}
               <div className="flex items-start justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">

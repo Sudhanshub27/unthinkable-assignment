@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/UIComponents';
-import { PriorityBadge, StatusBadge, ImportantBadge } from '../components/Badges';
+import { PriorityBadge, StatusBadge } from '../components/Badges';
 import NoticeCard from '../components/NoticeCard';
 import Timeline from '../components/Timeline';
 import { formatFlatNumber, formatDate } from '../utils/formatters';
@@ -16,37 +16,36 @@ import {
   ArrowRight,
   User,
   Shield,
-  Pin,
-  Sparkles,
-  Zap,
   ExternalLink,
   Code2,
   Check,
   Building2,
   History,
   Calendar,
+  Menu,
+  X,
 } from 'lucide-react';
 import heroCommunityIllustration from '../assets/hero-courtyard.webp';
 
 // Sleek Browser Frame Component for product mockups
 function BrowserFrame({ url, children, title, className = '' }) {
   return (
-    <div className={`rounded-2xl border border-line bg-paper shadow-lifted overflow-hidden flex flex-col h-full ${className}`}>
-      <div className="bg-paper-hover px-4 py-2.5 border-b border-line flex items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-1.5">
+    <div className={`rounded-2xl border border-line bg-paper shadow-lifted overflow-hidden flex flex-col h-full w-full min-w-0 ${className}`}>
+      <div className="bg-paper-hover px-3 sm:px-4 py-2 sm:py-2.5 border-b border-line flex items-center justify-between gap-2 shrink-0 min-w-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
           <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
           <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
         </div>
         {url && (
-          <div className="bg-paper px-3 py-0.5 rounded-md border border-line text-[11px] text-ink-muted font-mono max-w-xs truncate flex items-center gap-1">
-            <span className="text-olive-600 font-semibold">https://</span>
-            <span>{url}</span>
+          <div className="bg-paper px-2 sm:px-3 py-0.5 rounded-md border border-line text-[10px] sm:text-[11px] text-ink-muted font-mono min-w-0 max-w-[170px] sm:max-w-xs truncate flex items-center gap-1">
+            <span className="text-olive-600 font-semibold shrink-0">https://</span>
+            <span className="truncate">{url}</span>
           </div>
         )}
-        <div className="text-[11px] font-medium text-ink-muted hidden sm:block">{title || 'Angan Portal'}</div>
+        <div className="text-[11px] font-medium text-ink-muted hidden sm:block shrink-0">{title || 'Angan Portal'}</div>
       </div>
-      <div className="flex-1 flex flex-col bg-paper">{children}</div>
+      <div className="flex-1 flex flex-col bg-paper min-w-0">{children}</div>
     </div>
   );
 }
@@ -109,6 +108,7 @@ export default function Landing() {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const showDemo = import.meta.env.VITE_SHOW_DEMO === 'true';
 
   // Redirect logged in user directly to their respective workspace
@@ -118,6 +118,7 @@ export default function Landing() {
 
   const scrollToSection = (id) => (e) => {
     if (e) e.preventDefault();
+    setMobileNavOpen(false);
     const el = document.getElementById(id);
     if (el) {
       const navHeight = 64; // height of sticky navbar
@@ -148,22 +149,22 @@ export default function Landing() {
   }
 
   return (
-    <div className="bg-paper min-h-screen flex flex-col font-sans text-ink selection:bg-terracotta-100 selection:text-terracotta-600">
+    <div className="bg-paper min-h-screen flex flex-col font-sans text-ink selection:bg-terracotta-100 selection:text-terracotta-600 overflow-x-hidden w-full">
       {/* 1. STICKY BLUR NAVBAR */}
-      <header className="sticky top-0 bg-paper-card/90 backdrop-blur-md border-b border-line z-40">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 bg-paper-card/90 backdrop-blur-md border-b border-line z-40 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between w-full">
           <Link
             to="/"
             onClick={(e) => {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="flex items-center gap-2.5 group cursor-pointer"
+            className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer shrink-0"
           >
-            <img src="/logo.webp" alt="Angan Logo" className="h-9 w-auto object-contain transition-transform group-hover:scale-105" />
+            <img src="/logo.webp" alt="Angan Logo" className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105" />
             <div className="flex flex-col">
-              <span className="font-display font-bold text-lg text-ink leading-tight">Angan</span>
-              <span className="text-[10px] text-ink-muted font-medium tracking-wide">Society Management</span>
+              <span className="font-display font-bold text-base sm:text-lg text-ink leading-tight">Angan</span>
+              <span className="text-[10px] text-ink-muted font-medium tracking-wide hidden sm:block">Society Management</span>
             </div>
           </Link>
 
@@ -185,29 +186,60 @@ export default function Landing() {
             </a>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" href="#role-selection">
+          <div className="flex items-center gap-2.5 shrink-0">
+            <Button variant="outline" size="sm" href="#role-selection" onClick={scrollToSection('role-selection')}>
               Sign In
             </Button>
+
+            {/* Mobile Nav Toggle Button - Hamburger Menu Icon */}
+            <button
+              type="button"
+              className="md:hidden p-2 text-ink-secondary hover:text-ink focus:outline-none rounded-lg hover:bg-paper-hover transition-colors"
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              {mobileNavOpen ? <X className="w-6 h-6 text-ink" /> : <Menu className="w-6 h-6 text-ink" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Slide-Down Section Menu */}
+        {mobileNavOpen && (
+          <div className="md:hidden bg-paper-card border-b border-line px-4 py-3 space-y-2 text-sm font-semibold shadow-card animate-modal-backdrop">
+            <a href="#features" onClick={scrollToSection('features')} className="block py-2 px-3 rounded-lg hover:bg-paper-hover text-ink-secondary hover:text-terracotta-500">
+              Features
+            </a>
+            <a href="#capabilities" onClick={scrollToSection('capabilities')} className="block py-2 px-3 rounded-lg hover:bg-paper-hover text-ink-secondary hover:text-terracotta-500">
+              Capabilities
+            </a>
+            <a href="#how-it-works" onClick={scrollToSection('how-it-works')} className="block py-2 px-3 rounded-lg hover:bg-paper-hover text-ink-secondary hover:text-terracotta-500">
+              Workflow
+            </a>
+            <a href="#previews" onClick={scrollToSection('previews')} className="block py-2 px-3 rounded-lg hover:bg-paper-hover text-ink-secondary hover:text-terracotta-500">
+              Live Previews
+            </a>
+            <a href="#role-selection" onClick={scrollToSection('role-selection')} className="block py-2 px-3 rounded-lg hover:bg-paper-hover text-ink-secondary hover:text-terracotta-500">
+              Portals & Sign In
+            </a>
+          </div>
+        )}
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 md:py-20 relative overflow-hidden">
+      <section className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-8 sm:py-12 md:py-20 relative overflow-hidden w-full">
         <div className="absolute top-10 left-10 w-72 h-72 bg-terracotta-400/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-72 h-72 bg-olive-400/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-12 items-center relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid md:grid-cols-12 gap-8 md:gap-12 items-center relative w-full min-w-0">
           {/* Left Hero Text Column */}
-          <div className="md:col-span-7 space-y-6">
+          <div className="md:col-span-7 space-y-6 min-w-0">
             <div className="inline-flex items-center gap-2 bg-terracotta-50 text-terracotta-600 border border-terracotta-100 rounded-full px-3.5 py-1 text-xs font-semibold shadow-xs">
-              <Building2 className="w-3.5 h-3.5 text-terracotta-500" />
-              <span>Built for Indian Residential Societies</span>
+              <Building2 className="w-3.5 h-3.5 text-terracotta-500 shrink-0" />
+              <span className="truncate">Built for Indian Residential Societies</span>
             </div>
 
             <div className="space-y-2">
-              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-ink leading-tight tracking-tight">
+              <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-bold text-ink leading-tight tracking-tight">
                 Your courtyard, <br />
                 <span className="bg-gradient-to-r from-terracotta-500 via-clay-500 to-olive-600 bg-clip-text text-transparent">
                   now online.
@@ -218,28 +250,55 @@ export default function Landing() {
               </p>
             </div>
 
-            <p className="text-ink-secondary text-base md:text-lg max-w-xl leading-relaxed font-sans">
+            <p className="text-ink-secondary text-sm sm:text-base md:text-lg max-w-xl leading-relaxed font-sans">
               Raise maintenance complaints, track resolution timelines in real time, stay updated with official society notices, and foster an organized, transparent community.
             </p>
 
-            <div className="flex flex-wrap gap-4 items-center pt-2">
+            {/* Mobile Visual Image Mockup (Appears above action buttons on mobile) */}
+            <div className="block md:hidden my-4 w-full min-w-0">
+              <BrowserFrame url="angan.app" title="Angan Digital Courtyard">
+                <div className="p-3 bg-paper-card relative">
+                  <img
+                    src={heroCommunityIllustration}
+                    alt="Digital Society Courtyard Illustration"
+                    className="w-full h-auto rounded-xl object-contain"
+                  />
+                  <div className="mt-3 bg-paper rounded-xl p-2.5 sm:p-3 border border-line flex items-center justify-between text-xs gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-olive-500 animate-ping shrink-0" />
+                      <span className="font-semibold text-ink truncate">Live Triage Status: Active</span>
+                    </div>
+                    <span className="text-ink-muted text-[11px] shrink-0">100% Audit Tracked</span>
+                  </div>
+                </div>
+              </BrowserFrame>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 items-stretch sm:items-center pt-2">
               <Button
                 variant="primary"
                 size="lg"
                 href="#role-selection"
+                onClick={scrollToSection('role-selection')}
                 icon={<ArrowRight className="w-4.5 h-4.5" />}
-                className="shadow-lifted"
+                className="shadow-lifted justify-center"
               >
                 Enter Your Society
               </Button>
-              <Button variant="outline" size="lg" href="#features">
+              <Button
+                variant="outline"
+                size="lg"
+                href="#features"
+                onClick={scrollToSection('features')}
+                className="justify-center"
+              >
                 Explore Features
               </Button>
             </div>
           </div>
 
-          {/* Right Visual Column (In browser frame) */}
-          <div className="md:col-span-5 flex items-center justify-center relative">
+          {/* Right Visual Column (Desktop Only) */}
+          <div className="hidden md:flex md:col-span-5 items-center justify-center relative min-w-0 w-full">
             <BrowserFrame url="angan.app" title="Angan Digital Courtyard">
               <div className="p-3 bg-paper-card relative">
                 <img
@@ -260,77 +319,77 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 3. FEATURES SECTION (Asymmetrical Hero Feature Showcase + Supporting Cards) */}
-      <section id="features" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-16 scroll-mt-16 border-t border-line/60">
-        <div className="max-w-7xl mx-auto px-6 space-y-16">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
+      {/* 3. FEATURES SECTION */}
+      <section id="features" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 sm:py-16 scroll-mt-16 border-t border-line/60 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12 sm:space-y-16 w-full min-w-0">
+          <div className="text-center max-w-2xl mx-auto space-y-3 px-2">
             <span className="text-xs font-bold uppercase tracking-wider text-terracotta-500 bg-terracotta-50 px-3 py-1 rounded-full border border-terracotta-100">
               Core Capabilities
             </span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-ink">
               Built for Complete Maintenance Transparency
             </h2>
-            <p className="text-ink-secondary text-base leading-relaxed">
+            <p className="text-ink-secondary text-sm sm:text-base leading-relaxed">
               Empower residents with transparent status updates while giving management total control over issue resolution.
             </p>
           </div>
 
           {/* Asymmetric Showcase: Big Highlighted Feature Row */}
-          <div className="bg-paper rounded-2xl border border-line p-8 shadow-card grid md:grid-cols-12 gap-8 items-center">
-            <div className="md:col-span-6 space-y-6">
+          <div className="bg-paper rounded-2xl border border-line p-4 sm:p-6 md:p-8 shadow-card grid md:grid-cols-12 gap-6 md:gap-8 items-center w-full min-w-0">
+            <div className="md:col-span-6 space-y-5 min-w-0">
               <div className="w-12 h-12 rounded-xl bg-terracotta-50 text-terracotta-500 border border-terracotta-100 flex items-center justify-center shadow-xs">
                 <ClipboardList className="w-6 h-6" />
               </div>
               
               <div className="space-y-2">
-                <h3 className="font-display font-bold text-2xl text-ink">
+                <h3 className="font-display font-bold text-xl sm:text-2xl text-ink">
                   Real-Time Complaint & Audit Tracking
                 </h3>
-                <p className="text-ink-secondary text-sm leading-relaxed">
+                <p className="text-ink-secondary text-xs sm:text-sm leading-relaxed">
                   Never wonder about the status of a leaky pipe or broken lift again. Residents can attach photos, select categories, and follow an immutable timeline of every action taken by society staff.
                 </p>
               </div>
 
-              <ul className="space-y-3 text-xs text-ink-secondary pt-2">
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-terracotta-500 shrink-0" />
+              <ul className="space-y-2.5 text-xs text-ink-secondary pt-1">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-terracotta-500 shrink-0 mt-0.5" />
                   <span className="font-medium text-ink">Category Tagging (Plumbing, Electrical, Elevator, Security)</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-terracotta-500 shrink-0" />
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-terracotta-500 shrink-0 mt-0.5" />
                   <span className="font-medium text-ink">Photo attachments for clear visual proof</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-terracotta-500 shrink-0" />
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-terracotta-500 shrink-0 mt-0.5" />
                   <span className="font-medium text-ink">Step-by-step resolution history log</span>
                 </li>
               </ul>
             </div>
 
-            <div className="md:col-span-6">
+            <div className="md:col-span-6 min-w-0 w-full">
               <BrowserFrame url="angan.app/complaints/33" title="Complaint View">
                 {/* Authentic Complaint Card Layout */}
-                <div className="bg-paper-card p-5 border-l-4 border-terracotta-400 space-y-3">
-                  <div className="flex items-center justify-between gap-2 border-b border-line/60 pb-2.5">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-paper-hover border border-line/50 text-terracotta-500">
+                <div className="bg-paper-card p-3.5 sm:p-5 border-l-4 border-terracotta-400 space-y-3 min-w-0">
+                  <div className="flex items-center justify-between gap-2 border-b border-line/60 pb-2.5 min-w-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+                      <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-paper-hover border border-line/50 text-terracotta-500">
                         {sampleComplaint.category}
                       </span>
                       <span className="text-xs text-ink-muted font-mono font-medium">#{sampleComplaint.id}</span>
-                      <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-paper-hover text-ink-secondary">
+                      <span className="text-[10px] sm:text-[11px] font-medium px-1.5 py-0.5 rounded bg-paper-hover text-ink-secondary">
                         {formatFlatNumber(sampleComplaint.flat_number)}
                       </span>
                     </div>
                     <StatusBadge status={sampleComplaint.status} />
                   </div>
 
-                  <div className="space-y-1">
-                    <h4 className="font-semibold text-sm text-ink">{sampleComplaint.title}</h4>
+                  <div className="space-y-1 min-w-0">
+                    <h4 className="font-semibold text-sm text-ink truncate">{sampleComplaint.title}</h4>
                     <p className="text-xs text-ink-secondary leading-relaxed">{sampleComplaint.description}</p>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-ink-muted pt-2 border-t border-line/60">
-                    <div className="flex items-center gap-1.5 text-ink-muted">
+                  <div className="flex items-center justify-between text-xs text-ink-muted pt-2 border-t border-line/60 min-w-0">
+                    <div className="flex items-center gap-1.5 text-ink-muted flex-wrap min-w-0">
                       <Calendar className="w-3.5 h-3.5 shrink-0 text-ink-muted" />
                       <span>{formatDate(sampleComplaint.created_at)}</span>
                       <span>• {sampleComplaint.user_name}</span>
@@ -344,24 +403,24 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 4. CAPABILITIES SECTION (Platform Pillars) */}
-      <section id="capabilities" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-16 scroll-mt-16 border-t border-line/60">
-        <div className="max-w-7xl mx-auto px-6 space-y-12">
+      {/* 4. CAPABILITIES SECTION */}
+      <section id="capabilities" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 sm:py-16 scroll-mt-16 border-t border-line/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-olive-600 bg-olive-50 px-3 py-1 rounded-full border border-olive-100">
               Platform Pillars
             </span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-ink">
               Essential Society Management Modules
             </h2>
-            <p className="text-ink-secondary text-base leading-relaxed">
+            <p className="text-ink-secondary text-sm sm:text-base leading-relaxed">
               Designed specifically for housing society operational excellence and resident convenience.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1: Digital Notice Board */}
-            <div className="group rounded-2xl border border-line/80 bg-paper-card p-6 shadow-card hover:shadow-lifted hover:-translate-y-1.5 hover:border-olive-300/60 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+            {/* Card 1 */}
+            <div className="group rounded-2xl border border-line/80 bg-paper-card p-5 sm:p-6 shadow-card hover:shadow-lifted hover:-translate-y-1.5 hover:border-olive-300/60 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-olive-400 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
               <div className="space-y-3">
@@ -375,10 +434,10 @@ export default function Landing() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="font-display font-bold text-lg text-ink group-hover:text-olive-700 transition-colors">
+                  <h3 className="font-display font-bold text-base sm:text-lg text-ink group-hover:text-olive-700 transition-colors">
                     Digital Notice Board
                   </h3>
-                  <p className="text-xs md:text-sm text-ink-secondary leading-relaxed">
+                  <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                     Publish society announcements, pin critical notices, and broadcast water or power schedule changes instantly.
                   </p>
                 </div>
@@ -390,8 +449,8 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Card 2: Overdue SLA Alerts */}
-            <div className="group rounded-2xl border border-line/80 bg-paper-card p-6 shadow-card hover:shadow-lifted hover:-translate-y-1.5 hover:border-mustard-300/60 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden">
+            {/* Card 2 */}
+            <div className="group rounded-2xl border border-line/80 bg-paper-card p-5 sm:p-6 shadow-card hover:shadow-lifted hover:-translate-y-1.5 hover:border-mustard-300/60 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-mustard-400 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
               <div className="space-y-3">
@@ -405,10 +464,10 @@ export default function Landing() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="font-display font-bold text-lg text-ink group-hover:text-mustard-700 transition-colors">
+                  <h3 className="font-display font-bold text-base sm:text-lg text-ink group-hover:text-mustard-700 transition-colors">
                     Overdue SLA Alerts
                   </h3>
-                  <p className="text-xs md:text-sm text-ink-secondary leading-relaxed">
+                  <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                     Automatic flags highlight complaints pending beyond expected resolution timelines to ensure accountability.
                   </p>
                 </div>
@@ -420,8 +479,8 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Card 3: Role-Based Command */}
-            <div className="group rounded-2xl border border-line/80 bg-paper-card p-6 shadow-card hover:shadow-lifted hover:-translate-y-1.5 hover:border-terracotta-300/60 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden">
+            {/* Card 3 */}
+            <div className="group rounded-2xl border border-line/80 bg-paper-card p-5 sm:p-6 shadow-card hover:shadow-lifted hover:-translate-y-1.5 hover:border-terracotta-300/60 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-terracotta-400 to-clay-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
               <div className="space-y-3">
@@ -435,10 +494,10 @@ export default function Landing() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="font-display font-bold text-lg text-ink group-hover:text-terracotta-600 transition-colors">
+                  <h3 className="font-display font-bold text-base sm:text-lg text-ink group-hover:text-terracotta-600 transition-colors">
                     Role-Based Command
                   </h3>
-                  <p className="text-xs md:text-sm text-ink-secondary leading-relaxed">
+                  <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                     Tailored interfaces for Residents to submit & track, and Admins to manage queues & post notices.
                   </p>
                 </div>
@@ -453,25 +512,25 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 4. HOW IT WORKS SECTION (Sequential Stepper Connector Layout) */}
-      <section id="how-it-works" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-16 scroll-mt-16 border-t border-line/60">
-        <div className="max-w-7xl mx-auto px-6 space-y-16">
+      {/* 5. HOW IT WORKS SECTION */}
+      <section id="how-it-works" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 sm:py-16 scroll-mt-16 border-t border-line/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12 sm:space-y-16">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-mustard-600 bg-mustard-50 px-3 py-1 rounded-full border border-mustard-100">
               Sequential Process
             </span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-ink">
               How Angan Works
             </h2>
-            <p className="text-ink-secondary text-base leading-relaxed">
+            <p className="text-ink-secondary text-sm sm:text-base leading-relaxed">
               A transparent, 3-step workflow connecting residents directly with society management.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 relative">
             <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-line z-0" />
 
-            <div className="bg-paper-card rounded-2xl border border-line p-8 shadow-card space-y-4 relative z-10 hover:-translate-y-1 transition-all">
+            <div className="bg-paper-card rounded-2xl border border-line p-5 sm:p-8 shadow-card space-y-4 relative z-10 hover:-translate-y-1 transition-all">
               <div className="flex items-center justify-between">
                 <span className="w-12 h-12 rounded-full border-2 border-terracotta-400 text-terracotta-500 bg-terracotta-50 font-display font-bold text-base flex items-center justify-center shadow-xs">
                   01
@@ -480,13 +539,13 @@ export default function Landing() {
                   Step 1
                 </span>
               </div>
-              <h3 className="font-display font-bold text-xl text-ink">Raise an Issue</h3>
-              <p className="text-sm text-ink-secondary leading-relaxed">
+              <h3 className="font-display font-bold text-lg sm:text-xl text-ink">Raise an Issue</h3>
+              <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                 Resident selects a category (Plumbing, Lift, Security, etc.), describes the problem, and uploads a photo.
               </p>
             </div>
 
-            <div className="bg-paper-card rounded-2xl border border-line p-8 shadow-card space-y-4 relative z-10 hover:-translate-y-1 transition-all">
+            <div className="bg-paper-card rounded-2xl border border-line p-5 sm:p-8 shadow-card space-y-4 relative z-10 hover:-translate-y-1 transition-all">
               <div className="flex items-center justify-between">
                 <span className="w-12 h-12 rounded-full border-2 border-mustard-400 text-mustard-600 bg-mustard-50 font-display font-bold text-base flex items-center justify-center shadow-xs">
                   02
@@ -495,13 +554,13 @@ export default function Landing() {
                   Step 2
                 </span>
               </div>
-              <h3 className="font-display font-bold text-xl text-ink">Triage & Assign</h3>
-              <p className="text-sm text-ink-secondary leading-relaxed">
+              <h3 className="font-display font-bold text-lg sm:text-xl text-ink">Triage & Assign</h3>
+              <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                 Society Admin reviews the ticket, sets priority, updates status, and dispatches maintenance personnel.
               </p>
             </div>
 
-            <div className="bg-paper-card rounded-2xl border border-line p-8 shadow-card space-y-4 relative z-10 hover:-translate-y-1 transition-all">
+            <div className="bg-paper-card rounded-2xl border border-line p-5 sm:p-8 shadow-card space-y-4 relative z-10 hover:-translate-y-1 transition-all">
               <div className="flex items-center justify-between">
                 <span className="w-12 h-12 rounded-full border-2 border-olive-400 text-olive-600 bg-olive-50 font-display font-bold text-base flex items-center justify-center shadow-xs">
                   03
@@ -510,8 +569,8 @@ export default function Landing() {
                   Step 3
                 </span>
               </div>
-              <h3 className="font-display font-bold text-xl text-ink">Resolve & Audit</h3>
-              <p className="text-sm text-ink-secondary leading-relaxed">
+              <h3 className="font-display font-bold text-lg sm:text-xl text-ink">Resolve & Audit</h3>
+              <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                 Issue is marked resolved with detailed audit notes, giving residents complete resolution transparency.
               </p>
             </div>
@@ -519,9 +578,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 5. PREVIEWS SECTION (Rendering Authentic In-App NoticeCard and Timeline Components) */}
+      {/* 6. PREVIEWS SECTION */}
       <section id="previews" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-8 md:py-12 scroll-mt-16 border-t border-line/60">
-        <div className="max-w-7xl mx-auto px-6 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-olive-600 bg-olive-50 px-3 py-1 rounded-full border border-olive-100">
               Authentic UI Previews
@@ -529,15 +588,14 @@ export default function Landing() {
             <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
               Actual In-App Component Previews
             </h2>
-            <p className="text-ink-secondary text-sm leading-relaxed">
+            <p className="text-ink-secondary text-xs sm:text-sm leading-relaxed">
               Real React components (`NoticeCard` and `Timeline`) rendered exactly as they appear inside the portal.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Notice Board Preview Card using authentic NoticeCard components */}
             <BrowserFrame url="angan.app/notices" title="Official Notice Board">
-              <div className="p-4 sm:p-5 bg-paper flex-1 flex flex-col space-y-3">
+              <div className="p-3.5 sm:p-5 bg-paper flex-1 flex flex-col space-y-3">
                 <div className="flex items-center justify-between border-b border-line pb-2.5 shrink-0">
                   <div className="flex items-center gap-2 text-olive-600 font-display font-bold text-sm">
                     <Megaphone className="w-4 h-4" />
@@ -553,9 +611,8 @@ export default function Landing() {
               </div>
             </BrowserFrame>
 
-            {/* Complaint Audit Timeline Preview using authentic Timeline component */}
             <BrowserFrame url="angan.app/complaints/33" title="Audit Log Timeline">
-              <div className="p-4 sm:p-5 bg-paper flex-1 flex flex-col space-y-3">
+              <div className="p-3.5 sm:p-5 bg-paper flex-1 flex flex-col space-y-3">
                 <div className="flex items-center justify-between border-b border-line pb-2.5 shrink-0">
                   <div className="flex items-center gap-2 text-terracotta-500 font-display font-bold text-sm">
                     <History className="w-4 h-4" />
@@ -564,7 +621,7 @@ export default function Landing() {
                   <StatusBadge status={sampleComplaint.status} />
                 </div>
 
-                <div className="bg-paper-card p-3.5 rounded-xl border border-line flex-1">
+                <div className="bg-paper-card p-3 sm:p-3.5 rounded-xl border border-line flex-1">
                   <Timeline history={sampleHistory} />
                 </div>
               </div>
@@ -573,24 +630,24 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 6. ROLE SELECTION SECTION */}
-      <section id="role-selection" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-16 scroll-mt-16 border-t border-line/60">
-        <div className="max-w-7xl mx-auto px-6 space-y-16">
+      {/* 7. ROLE SELECTION SECTION */}
+      <section id="role-selection" className="bg-paper min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 sm:py-16 scroll-mt-16 border-t border-line/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12 sm:space-y-16">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-terracotta-500 bg-terracotta-50 px-3 py-1 rounded-full border border-terracotta-100">
               Access Workspace
             </span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-ink">
               Choose Your Role to Enter
             </h2>
-            <p className="text-ink-secondary text-base leading-relaxed">
+            <p className="text-ink-secondary text-sm sm:text-base leading-relaxed">
               Select your workspace role to sign in or test drive the portal instantly.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
             {/* Resident Card */}
-            <div className="bg-paper-card rounded-2xl shadow-card hover:shadow-lifted transition-all duration-200 p-8 border border-line space-y-6 flex flex-col justify-between">
+            <div className="bg-paper-card rounded-2xl shadow-card hover:shadow-lifted transition-all duration-200 p-5 sm:p-8 border border-line space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="w-12 h-12 rounded-xl bg-terracotta-50 text-terracotta-400 border border-terracotta-100 flex items-center justify-center">
@@ -602,13 +659,13 @@ export default function Landing() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="font-display text-2xl font-bold text-ink">Resident</h3>
-                  <p className="text-sm text-ink-secondary leading-relaxed">
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-ink">Resident</h3>
+                  <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                     Raise complaints, track issues, read notices and stay connected with your society.
                   </p>
                 </div>
 
-                <ul className="space-y-2.5 text-xs text-ink-secondary pt-2">
+                <ul className="space-y-2.5 text-xs text-ink-secondary pt-1">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-terracotta-400 flex-shrink-0" />
                     <span>View & raise maintenance complaints with photos</span>
@@ -638,7 +695,7 @@ export default function Landing() {
             </div>
 
             {/* Admin Card */}
-            <div className="bg-paper-card rounded-2xl shadow-card hover:shadow-lifted transition-all duration-200 p-8 border border-line space-y-6 flex flex-col justify-between">
+            <div className="bg-paper-card rounded-2xl shadow-card hover:shadow-lifted transition-all duration-200 p-5 sm:p-8 border border-line space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="w-12 h-12 rounded-xl bg-olive-50 text-olive-500 border border-olive-100 flex items-center justify-center">
@@ -650,13 +707,13 @@ export default function Landing() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="font-display text-2xl font-bold text-ink">Admin</h3>
-                  <p className="text-sm text-ink-secondary leading-relaxed">
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-ink">Admin</h3>
+                  <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
                     Manage complaints, update statuses, publish notices and monitor society activity.
                   </p>
                 </div>
 
-                <ul className="space-y-2.5 text-xs text-ink-secondary pt-2">
+                <ul className="space-y-2.5 text-xs text-ink-secondary pt-1">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-olive-500 flex-shrink-0" />
                     <span>Manage & triage maintenance complaints queue</span>
@@ -688,9 +745,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 7. ENHANCED DEVELOPER FOOTER */}
-      <footer className="bg-ink text-white py-14 border-t border-ink/20">
-        <div className="max-w-7xl mx-auto px-6 space-y-10">
+      {/* 8. DEVELOPER FOOTER */}
+      <footer className="bg-ink text-white py-10 sm:py-14 border-t border-ink/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
             <div className="md:col-span-6 space-y-3">
               <div className="flex items-center gap-3">
@@ -729,7 +786,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
+          <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
             <p>© {new Date().getFullYear()} Angan Society Maintenance Tracker. Designed & Developed by Sudhanshu Batra.</p>
             <p>Unthinkable SDE Assignment Project</p>
           </div>

@@ -108,27 +108,27 @@ export default function ComplaintDetailModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
       onClick={onClose}
     >
       <div
-        className="bg-paper-card rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto animate-modal-card"
+        className="bg-paper-card rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto animate-modal-card"
         role="dialog"
         aria-modal="true"
         aria-labelledby="complaint-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Bar */}
-        <div className="px-6 py-4 border-b border-line flex items-center justify-between bg-paper-card">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-sm font-semibold text-ink-muted">#{complaint.id}</span>
-            <h2 id="complaint-modal-title" className="font-display font-semibold text-lg text-ink">
+        <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-line flex items-center justify-between bg-paper-card">
+          <div className="flex items-center gap-2 min-w-0 pr-2">
+            <span className="font-mono text-xs sm:text-sm font-semibold text-ink-muted shrink-0">#{complaint.id}</span>
+            <h2 id="complaint-modal-title" className="font-display font-semibold text-base sm:text-lg text-ink truncate">
               {complaint.category} Request
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-lg transition-colors"
+            className="p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-lg transition-colors shrink-0"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
@@ -136,7 +136,7 @@ export default function ComplaintDetailModal({
         </div>
 
         {/* Scrollable Body */}
-        <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1">
+        <div className="px-4 py-4 sm:px-6 sm:py-6 overflow-y-auto space-y-5 sm:space-y-6 flex-1">
           {/* SECTION 1: HEADER & METADATA */}
           <div className="space-y-2 pb-1 border-b border-line/60">
             <div className="flex items-center justify-between gap-3 flex-wrap">

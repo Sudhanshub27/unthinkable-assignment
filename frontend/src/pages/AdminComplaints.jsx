@@ -153,8 +153,8 @@ export default function AdminComplaints() {
       )}
 
       {/* 3. FILTER BAR */}
-      <div className="bg-paper-card rounded-xl shadow-soft p-3 flex flex-wrap gap-3 items-center border border-line">
-        <div className="relative flex-1 min-w-[220px]">
+      <div className="bg-paper-card rounded-xl shadow-soft p-3 flex flex-wrap gap-2.5 items-center border border-line">
+        <div className="relative w-full sm:flex-1 min-w-0">
           <Search className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -165,10 +165,9 @@ export default function AdminComplaints() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-          <Filter className="w-4 h-4 text-ink-muted hidden lg:block" />
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
           <select
-            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+            className="rounded-lg border border-line px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors w-full sm:w-auto"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -179,7 +178,7 @@ export default function AdminComplaints() {
           </select>
 
           <select
-            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+            className="rounded-lg border border-line px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors w-full sm:w-auto"
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
           >
@@ -190,7 +189,7 @@ export default function AdminComplaints() {
           </select>
 
           <select
-            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
+            className="rounded-lg border border-line px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors w-full sm:w-auto col-span-2 sm:col-span-1"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
           >
@@ -202,25 +201,28 @@ export default function AdminComplaints() {
             ))}
           </select>
 
-          <Button
-            variant={overdueOnly ? 'danger' : 'secondary'}
-            size="sm"
-            onClick={() => setOverdueOnly(!overdueOnly)}
-            icon={<AlertTriangle className="w-3.5 h-3.5" />}
-          >
-            Overdue Only
-          </Button>
-
-          {isFilterActive && (
+          <div className="flex items-center gap-2 col-span-2 sm:col-span-1">
             <Button
-              variant="ghost"
+              variant={overdueOnly ? 'danger' : 'secondary'}
               size="sm"
-              onClick={handleClearFilters}
-              icon={<X className="w-3.5 h-3.5" />}
+              onClick={() => setOverdueOnly(!overdueOnly)}
+              icon={<AlertTriangle className="w-3.5 h-3.5" />}
+              className="flex-1 sm:flex-initial"
             >
-              Clear
+              Overdue Only
             </Button>
-          )}
+
+            {isFilterActive && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearFilters}
+                icon={<X className="w-3.5 h-3.5" />}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

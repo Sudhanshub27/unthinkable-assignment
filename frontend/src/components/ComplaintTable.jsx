@@ -83,19 +83,21 @@ export default function ComplaintTable({
             className={`bg-paper-card rounded-xl border border-line shadow-card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-200 p-4 border-l-4 ${catStyle.border} cursor-pointer flex flex-col justify-between space-y-3 group`}
           >
             {/* Top Row: Category + ID + Flat + Status */}
-            <div className="flex items-center justify-between gap-2 border-b border-line/60 pb-2.5">
-              <div className="flex items-center gap-2 flex-wrap min-w-0">
-                <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-paper-hover border border-line/50 ${catStyle.text}`}>
+            <div className="flex items-start sm:items-center justify-between gap-2 border-b border-line/60 pb-2.5">
+              <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+                <span className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-paper-hover border border-line/50 ${catStyle.text}`}>
                   {c.category}
                 </span>
                 <span className="text-xs text-ink-muted font-mono font-medium">#{c.id}</span>
                 {c.flat_number && (
-                  <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-paper-hover text-ink-secondary">
+                  <span className="text-[10px] sm:text-[11px] font-medium px-1.5 py-0.5 rounded bg-paper-hover text-ink-secondary">
                     {formatFlatNumber(c.flat_number)}
                   </span>
                 )}
               </div>
-              <StatusBadge status={c.status} />
+              <div className="shrink-0">
+                <StatusBadge status={c.status} />
+              </div>
             </div>
 
             {/* Middle Row: Description + Photo Attachment */}
@@ -116,8 +118,8 @@ export default function ComplaintTable({
             </div>
 
             {/* Bottom Row: Date + Priority + Overdue */}
-            <div className="flex items-center justify-between text-xs text-ink-muted pt-2.5 border-t border-line/60 mt-auto">
-              <div className="flex items-center gap-1.5 min-w-0 text-ink-muted">
+            <div className="flex items-center justify-between gap-2 text-xs text-ink-muted pt-2.5 border-t border-line/60 mt-auto flex-wrap sm:flex-nowrap">
+              <div className="flex items-center gap-1.5 min-w-0 text-ink-muted text-[11px] sm:text-xs">
                 <Calendar className="w-3.5 h-3.5 shrink-0 text-ink-muted" />
                 <span className="truncate">{formatDate(c.created_at)}</span>
                 {mode === 'admin' && c.user_name && (

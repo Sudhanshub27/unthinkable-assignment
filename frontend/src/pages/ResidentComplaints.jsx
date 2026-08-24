@@ -177,8 +177,8 @@ export default function ResidentComplaints() {
       )}
 
       {/* 3. SEARCH & FILTER BAR */}
-      <div className="bg-paper-card rounded-xl shadow-soft p-3 flex flex-wrap gap-3 items-center border border-line">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="bg-paper-card rounded-xl shadow-soft p-3 flex flex-wrap gap-2.5 items-center border border-line">
+        <div className="relative w-full sm:flex-1 min-w-0">
           <Search className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -189,10 +189,9 @@ export default function ResidentComplaints() {
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-ink-muted hidden sm:block" />
+        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center">
           <select
-            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors flex-1 sm:flex-initial"
+            className="rounded-lg border border-line px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors w-full sm:w-auto"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -203,7 +202,7 @@ export default function ResidentComplaints() {
           </select>
 
           <select
-            className="rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors flex-1 sm:flex-initial"
+            className="rounded-lg border border-line px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors w-full sm:w-auto"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
           >

@@ -129,32 +129,32 @@ export default function AdminSettings() {
           )}
 
           {/* Section 1: Society Identity & Contacts */}
-          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-5 transition-all">
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-4 sm:p-6 space-y-5 transition-all">
             <div className="flex items-center gap-3 border-b border-line pb-4">
-              <div className="w-10 h-10 rounded-xl bg-terracotta-500/10 border border-terracotta-500/20 text-terracotta-500 flex items-center justify-center shrink-0">
-                <Building className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-terracotta-500/10 border border-terracotta-500/20 text-terracotta-500 flex items-center justify-center shrink-0">
+                <Building className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h3 className="font-display font-bold text-base text-ink">
+              <div className="min-w-0">
+                <h3 className="font-display font-bold text-sm sm:text-base text-ink">
                   Society Profile & Emergency Contacts
                 </h3>
-                <p className="text-xs text-ink-muted">
+                <p className="text-xs text-ink-muted leading-relaxed">
                   Basic association details displayed across resident portals, emails, and header badges.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <div className="space-y-1.5 md:col-span-2">
                 <label htmlFor="settings-society-name" className="block text-xs font-bold text-ink">
                   Society Name / Association Title <span className="text-clay-500">*</span>
                 </label>
                 <div className="relative">
-                  <Building className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Building className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     id="settings-society-name"
                     type="text"
-                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                    className="w-full rounded-xl border border-line px-3.5 py-2 sm:py-2.5 pl-9 text-xs sm:text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
                     value={settings.society_name}
                     onChange={(e) => handleChange('society_name', e.target.value)}
                     placeholder="e.g. Angan Residential Society"
@@ -168,11 +168,11 @@ export default function AdminSettings() {
                   Management Office Email <span className="text-clay-500">*</span>
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     id="settings-support-email"
                     type="email"
-                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                    className="w-full rounded-xl border border-line px-3.5 py-2 sm:py-2.5 pl-9 text-xs sm:text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
                     value={settings.support_email}
                     onChange={(e) => handleChange('support_email', e.target.value)}
                     placeholder="e.g. office@society.com"
@@ -186,11 +186,11 @@ export default function AdminSettings() {
                   24/7 Security Helpline Phone
                 </label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Phone className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     id="settings-emergency-phone"
                     type="text"
-                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                    className="w-full rounded-xl border border-line px-3.5 py-2 sm:py-2.5 pl-9 text-xs sm:text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
                     value={settings.emergency_phone}
                     onChange={(e) => handleChange('emergency_phone', e.target.value)}
                     placeholder="e.g. +91 98765 43210"
@@ -201,40 +201,40 @@ export default function AdminSettings() {
           </div>
 
           {/* Section 2: SLA & Overdue Determination Rules */}
-          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-5 transition-all">
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-4 sm:p-6 space-y-5 transition-all">
             <div className="flex items-center gap-3 border-b border-line pb-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
-                <Clock className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h3 className="font-display font-bold text-base text-ink">
+              <div className="min-w-0">
+                <h3 className="font-display font-bold text-sm sm:text-base text-ink">
                   Service Level Agreement (SLA) & Overdue Rules
                 </h3>
-                <p className="text-xs text-ink-muted">
+                <p className="text-xs text-ink-muted leading-relaxed">
                   Configure automated resolution timelines, max attachment sizes, and escalation thresholds.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <div className="space-y-1.5">
                 <label htmlFor="settings-overdue-days" className="block text-xs font-bold text-ink">
                   Automatic SLA Overdue Threshold <span className="text-clay-500">*</span>
                 </label>
                 <div className="relative flex items-center gap-2">
                   <div className="relative flex-1">
-                    <Clock className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Clock className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       id="settings-overdue-days"
                       type="number"
                       min="1"
-                      className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                      className="w-full rounded-xl border border-line px-3.5 py-2 sm:py-2.5 pl-9 text-xs sm:text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
                       value={settings.overdue_threshold_days}
                       onChange={(e) => handleChange('overdue_threshold_days', e.target.value)}
                       required
                     />
                   </div>
-                  <span className="text-xs font-semibold text-ink-muted shrink-0 bg-paper px-3 py-2.5 rounded-xl border border-line">
+                  <span className="text-[11px] sm:text-xs font-semibold text-ink-muted shrink-0 bg-paper px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-line whitespace-nowrap">
                     Days Unresolved
                   </span>
                 </div>
@@ -245,10 +245,10 @@ export default function AdminSettings() {
                   Max Photo Upload Limit
                 </label>
                 <div className="relative">
-                  <HardDrive className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <HardDrive className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <select
                     id="settings-max-upload"
-                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all cursor-pointer"
+                    className="w-full rounded-xl border border-line px-3.5 py-2 sm:py-2.5 pl-9 pr-6 text-xs sm:text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all cursor-pointer truncate"
                     value={settings.max_upload_size_mb}
                     onChange={(e) => handleChange('max_upload_size_mb', e.target.value)}
                   >
@@ -261,11 +261,11 @@ export default function AdminSettings() {
             </div>
 
             {/* SLA Callout Banner */}
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0 mt-0.5">
-                <AlertTriangle className="w-4 h-4" />
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5 sm:p-4 flex items-start gap-3">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0 mt-0.5">
+                <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 min-w-0">
                 <h4 className="text-xs font-bold text-ink">Automated SLA Escalation Policy</h4>
                 <p className="text-xs text-ink-secondary leading-relaxed">
                   Complaints remaining open beyond <strong className="text-ink font-bold">{settings.overdue_threshold_days} days</strong> will automatically surface with an <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-clay-500/10 text-clay-600 border border-clay-500/20 font-mono">OVERDUE</span> badge on administrative dashboards and generate alert notifications.
@@ -275,31 +275,31 @@ export default function AdminSettings() {
           </div>
 
           {/* Section 3: System Automation & Audit Security */}
-          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-5 transition-all">
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-4 sm:p-6 space-y-5 transition-all">
             <div className="flex items-center gap-3 border-b border-line pb-4">
-              <div className="w-10 h-10 rounded-xl bg-olive-500/10 border border-olive-500/20 text-olive-600 flex items-center justify-center shrink-0">
-                <Bell className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-olive-500/10 border border-olive-500/20 text-olive-600 flex items-center justify-center shrink-0">
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h3 className="font-display font-bold text-base text-ink">
+              <div className="min-w-0">
+                <h3 className="font-display font-bold text-sm sm:text-base text-ink">
                   System Notifications & Audit Security
                 </h3>
-                <p className="text-xs text-ink-muted">
+                <p className="text-xs text-ink-muted leading-relaxed">
                   Email dispatch rules and system audit trail logging preferences.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <div className="space-y-1.5">
                 <label htmlFor="settings-email-notifications" className="block text-xs font-bold text-ink">
                   Resident Email Status Notifications
                 </label>
                 <div className="relative">
-                  <Bell className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Bell className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <select
                     id="settings-email-notifications"
-                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all cursor-pointer"
+                    className="w-full rounded-xl border border-line px-3.5 py-2 sm:py-2.5 pl-9 pr-6 text-xs sm:text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all cursor-pointer truncate"
                     value={settings.email_notifications}
                     onChange={(e) => handleChange('email_notifications', e.target.value)}
                   >
@@ -311,12 +311,12 @@ export default function AdminSettings() {
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-ink">Audit Trail Logging Policy</label>
-                <div className="p-2.5 bg-paper border border-line rounded-xl text-xs text-ink-secondary flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                <div className="p-2.5 bg-paper border border-line rounded-xl text-xs text-ink-secondary flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                  <div className="flex items-center gap-2 min-w-0">
                     <ShieldCheck className="w-4 h-4 text-olive-600 shrink-0" />
-                    <span className="font-medium text-ink">Immutable Audit Trail</span>
+                    <span className="font-medium text-ink text-xs truncate">Immutable Audit Trail</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-olive-500/10 text-olive-600 border border-olive-500/20 font-bold text-[10px] uppercase">
+                  <span className="px-2 py-0.5 rounded-full bg-olive-500/10 text-olive-600 border border-olive-500/20 font-bold text-[10px] uppercase shrink-0">
                     Active & Protected
                   </span>
                 </div>
@@ -325,17 +325,17 @@ export default function AdminSettings() {
           </div>
 
           {/* Section 4: Data Management & Reset */}
-          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-line pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-clay-500/10 border border-clay-500/20 text-clay-600 flex items-center justify-center shrink-0">
-                  <Trash2 className="w-5 h-5" />
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-4 sm:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-line pb-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-clay-500/10 border border-clay-500/20 text-clay-600 flex items-center justify-center shrink-0">
+                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h3 className="font-display font-bold text-base text-ink">
+                <div className="min-w-0">
+                  <h3 className="font-display font-bold text-sm sm:text-base text-ink">
                     Reset Operational Data
                   </h3>
-                  <p className="text-xs text-ink-muted">
+                  <p className="text-xs text-ink-muted leading-relaxed">
                     Empty all active complaints, audit timeline history, notices, and email logs.
                   </p>
                 </div>
@@ -344,7 +344,7 @@ export default function AdminSettings() {
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="text-clay-600 hover:bg-clay-500/10 border-clay-500/20 cursor-pointer font-medium"
+                className="text-clay-600 hover:bg-clay-500/10 border-clay-500/20 cursor-pointer font-medium w-full sm:w-auto shrink-0"
                 isLoading={resetting}
                 onClick={() => setShowResetModal(true)}
                 icon={<RefreshCw className="w-3.5 h-3.5" />}
@@ -355,7 +355,7 @@ export default function AdminSettings() {
           </div>
 
           {/* Form Submit Action Bar */}
-          <div className="flex items-center justify-between pt-2 bg-paper-card p-4 rounded-2xl border border-line shadow-card">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-paper-card p-4 rounded-2xl border border-line shadow-card">
             <div className="flex items-center gap-2 text-xs text-ink-muted">
               <Info className="w-4 h-4 text-terracotta-500 shrink-0" />
               <span>All updates apply immediately to live society operations.</span>
@@ -366,6 +366,7 @@ export default function AdminSettings() {
               size="lg"
               isLoading={saving}
               icon={<CheckCircle2 className="w-4 h-4" />}
+              className="w-full sm:w-auto"
             >
               {saving ? 'Saving Configurations...' : 'Save All Configurations'}
             </Button>
