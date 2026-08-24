@@ -18,6 +18,8 @@ import {
   ShieldCheck,
   Save,
   Info,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 
 export default function AdminSettings() {
@@ -35,6 +37,7 @@ export default function AdminSettings() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [error, setError] = useState('');
 
   async function loadSettings() {
@@ -87,6 +90,22 @@ export default function AdminSettings() {
       addToast(msg, 'error');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleResetData() {
+    if (!window.confirm('Are you sure you want to empty all operational data (complaints, history, notices, notifications, email logs)?')) {
+      return;
+    }
+    setResetting(true);
+    try {
+      const res = await client.post('/settings/reset-data');
+      addToast(res.data.message || 'Operational data emptied successfully!', 'success');
+    } catch (err) {
+      console.error(err);
+      addToast(err.response?.data?.error || 'Failed to empty operational data.', 'error');
+    } finally {
+      setResetting(false);
     }
   }
 
@@ -301,6 +320,36 @@ export default function AdminSettings() {
                   </span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Section 4: Data Management & Reset */}
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-clay-500/10 border border-clay-500/20 text-clay-600 flex items-center justify-center shrink-0">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-base text-ink">
+                    Reset Operational Data
+                  </h3>
+                  <p className="text-xs text-ink-muted">
+                    Empty all active complaints, audit timeline history, notices, and email logs.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="text-clay-600 hover:bg-clay-500/10 border-clay-500/20"
+                isLoading={resetting}
+                onClick={handleResetData}
+                icon={<RefreshCw className="w-3.5 h-3.5" />}
+              >
+                {resetting ? 'Resetting...' : 'Empty Operational Data'}
+              </Button>
             </div>
           </div>
 

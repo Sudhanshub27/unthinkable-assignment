@@ -128,4 +128,22 @@ router.put('/overdue-threshold', authenticate, requireAdmin, async (req, res) =>
   }
 });
 
+// POST /api/settings/reset-data (admin only - empty operational data)
+router.post('/reset-data', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM complaint_history');
+    await pool.query('DELETE FROM complaints');
+    await pool.query('DELETE FROM notices');
+    await pool.query('DELETE FROM notifications');
+    await pool.query('DELETE FROM email_logs');
+
+    res.json({
+      message: 'All operational data (complaints, history, notices, notifications, email logs) has been emptied successfully.',
+    });
+  } catch (err) {
+    console.error('Failed to reset operational data:', err);
+    res.status(500).json({ error: 'Failed to reset operational data' });
+  }
+});
+
 module.exports = router;
