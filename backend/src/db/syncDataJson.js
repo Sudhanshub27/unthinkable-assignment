@@ -17,6 +17,15 @@ async function syncDataJson() {
     const email_logs = (await pool.query('SELECT * FROM email_logs ORDER BY id ASC')).rows;
     const settings = (await pool.query('SELECT * FROM settings ORDER BY key ASC')).rows;
 
+    // Only overwrite data.json if there are complaints OR if data.json doesn't exist
+    if (complaints.length === 0 && fs.existsSync(DATA_JSON_PATH)) {
+      const existing = JSON.parse(fs.readFileSync(DATA_JSON_PATH, 'utf8'));
+      if (existing.complaints && existing.complaints.length > 0) {
+        console.log('[DATA_JSON_SYNC] Skipping sync to protect existing data.json records from empty DB overwrite.');
+        return;
+      }
+    }
+
     const data = {
       users,
       complaints,
@@ -51,13 +60,13 @@ async function seedFromDataJson() {
     const existingComplaints = await pool.query('SELECT COUNT(*) as c FROM complaints');
     const count = parseInt(existingComplaints.rows[0]?.c || '0', 10);
 
-    // If database already has 48 or more complaints, skip seeding
-    if (count >= (data.complaints?.length || 48)) {
+    const targetCount = data.complaints?.length || 48;
+    if (count >= targetCount) {
       console.log(`[DATA_JSON_SEED] DB already has ${count} complaints. Skipping seedFromDataJson.`);
       return;
     }
 
-    console.log(`[DATA_JSON_SEED] Seeding DB from data.json (${data.complaints?.length || 0} complaints)...`);
+    console.log(`[DATA_JSON_SEED] Seeding DB from data.json (${targetCount} complaints)...`);
 
     // 1. Users
     if (Array.isArray(data.users)) {
@@ -100,7 +109,7 @@ async function seedFromDataJson() {
             c.photo_url || null,
             c.status,
             c.priority,
-            c.is_overdue_flag ? 1 : 0,
+            c.is_overdue_flag ? true : false,
             c.resolved_at || null,
             c.created_at,
             c.updated_at || c.created_at,
@@ -131,7 +140,7 @@ async function seedFromDataJson() {
              title = EXCLUDED.title,
              body = EXCLUDED.body,
              is_important = EXCLUDED.is_important`,
-          [n.id, n.title, n.body, n.is_important ? 1 : 0, n.posted_by, n.created_at]
+          [n.id, n.title, n.body, n.is_important ? true : false, n.posted_by, n.created_at]
         );
       }
     }
@@ -143,7 +152,17 @@ async function seedFromDataJson() {
           `INSERT INTO notifications (id, user_id, title, message, is_read, type, complaint_id, notice_id, created_at)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
            ON CONFLICT (id) DO NOTHING`,
-          [notif.id, notif.user_id, notif.title, notif.message, notif.is_read ? 1 : 0, notif.type || 'info', notif.complaint_id || null, notif.notice_id || null, notif.created_at]
+          [
+            notif.id,
+            notif.user_id,
+            notif.title,
+            notif.message,
+            notif.is_read ? true : false,
+            notif.type || 'info',
+            notif.complaint_id || null,
+            notif.notice_id || null,
+            notif.created_at,
+          ]
         );
       }
     }
@@ -151,11 +170,26 @@ async function seedFromDataJson() {
     // 6. Email Logs
     if (Array.isArray(data.email_logs)) {
       for (const em of data.email_logs) {
+        const recipientEmail = em.recipient_email || em.recipient || 'resident@society.com';
+        const eventType = em.event_type || 'Complaint Status Update';
         await pool.query(
-          `INSERT INTO email_logs (id, recipient, subject, status, complaint_id, notice_id, created_at, body, provider_msg_id, error_details, recipient_name)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          `INSERT INTO email_logs (id, recipient_email, recipient_name, event_type, subject, status, complaint_id, notice_id, created_at, body, provider_msg_id, error_details)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
            ON CONFLICT (id) DO NOTHING`,
-          [em.id, em.recipient, em.subject, em.status, em.complaint_id || null, em.notice_id || null, em.created_at, em.body || null, em.provider_msg_id || null, em.error_details || null, em.recipient_name || null]
+          [
+            em.id,
+            recipientEmail,
+            em.recipient_name || null,
+            eventType,
+            em.subject || 'Notice',
+            em.status || 'sent',
+            em.complaint_id || null,
+            em.notice_id || null,
+            em.created_at || new Date().toISOString(),
+            em.body || null,
+            em.provider_msg_id || null,
+            em.error_details || null,
+          ]
         );
       }
     }
@@ -164,10 +198,10 @@ async function seedFromDataJson() {
     if (Array.isArray(data.settings)) {
       for (const s of data.settings) {
         await pool.query(
-          `INSERT INTO settings (key, value, updated_at)
-           VALUES ($1, $2, $3)
+          `INSERT INTO settings (key, value)
+           VALUES ($1, $2)
            ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
-          [s.key, s.value, s.updated_at || new Date().toISOString()]
+          [s.key, s.value]
         );
       }
     }
