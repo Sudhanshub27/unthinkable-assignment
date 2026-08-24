@@ -153,9 +153,13 @@ export default function ResidentDashboard() {
   // Important notices
   const importantNotices = notices.filter((n) => n.is_important);
 
-  // Recent complaints (last 4)
+  // Recent complaints (last 4, newest first)
   const recentComplaints = [...complaints]
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .sort((a, b) => {
+      const timeDiff = new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      if (timeDiff !== 0) return timeDiff;
+      return Number(b.id) - Number(a.id);
+    })
     .slice(0, 4);
 
   return (

@@ -89,7 +89,7 @@ router.post('/', authenticate, upload.single('photo'), async (req, res) => {
 router.get('/mine', authenticate, async (req, res) => {
   try {
     const complaintsRes = await pool.query(
-      `SELECT * FROM complaints WHERE resident_id = $1 ORDER BY created_at DESC`,
+      `SELECT * FROM complaints WHERE resident_id = $1 ORDER BY created_at DESC, id DESC`,
       [req.user.id]
     );
     const threshold = await getOverdueThresholdDays();
@@ -142,16 +142,18 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
       `SELECT c.*, u.name AS resident_name, u.flat_number
        FROM complaints c JOIN users u ON u.id = c.resident_id
        ${where}
-       ORDER BY c.created_at DESC`,
+       ORDER BY c.created_at DESC, c.id DESC`,
       params
     );
     const threshold = await getOverdueThresholdDays();
     let complaints = annotateOverdue(result.rows, threshold);
 
-    // Overdue complaints surface at the top of the admin view, as required.
+    // Overdue complaints surface at the top of the admin view, then newest first
     complaints.sort((a, b) => {
       if (a.is_overdue !== b.is_overdue) return a.is_overdue ? -1 : 1;
-      return new Date(b.created_at) - new Date(a.created_at);
+      const timeDiff = new Date(b.created_at) - new Date(a.created_at);
+      if (timeDiff !== 0) return timeDiff;
+      return Number(b.id) - Number(a.id);
     });
 
     res.json(complaints);

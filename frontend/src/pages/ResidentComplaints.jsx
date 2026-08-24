@@ -45,6 +45,7 @@ export default function ResidentComplaints() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [sortOrder, setSortOrder] = useState('newest');
 
   async function loadData() {
     setLoading(true);
@@ -131,19 +132,25 @@ export default function ResidentComplaints() {
     }
   }
 
-  // Filters
-  const filteredComplaints = complaints.filter((c) => {
-    if (filterStatus && c.status !== filterStatus) return false;
-    if (filterCategory && c.category !== filterCategory) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchId = String(c.id).includes(q);
-      const matchDesc = (c.description || '').toLowerCase().includes(q);
-      const matchCat = (c.category || '').toLowerCase().includes(q);
-      return matchId || matchDesc || matchCat;
-    }
-    return true;
-  });
+  // Filters & Sorting
+  const filteredComplaints = complaints
+    .filter((c) => {
+      if (filterStatus && c.status !== filterStatus) return false;
+      if (filterCategory && c.category !== filterCategory) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchId = String(c.id).includes(q);
+        const matchDesc = (c.description || '').toLowerCase().includes(q);
+        const matchCat = (c.category || '').toLowerCase().includes(q);
+        return matchId || matchDesc || matchCat;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const timeDiff = new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      const primaryDiff = timeDiff !== 0 ? timeDiff : Number(b.id) - Number(a.id);
+      return sortOrder === 'oldest' ? -primaryDiff : primaryDiff;
+    });
 
   const totalCount = complaints.length;
   const openCount = complaints.filter((c) => c.status === 'Open').length;
@@ -189,7 +196,16 @@ export default function ResidentComplaints() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+          <select
+            className="rounded-lg border border-line px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors w-full sm:w-auto font-medium"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="newest">Sort: Newest First</option>
+            <option value="oldest">Sort: Oldest First</option>
+          </select>
+
           <select
             className="rounded-lg border border-line px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors w-full sm:w-auto"
             value={filterStatus}
