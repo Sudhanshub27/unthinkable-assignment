@@ -9,21 +9,32 @@ async function migrate() {
   try {
     await pool.query(schema);
 
-    // Safely add body and provider_msg_id columns if table existed prior
-    try {
-      await pool.query('ALTER TABLE email_logs ADD COLUMN body TEXT');
-    } catch (e) {}
+    // Safely add missing columns if tables pre-existed in Postgres
+    const safeAlterations = [
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_status VARCHAR(20);',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS flat_number VARCHAR(20);',
+      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS body TEXT;',
+      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS provider_msg_id VARCHAR(100);',
+      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS recipient_name VARCHAR(150);',
+      'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS error_details TEXT;',
+    ];
 
-    try {
-      await pool.query('ALTER TABLE email_logs ADD COLUMN provider_msg_id VARCHAR(100)');
-    } catch (e) {}
+    for (const sql of safeAlterations) {
+      try {
+        await pool.query(sql);
+      } catch (e) {
+        // Fallback for drivers/DB versions without IF NOT EXISTS syntax
+      }
+    }
 
     console.log('Migration completed successfully.');
   } catch (err) {
     console.error('Migration failed:', err);
     process.exit(1);
   } finally {
-    await pool.end();
+    if (pool.end) {
+      try { await pool.end(); } catch (e) {}
+    }
   }
 }
 
