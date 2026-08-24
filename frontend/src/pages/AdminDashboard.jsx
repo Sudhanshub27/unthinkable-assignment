@@ -271,7 +271,6 @@ export default function AdminDashboard() {
           <SkeletonTable rows={2} cols={6} />
         ) : overdueComplaints.length === 0 ? (
           <EmptyState
-            illustration={emptyComplaintsIllustration}
             icon="check-circle"
             title="No overdue complaints"
             description="All complaints are currently within configured SLA limits."
@@ -304,7 +303,6 @@ export default function AdminDashboard() {
           <SkeletonTable rows={3} cols={6} />
         ) : recentComplaints.length === 0 ? (
           <EmptyState
-            illustration={emptyComplaintsIllustration}
             icon="clipboard"
             title="No complaints recorded yet"
             description="New resident complaints will appear here automatically."

@@ -5,7 +5,20 @@ import { useSettings } from '../context/SettingsContext';
 import PageHeader from '../components/PageHeader';
 import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
-import { Settings, Clock, Bell, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import {
+  Settings,
+  Clock,
+  Bell,
+  AlertTriangle,
+  CheckCircle2,
+  Building,
+  Mail,
+  Phone,
+  HardDrive,
+  ShieldCheck,
+  Save,
+  Info,
+} from 'lucide-react';
 
 export default function AdminSettings() {
   const { addToast } = useToast();
@@ -91,151 +104,214 @@ export default function AdminSettings() {
       ) : (
         <form onSubmit={handleSaveSettings} className="space-y-6">
           {error && (
-            <div className="p-3 rounded-lg bg-clay-500/10 border border-clay-500/20 text-clay-500 text-xs font-medium">
-              {error}
+            <div className="p-3.5 rounded-xl bg-clay-500/10 border border-clay-500/20 text-clay-600 text-xs font-medium flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
           {/* Section 1: Society Identity & Contacts */}
-          <div className="bg-paper-card rounded-xl border border-line shadow-card p-6 space-y-4">
-            <h3 className="font-display font-semibold text-base text-ink border-b border-line pb-3 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-terracotta-400" />
-              <span>Society Profile & Emergency Contacts</span>
-            </h3>
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-5 transition-all">
+            <div className="flex items-center gap-3 border-b border-line pb-4">
+              <div className="w-10 h-10 rounded-xl bg-terracotta-500/10 border border-terracotta-500/20 text-terracotta-500 flex items-center justify-center shrink-0">
+                <Building className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-base text-ink">
+                  Society Profile & Emergency Contacts
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Basic association details displayed across resident portals, emails, and header badges.
+                </p>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1 md:col-span-2">
-                <label htmlFor="settings-society-name" className="block text-xs font-semibold text-ink-muted">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5 md:col-span-2">
+                <label htmlFor="settings-society-name" className="block text-xs font-bold text-ink">
                   Society Name / Association Title <span className="text-clay-500">*</span>
                 </label>
-                <input
-                  id="settings-society-name"
-                  type="text"
-                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
-                  value={settings.society_name}
-                  onChange={(e) => handleChange('society_name', e.target.value)}
-                  placeholder="e.g. Angan Residential Society"
-                  required
-                />
+                <div className="relative">
+                  <Building className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="settings-society-name"
+                    type="text"
+                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                    value={settings.society_name}
+                    onChange={(e) => handleChange('society_name', e.target.value)}
+                    placeholder="e.g. Angan Residential Society"
+                    required
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label htmlFor="settings-support-email" className="block text-xs font-semibold text-ink-muted">
+              <div className="space-y-1.5">
+                <label htmlFor="settings-support-email" className="block text-xs font-bold text-ink">
                   Management Office Email <span className="text-clay-500">*</span>
                 </label>
-                <input
-                  id="settings-support-email"
-                  type="email"
-                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
-                  value={settings.support_email}
-                  onChange={(e) => handleChange('support_email', e.target.value)}
-                  placeholder="e.g. office@society.com"
-                  required
-                />
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="settings-support-email"
+                    type="email"
+                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                    value={settings.support_email}
+                    onChange={(e) => handleChange('support_email', e.target.value)}
+                    placeholder="e.g. office@society.com"
+                    required
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label htmlFor="settings-emergency-phone" className="block text-xs font-semibold text-ink-muted">
+              <div className="space-y-1.5">
+                <label htmlFor="settings-emergency-phone" className="block text-xs font-bold text-ink">
                   24/7 Security Helpline Phone
                 </label>
-                <input
-                  id="settings-emergency-phone"
-                  type="text"
-                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
-                  value={settings.emergency_phone}
-                  onChange={(e) => handleChange('emergency_phone', e.target.value)}
-                  placeholder="e.g. +91 98765 43210"
-                />
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="settings-emergency-phone"
+                    type="text"
+                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                    value={settings.emergency_phone}
+                    onChange={(e) => handleChange('emergency_phone', e.target.value)}
+                    placeholder="e.g. +91 98765 43210"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Section 2: SLA & Overdue Determination Rules */}
-          <div className="bg-paper-card rounded-xl border border-line shadow-card p-6 space-y-4">
-            <h3 className="font-display font-semibold text-base text-ink border-b border-line pb-3 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-mustard-500" />
-              <span>Service Level Agreement (SLA) & Overdue Rules</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label htmlFor="settings-overdue-days" className="block text-xs font-semibold text-ink-muted">
-                  Automatic SLA Overdue Threshold (Days) <span className="text-clay-500">*</span>
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    id="settings-overdue-days"
-                    type="number"
-                    min="1"
-                    className="w-32 rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
-                    value={settings.overdue_threshold_days}
-                    onChange={(e) => handleChange('overdue_threshold_days', e.target.value)}
-                    required
-                  />
-                  <span className="text-xs text-ink-muted font-semibold">days unresolved</span>
-                </div>
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-5 transition-all">
+            <div className="flex items-center gap-3 border-b border-line pb-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5" />
               </div>
-
-              <div className="space-y-1">
-                <label htmlFor="settings-max-upload" className="block text-xs font-semibold text-ink-muted">
-                  Max Photo Upload Size (MB)
-                </label>
-                <select
-                  id="settings-max-upload"
-                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
-                  value={settings.max_upload_size_mb}
-                  onChange={(e) => handleChange('max_upload_size_mb', e.target.value)}
-                >
-                  <option value="2">2 MB (Compact)</option>
-                  <option value="5">5 MB (Standard Default)</option>
-                  <option value="10">10 MB (High Resolution)</option>
-                </select>
+              <div>
+                <h3 className="font-display font-bold text-base text-ink">
+                  Service Level Agreement (SLA) & Overdue Rules
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Configure automated resolution timelines, max attachment sizes, and escalation thresholds.
+                </p>
               </div>
             </div>
 
-            <div className="bg-mustard-50/70 border border-mustard-400/30 rounded-lg p-3.5 flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-mustard-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-ink-secondary leading-relaxed">
-                Complaints remaining open beyond <strong className="text-ink font-semibold">{settings.overdue_threshold_days} days</strong> automatically surface with an <code className="bg-mustard-100 text-mustard-500 px-1 py-0.5 rounded text-[11px] font-mono">OVERDUE</code> SLA badge on administrative dashboards.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label htmlFor="settings-overdue-days" className="block text-xs font-bold text-ink">
+                  Automatic SLA Overdue Threshold <span className="text-clay-500">*</span>
+                </label>
+                <div className="relative flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Clock className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      id="settings-overdue-days"
+                      type="number"
+                      min="1"
+                      className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all"
+                      value={settings.overdue_threshold_days}
+                      onChange={(e) => handleChange('overdue_threshold_days', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-ink-muted shrink-0 bg-paper px-3 py-2.5 rounded-xl border border-line">
+                    Days Unresolved
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="settings-max-upload" className="block text-xs font-bold text-ink">
+                  Max Photo Upload Limit
+                </label>
+                <div className="relative">
+                  <HardDrive className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    id="settings-max-upload"
+                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all cursor-pointer"
+                    value={settings.max_upload_size_mb}
+                    onChange={(e) => handleChange('max_upload_size_mb', e.target.value)}
+                  >
+                    <option value="2">2 MB (Compact Compression)</option>
+                    <option value="5">5 MB (Standard Default)</option>
+                    <option value="10">10 MB (High Resolution)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* SLA Callout Banner */}
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0 mt-0.5">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <h4 className="text-xs font-bold text-ink">Automated SLA Escalation Policy</h4>
+                <p className="text-xs text-ink-secondary leading-relaxed">
+                  Complaints remaining open beyond <strong className="text-ink font-bold">{settings.overdue_threshold_days} days</strong> will automatically surface with an <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-clay-500/10 text-clay-600 border border-clay-500/20 font-mono">OVERDUE</span> badge on administrative dashboards and generate alert notifications.
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Section 3: System Automation & Audit Security */}
-          <div className="bg-paper-card rounded-xl border border-line shadow-card p-6 space-y-4">
-            <h3 className="font-display font-semibold text-base text-ink border-b border-line pb-3 flex items-center gap-2">
-              <Bell className="w-5 h-5 text-olive-500" />
-              <span>System Notifications & Security Preferences</span>
-            </h3>
+          <div className="bg-paper-card rounded-2xl border border-line shadow-card p-6 space-y-5 transition-all">
+            <div className="flex items-center gap-3 border-b border-line pb-4">
+              <div className="w-10 h-10 rounded-xl bg-olive-500/10 border border-olive-500/20 text-olive-600 flex items-center justify-center shrink-0">
+                <Bell className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-base text-ink">
+                  System Notifications & Audit Security
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Email dispatch rules and system audit trail logging preferences.
+                </p>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label htmlFor="settings-email-notifications" className="block text-xs font-semibold text-ink-muted">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label htmlFor="settings-email-notifications" className="block text-xs font-bold text-ink">
                   Resident Email Status Notifications
                 </label>
-                <select
-                  id="settings-email-notifications"
-                  className="w-full rounded-lg border border-line px-3 py-2 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-colors"
-                  value={settings.email_notifications}
-                  onChange={(e) => handleChange('email_notifications', e.target.value)}
-                >
-                  <option value="enabled">Enabled (Send email on status change)</option>
-                  <option value="disabled">Disabled (Internal dashboard only)</option>
-                </select>
+                <div className="relative">
+                  <Bell className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    id="settings-email-notifications"
+                    className="w-full rounded-xl border border-line px-4 py-2.5 pl-10 text-sm text-ink bg-paper hover:bg-paper-hover focus:bg-paper focus:ring-2 focus:ring-terracotta-400/30 focus:border-terracotta-400 outline-none transition-all cursor-pointer"
+                    value={settings.email_notifications}
+                    onChange={(e) => handleChange('email_notifications', e.target.value)}
+                  >
+                    <option value="enabled">Enabled (Send email on status change)</option>
+                    <option value="disabled">Disabled (Internal dashboard only)</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-ink-muted">Audit Trail Logging Policy</label>
-                <div className="p-2.5 bg-paper border border-line rounded-lg text-xs text-ink-secondary flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded bg-olive-50 text-olive-600 font-semibold text-[11px]">Active</span>
-                  <span>Immutable Append-Only Audit Logging</span>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-ink">Audit Trail Logging Policy</label>
+                <div className="p-2.5 bg-paper border border-line rounded-xl text-xs text-ink-secondary flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-olive-600 shrink-0" />
+                    <span className="font-medium text-ink">Immutable Audit Trail</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-olive-500/10 text-olive-600 border border-olive-500/20 font-bold text-[10px] uppercase">
+                    Active & Protected
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Form Submit Action */}
-          <div className="flex justify-end pt-2">
+          {/* Form Submit Action Bar */}
+          <div className="flex items-center justify-between pt-2 bg-paper-card p-4 rounded-2xl border border-line shadow-card">
+            <div className="flex items-center gap-2 text-xs text-ink-muted">
+              <Info className="w-4 h-4 text-terracotta-500 shrink-0" />
+              <span>All updates apply immediately to live society operations.</span>
+            </div>
             <Button
               type="submit"
               variant="primary"
@@ -243,7 +319,7 @@ export default function AdminSettings() {
               isLoading={saving}
               icon={<CheckCircle2 className="w-4 h-4" />}
             >
-              {saving ? 'Saving Settings...' : 'Save All Configurations'}
+              {saving ? 'Saving Configurations...' : 'Save All Configurations'}
             </Button>
           </div>
         </form>

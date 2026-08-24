@@ -41,7 +41,7 @@ export default function Register() {
         name: name.trim(),
         email: email.trim(),
         password,
-        flatNumber: flatNumber.trim() || undefined,
+        flatNumber: activeRoleTab === 'resident' ? (flatNumber.trim() || undefined) : undefined,
         role: activeRoleTab,
       });
 
@@ -172,20 +172,22 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Flat Number Field */}
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-ink-muted">Flat / Apartment Number</label>
-              <div className="relative">
-                <Building className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  className="w-full rounded-lg border border-line px-4 py-3 pl-10 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-all placeholder:text-ink-muted"
-                  placeholder="e.g. Flat A-204"
-                  value={flatNumber}
-                  onChange={(e) => setFlatNumber(e.target.value)}
-                />
+            {/* Flat Number Field (Only for Residents) */}
+            {activeRoleTab === 'resident' && (
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-ink-muted">Flat / Apartment Number</label>
+                <div className="relative">
+                  <Building className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-line px-4 py-3 pl-10 text-sm text-ink bg-paper focus:ring-2 focus:ring-terracotta-400/40 focus:border-terracotta-400 outline-none transition-all placeholder:text-ink-muted"
+                    placeholder="e.g. Flat A-204"
+                    value={flatNumber}
+                    onChange={(e) => setFlatNumber(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Password Field */}
             <div className="space-y-1">
