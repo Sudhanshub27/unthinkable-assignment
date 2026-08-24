@@ -26,17 +26,17 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
-      
+
       // If wildcard or unconfigured, permit request
       if (!corsOrigin || corsOrigin === '*') return callback(null, true);
-      
+
       const allowedOrigins = corsOrigin.split(',').map((o) => o.trim().replace(/\/$/, ''));
       const cleanOrigin = origin.replace(/\/$/, '');
-      
+
       if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
         return callback(null, true);
       }
-      
+
       // Dynamic fallback for Vercel deployment preview domains
       if (cleanOrigin.endsWith('.vercel.app') || cleanOrigin.endsWith('.onrender.com')) {
         return callback(null, true);
