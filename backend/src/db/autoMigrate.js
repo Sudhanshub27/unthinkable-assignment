@@ -99,7 +99,7 @@ async function autoMigrate() {
     }
 
     migrationExecuted = true;
-    console.log('✅ Automated database schema verification and seeding completed successfully.');
+    console.log('✅ Automated database schema verification completed successfully.');
   } catch (err) {
     console.error('⚠️ Database auto-migration warning:', err.message);
   }

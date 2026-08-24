@@ -15,7 +15,7 @@ async function seed() {
     // Admin Demo Account
     const adminHash = await bcrypt.hash('Admin@123', 10);
     await pool.query(
-      `INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'admin')`,
+      `INSERT INTO users (name, email, password_hash, role, admin_status) VALUES ($1, $2, $3, 'admin', 'approved')`,
       ['Society Admin', 'admin@society.com', adminHash]
     );
 
