@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="Angan Logo" width="110" />
+  <img src="frontend/public/logo.webp" alt="Angan Logo" width="110" />
   <h1>Angan — Society Maintenance Tracker</h1>
   <p><i>The digital courtyard for modern housing societies</i></p>
 </div>
