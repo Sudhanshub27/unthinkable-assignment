@@ -41,9 +41,23 @@ router.post('/', authenticate, upload.single('photo'), async (req, res) => {
     await client.query('COMMIT');
     res.status(201).json(complaint);
 
-    // Asynchronously notify all admins of new complaint creation
+    // Asynchronously notify all admins AND the resident of new complaint creation
     setImmediate(async () => {
       try {
+        // 1. Notify Resident (complaint author)
+        await pool.query(
+          `INSERT INTO notifications (user_id, type, title, message, complaint_id)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            req.user.id,
+            'complaint_created',
+            `Complaint Submitted (#${complaint.id})`,
+            `Your complaint "${category}" has been logged successfully and sent to administration.`,
+            complaint.id,
+          ]
+        );
+
+        // 2. Notify all Admins
         const admins = await pool.query("SELECT id, name, email FROM users WHERE role = 'admin'");
         for (const admin of admins.rows) {
           await pool.query(
@@ -59,7 +73,7 @@ router.post('/', authenticate, upload.single('photo'), async (req, res) => {
           );
         }
       } catch (notifErr) {
-        console.error('Failed to create admin notification for new complaint:', notifErr);
+        console.error('Failed to create notifications for new complaint:', notifErr);
       }
     });
   } catch (err) {
@@ -347,6 +361,7 @@ router.patch('/:id', authenticate, requireAdmin, async (req, res) => {
             text,
             eventType: 'Complaint Status Update',
             complaintId: req.params.id,
+            senderId: req.user.id,
           }).catch((e) => console.error('Background sendEmail error:', e));
         }
       } catch (emailErr) {

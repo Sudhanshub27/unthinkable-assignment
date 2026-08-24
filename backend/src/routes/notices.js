@@ -82,6 +82,7 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
               text,
               eventType: 'Important Notice',
               noticeId: notice.id,
+              senderId: req.user.id,
             }).catch((e) => console.error('Background notice email error:', e));
           }
         } catch (emailErr) {

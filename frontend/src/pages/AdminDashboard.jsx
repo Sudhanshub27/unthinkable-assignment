@@ -10,7 +10,7 @@ import EmptyState from '../components/EmptyState';
 import { SkeletonCard, SkeletonTable } from '../components/Skeletons';
 import emptyComplaintsIllustration from '../assets/empty-complaints-new.webp';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { AlertTriangle, ClipboardList, PieChart as PieIcon, BarChart3 } from 'lucide-react';
+import { AlertTriangle, ClipboardList, PieChart as PieIcon, BarChart3, UserCheck } from 'lucide-react';
 
 const ANGAN_PALETTE = ['#C1502E', '#4B6B3E', '#D99A2B', '#2F6E6A', '#A8563F', '#7A4A5C'];
 
@@ -27,15 +27,19 @@ export default function AdminDashboard() {
   const [complaintHistory, setComplaintHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  const [pendingAdminsCount, setPendingAdminsCount] = useState(0);
+
   async function loadDashboardData(showSpinner = true) {
     if (showSpinner) setLoading(true);
     try {
-      const [dashRes, complaintsRes] = await Promise.all([
+      const [dashRes, complaintsRes, pendingRes] = await Promise.all([
         client.get('/dashboard'),
         client.get('/complaints'),
+        client.get('/admin/pending-admins').catch(() => ({ data: [] })),
       ]);
       setStats(dashRes.data);
       setComplaints(complaintsRes.data || []);
+      setPendingAdminsCount((pendingRes.data || []).length);
     } catch (err) {
       console.error(err);
       addToast('Failed to load operational analytics.', 'error');
@@ -160,6 +164,38 @@ export default function AdminDashboard() {
           />
         </div>
       )}
+
+      {/* PENDING ADMIN REQUESTS CARD */}
+      <div className="bg-paper-card rounded-2xl border border-line p-5 shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${
+            pendingAdminsCount > 0
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-600'
+              : 'bg-olive-500/10 border-olive-500/20 text-olive-600'
+          }`}>
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-base text-ink">Pending Admin Requests</h3>
+            <p className="text-xs text-ink-muted mt-0.5">
+              {pendingAdminsCount === 0
+                ? 'No pending admin requests.'
+                : `${pendingAdminsCount} request${pendingAdminsCount > 1 ? 's' : ''} awaiting approval`}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => navigate('/admin/pending-admins')}
+          className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all shrink-0 ${
+            pendingAdminsCount > 0
+              ? 'bg-terracotta-400 text-white border-terracotta-500 shadow-xs hover:bg-terracotta-500'
+              : 'bg-paper text-ink-secondary border-line hover:text-ink hover:border-ink-muted'
+          }`}
+        >
+          Review Requests
+        </button>
+      </div>
 
       {/* 3. TWO CHARTS SIDE BY SIDE */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

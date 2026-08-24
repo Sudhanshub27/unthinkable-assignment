@@ -44,6 +44,7 @@ router.post('/test', authenticate, requireAdmin, async (req, res) => {
       subject: '[Angan Society] Test Audit Email Dispatch',
       text: 'This is an automated test dispatch from the Administrative Audit Console to verify email delivery logs.',
       eventType: 'Test Notification',
+      senderId: req.user.id,
     });
     res.json({ message: 'Test email log generated successfully', result: testResult });
   } catch (err) {

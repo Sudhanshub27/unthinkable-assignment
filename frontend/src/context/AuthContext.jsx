@@ -46,6 +46,9 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user');
 
     const res = await client.post('/auth/register', payload);
+    if (res.data.requiresApproval) {
+      return res.data;
+    }
     localStorage.setItem('token', res.data.token);
     localStorage.setItem('user', JSON.stringify(res.data.user));
     setUser(res.data.user);

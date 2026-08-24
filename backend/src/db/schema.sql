@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     email           VARCHAR(150) UNIQUE NOT NULL,
     password_hash   VARCHAR(255) NOT NULL,
     role            VARCHAR(20) NOT NULL DEFAULT 'resident' CHECK (role IN ('resident', 'admin')),
+    admin_status    VARCHAR(20) CHECK (admin_status IN ('pending', 'approved', 'rejected')),
     flat_number     VARCHAR(20),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

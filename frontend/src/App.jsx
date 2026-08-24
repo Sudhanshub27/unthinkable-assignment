@@ -10,6 +10,7 @@ import AdminComplaints from './pages/AdminComplaints';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminSettings from './pages/AdminSettings';
 import AdminEmailLogs from './pages/AdminEmailLogs';
+import AdminPendingRequests from './pages/AdminPendingRequests';
 import NoticeBoard from './pages/NoticeBoard';
 import Profile from './pages/Profile';
 import { ToastProvider } from './context/ToastContext';
@@ -99,6 +100,16 @@ function AppShell() {
           <ProtectedRoute adminOnly>
             <AppLayout>
               <AdminDashboard />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pending-admins"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout>
+              <AdminPendingRequests />
             </AppLayout>
           </ProtectedRoute>
         }

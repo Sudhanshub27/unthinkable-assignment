@@ -12,6 +12,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const settingsRoutes = require('./routes/settings');
 const notificationsRoutes = require('./routes/notifications');
 const emailLogsRoutes = require('./routes/emailLogs');
+const adminManagementRoutes = require('./routes/adminManagement');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -83,6 +84,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/email-logs', emailLogsRoutes);
+app.use('/api/admin', adminManagementRoutes);
 
 // Multer and general error middleware
 app.use((err, req, res, next) => {

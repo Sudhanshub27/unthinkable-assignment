@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  UserCheck,
 } from 'lucide-react';
 
 import { getUserInitials } from '../utils/formatters';
@@ -68,6 +69,7 @@ export default function Topbar() {
   const adminNavItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: Home },
     { path: '/admin', label: 'Complaints', icon: ClipboardList },
+    { path: '/admin/pending-admins', label: 'Admin Requests', icon: UserCheck },
     { path: '/notices', label: 'Notice Board', icon: Megaphone },
     { path: '/admin/settings', label: 'Settings', icon: Settings },
     { path: '/admin/emails', label: 'Email Activity', icon: Mail },

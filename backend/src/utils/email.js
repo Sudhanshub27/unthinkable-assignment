@@ -63,7 +63,51 @@ async function logEmailAttempt({ recipientEmail, recipientName, eventType, subje
   }
 }
 
-async function sendEmail({ to, recipientName, subject, text, html, eventType, complaintId, noticeId }) {
+async function dispatchInAppEmailNotifications({ to, subject, complaintId, noticeId, senderId }) {
+  try {
+    const recipientEmails = Array.isArray(to) ? to : [to];
+    for (const rEmail of recipientEmails) {
+      // 1. Notify Recipient if user exists in DB
+      const userRes = await pool.query('SELECT id, role FROM users WHERE email = $1', [rEmail]);
+      if (userRes.rows.length > 0) {
+        const recipientUser = userRes.rows[0];
+        await pool.query(
+          `INSERT INTO notifications (user_id, type, title, message, complaint_id, notice_id)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [
+            recipientUser.id,
+            'email_received',
+            'Email Received',
+            `You received an email regarding: "${subject}". Please check your mail.`,
+            complaintId || null,
+            noticeId || null,
+          ]
+        );
+      }
+    }
+
+    // 2. Notify Sender if senderId provided
+    if (senderId) {
+      const recipientStr = Array.isArray(to) ? to.join(', ') : to;
+      await pool.query(
+        `INSERT INTO notifications (user_id, type, title, message, complaint_id, notice_id)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          senderId,
+          'email_sent',
+          'Email Sent',
+          `Email "${subject}" was successfully sent to ${recipientStr}.`,
+          complaintId || null,
+          noticeId || null,
+        ]
+      );
+    }
+  } catch (notifErr) {
+    console.error('Failed to dispatch in-app email notifications:', notifErr);
+  }
+}
+
+async function sendEmail({ to, recipientName, subject, text, html, eventType, complaintId, noticeId, senderId }) {
   const { societyName, supportEmail } = await getSocietySettings();
   const rawSender = process.env.RESEND_FROM || process.env.SMTP_FROM || process.env.SMTP_USER || 'onboarding@resend.dev';
   let emailAddr = rawSender;
@@ -74,6 +118,11 @@ async function sendEmail({ to, recipientName, subject, text, html, eventType, co
   const dynamicFrom = `${societyName} <${emailAddr}>`;
   const recipientEmail = Array.isArray(to) ? to.join(', ') : to;
   const emailBody = text || (html ? html.replace(/<[^>]+>/g, '') : '');
+
+  // Dispatch in-app notifications asynchronously for email events
+  setImmediate(() => {
+    dispatchInAppEmailNotifications({ to, subject, complaintId, noticeId, senderId });
+  });
 
   // Option 1: Direct Resend API Key support
   if (process.env.RESEND_API_KEY) {

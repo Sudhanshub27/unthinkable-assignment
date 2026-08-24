@@ -22,15 +22,38 @@ router.post('/register', async (req, res) => {
     }
     const hash = await bcrypt.hash(password, 10);
     const userRole = role === 'admin' ? 'admin' : 'resident';
+    const adminStatus = userRole === 'admin' ? 'pending' : null;
+
     const result = await pool.query(
-      `INSERT INTO users (name, email, password_hash, role, flat_number)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, name, email, role, flat_number, created_at`,
-      [name, email.toLowerCase(), hash, userRole, flatNumber || null]
+      `INSERT INTO users (name, email, password_hash, role, admin_status, flat_number)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, name, email, role, admin_status, flat_number, created_at`,
+      [name, email.toLowerCase(), hash, userRole, adminStatus, flatNumber || null]
     );
     const user = result.rows[0];
+
+    // Admin registration must NOT issue a token or log the user in immediately
+    if (user.role === 'admin') {
+      return res.status(201).json({
+        requiresApproval: true,
+        title: 'Admin Registration Submitted',
+        message: 'Your admin account has been created and is awaiting approval from an existing administrator.',
+        subMessage: 'Once approved, you can sign in using your registered email and password.',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          admin_status: user.admin_status,
+          flat_number: user.flat_number,
+          created_at: user.created_at,
+        },
+      });
+    }
+
+    // Resident registration issues a token and logs in immediately
     const token = jwt.sign(
-      { id: user.id, role: user.role, email: user.email, name: user.name },
+      { id: user.id, role: user.role, admin_status: user.admin_status, email: user.email, name: user.name },
       getJwtSecret(),
       { expiresIn: '7d' }
     );
@@ -57,8 +80,28 @@ router.post('/login', async (req, res) => {
     if (!match) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
+
+    // Check approval status for admin accounts
+    if (user.role === 'admin') {
+      if (user.admin_status === 'pending') {
+        return res.status(403).json({
+          error: 'Your admin account is still awaiting approval. Please ask an existing administrator to approve your account.',
+        });
+      }
+      if (user.admin_status === 'rejected') {
+        return res.status(403).json({
+          error: 'Your admin access request was rejected. Please contact the society administrator.',
+        });
+      }
+      if (user.admin_status !== 'approved') {
+        return res.status(403).json({
+          error: 'Your admin account is awaiting approval.',
+        });
+      }
+    }
+
     const token = jwt.sign(
-      { id: user.id, role: user.role, email: user.email, name: user.name },
+      { id: user.id, role: user.role, admin_status: user.admin_status, email: user.email, name: user.name },
       getJwtSecret(),
       { expiresIn: '7d' }
     );
@@ -69,6 +112,7 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        admin_status: user.admin_status,
         flat_number: user.flat_number,
       },
     });

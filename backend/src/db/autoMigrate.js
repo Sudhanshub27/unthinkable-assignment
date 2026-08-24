@@ -22,6 +22,7 @@ async function autoMigrate() {
       'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS error_details TEXT;',
       'ALTER TABLE email_logs ADD COLUMN IF NOT EXISTS recipient_name VARCHAR(150);',
       'ALTER TABLE users ADD COLUMN IF NOT EXISTS flat_number VARCHAR(20);',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_status VARCHAR(20);',
     ];
 
     for (const sql of colAlterations) {
@@ -32,12 +33,21 @@ async function autoMigrate() {
         try {
           const rawCol = sql.split('ADD COLUMN IF NOT EXISTS ')[1]?.split(' ')[0];
           if (rawCol) {
-            await pool.query(`ALTER TABLE email_logs ADD COLUMN ${rawCol} TEXT`);
+            await pool.query(`ALTER TABLE users ADD COLUMN ${rawCol} VARCHAR(20)`);
           }
         } catch (innerErr) {
           // Column already exists or error ignored
         }
       }
+    }
+
+    // Ensure all pre-existing admin users have admin_status = 'approved'
+    try {
+      await pool.query(
+        "UPDATE users SET admin_status = 'approved' WHERE role = 'admin' AND (admin_status IS NULL OR admin_status = '')"
+      );
+    } catch (migrErr) {
+      console.warn('Admin status migration warning:', migrErr.message);
     }
 
     // Seed default settings rows idempotently
@@ -62,10 +72,12 @@ async function autoMigrate() {
       if (adminRes.rows.length === 0) {
         const adminHash = await bcrypt.hash('Admin@123', 10);
         await pool.query(
-          `INSERT INTO users (name, email, password_hash, role)
-           VALUES ($1, $2, $3, 'admin') ON CONFLICT (email) DO NOTHING`,
+          `INSERT INTO users (name, email, password_hash, role, admin_status)
+           VALUES ($1, $2, $3, 'admin', 'approved') ON CONFLICT (email) DO NOTHING`,
           ['Society Admin', 'admin@society.com', adminHash]
         );
+      } else {
+        await pool.query("UPDATE users SET admin_status = 'approved' WHERE email = 'admin@society.com'");
       }
     } catch (userErr) {
       console.warn('Idempotent admin seed skipped:', userErr.message);

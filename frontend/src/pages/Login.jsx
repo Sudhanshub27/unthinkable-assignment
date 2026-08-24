@@ -7,7 +7,7 @@ import { Mail, Lock, User, Shield, Eye, EyeOff, Sparkles, ArrowRight } from 'luc
 import authIllustration from '../assets/auth-illustration-new.webp';
 
 export default function Login() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialRole = searchParams.get('role') === 'admin' ? 'admin' : 'resident';
 
   const [activeRoleTab, setActiveRoleTab] = useState(initialRole);
@@ -23,11 +23,21 @@ export default function Login() {
 
   useEffect(() => {
     document.title = 'Sign In — Angan';
-    const paramRole = searchParams.get('role');
-    if (paramRole === 'admin' || paramRole === 'resident') {
-      setActiveRoleTab(paramRole);
+    const paramEmail = searchParams.get('email');
+    if (paramEmail) {
+      setEmail(paramEmail);
     }
   }, [searchParams]);
+
+  function handleSwitchTab(role) {
+    setActiveRoleTab(role);
+    setError('');
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('role', role);
+      return newParams;
+    });
+  }
 
   function handleResetSession() {
     logout();
@@ -116,10 +126,7 @@ export default function Login() {
             <div className="flex bg-paper-hover p-1 rounded-xl gap-1 w-full mt-3 sm:mt-4">
               <button
                 type="button"
-                onClick={() => {
-                  setActiveRoleTab('resident');
-                  setError('');
-                }}
+                onClick={() => handleSwitchTab('resident')}
                 className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                   activeRoleTab === 'resident'
                     ? 'bg-terracotta-400 text-white shadow-sm'
@@ -131,10 +138,7 @@ export default function Login() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setActiveRoleTab('admin');
-                  setError('');
-                }}
+                onClick={() => handleSwitchTab('admin')}
                 className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                   activeRoleTab === 'admin'
                     ? 'bg-terracotta-400 text-white shadow-sm'
@@ -258,12 +262,12 @@ export default function Login() {
           {/* Link to Register */}
           <div className="text-center text-xs text-ink-secondary pt-1 space-y-2">
             <div>
-              <span>Don't have an account? </span>
+              <span>{activeRoleTab === 'admin' ? 'Need admin access? ' : "Don't have an account? "}</span>
               <Link
                 to={`/register?role=${activeRoleTab}`}
                 className="text-terracotta-400 font-semibold hover:underline"
               >
-                Register as {activeRoleTab === 'admin' ? 'Admin' : 'Resident'}
+                {activeRoleTab === 'admin' ? 'Request Admin Access' : 'Register as Resident'}
               </Link>
             </div>
 

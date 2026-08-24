@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { formatTimeAgo } from '../utils/formatters';
-import { Bell, Megaphone, ClipboardList } from 'lucide-react';
+import { Bell, Megaphone, ClipboardList, Send, Mail } from 'lucide-react';
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   async function fetchNotifications() {
@@ -76,9 +78,38 @@ export default function NotificationBell() {
     setIsOpen(false);
 
     if (item.complaint_id) {
-      navigate('/complaints');
+      navigate(user?.role === 'admin' ? '/admin' : '/complaints');
     } else if (item.notice_id) {
       navigate('/notices');
+    }
+  }
+
+  function renderNotificationIcon(type) {
+    switch (type) {
+      case 'email_sent':
+        return (
+          <div className="w-8 h-8 rounded-full bg-olive-500/10 text-olive-600 flex items-center justify-center shrink-0 mt-0.5">
+            <Send className="w-4 h-4" />
+          </div>
+        );
+      case 'email_received':
+        return (
+          <div className="w-8 h-8 rounded-full bg-terracotta-500/10 text-terracotta-500 flex items-center justify-center shrink-0 mt-0.5">
+            <Mail className="w-4 h-4" />
+          </div>
+        );
+      case 'important_notice':
+        return (
+          <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+            <Megaphone className="w-4 h-4" />
+          </div>
+        );
+      default:
+        return (
+          <div className="w-8 h-8 rounded-full bg-terracotta-50 text-terracotta-400 flex items-center justify-center shrink-0 mt-0.5">
+            <ClipboardList className="w-4 h-4" />
+          </div>
+        );
     }
   }
 
@@ -135,19 +166,7 @@ export default function NotificationBell() {
                     item.is_read ? 'bg-paper-card hover:bg-paper-hover' : 'bg-terracotta-50/50 hover:bg-terracotta-50'
                   }`}
                 >
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                      item.type === 'important_notice'
-                        ? 'bg-mustard-50 text-mustard-500'
-                        : 'bg-terracotta-50 text-terracotta-400'
-                    }`}
-                  >
-                    {item.type === 'important_notice' ? (
-                      <Megaphone className="w-4 h-4" />
-                    ) : (
-                      <ClipboardList className="w-4 h-4" />
-                    )}
-                  </div>
+                  {renderNotificationIcon(item.type)}
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
