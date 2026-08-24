@@ -84,7 +84,10 @@ export default function AdminEmailLogs() {
       }
     } catch (err) {
       console.error('Failed to load email logs:', err);
-      setError('Failed to load email activity logs');
+      const msg = err.response?.status === 401 || err.response?.status === 403
+        ? 'Session expired or unauthorized. Please log in as Admin.'
+        : err.response?.data?.error || 'Failed to load email activity logs from backend API.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -314,19 +317,22 @@ export default function AdminEmailLogs() {
           </div>
         </div>
 
-        {error && (
-          <div className="p-8 text-center bg-clay-500/5 space-y-3">
-            <AlertCircle className="w-8 h-8 text-clay-500 mx-auto" />
-            <p className="text-sm font-semibold text-clay-500">{error}</p>
-            <Button variant="outline" size="sm" onClick={fetchEmailLogs}>
-              Retry Fetching Logs
-            </Button>
-          </div>
-        )}
-
         {loading ? (
           <div className="p-6">
             <SkeletonTable rows={5} cols={6} />
+          </div>
+        ) : error ? (
+          <div className="p-12 text-center bg-clay-500/5 space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-clay-500/10 text-clay-500 border border-clay-500/20 flex items-center justify-center mx-auto shadow-xs">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <div className="space-y-1.5 max-w-md mx-auto">
+              <h4 className="font-display font-bold text-base text-clay-600">Failed to Fetch Audit Logs</h4>
+              <p className="text-xs text-ink-secondary leading-relaxed">{error}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={fetchEmailLogs} icon={<RotateCw className="w-4 h-4" />}>
+              Retry Fetching Logs
+            </Button>
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="p-14 text-center space-y-5">
