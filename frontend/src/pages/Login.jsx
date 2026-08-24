@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/UIComponents';
-import { Mail, Lock, User, Shield, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Shield, Eye, EyeOff, Sparkles } from 'lucide-react';
 import authIllustration from '../assets/auth-illustration-new.png';
 
 export default function Login() {
@@ -209,31 +209,37 @@ export default function Login() {
           </form>
 
           {/* 1-Click Demo Login */}
-          {showDemo && (
-            <div className="pt-4 border-t border-line space-y-2">
-              <div className="text-[11px] font-semibold text-center uppercase tracking-wider text-ink-muted">
-                1-Click Demo Sign-in
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="xs"
-                  onClick={() => handleQuickFill('resident@society.com', 'Resident@123', 'resident')}
-                >
-                  Resident Demo
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="xs"
-                  onClick={() => handleQuickFill('admin@society.com', 'Admin@123', 'admin')}
-                >
-                  Admin Demo
-                </Button>
-              </div>
+          <div className="pt-4 border-t border-line space-y-3">
+            <div className="text-[11px] font-semibold text-center uppercase tracking-wider text-ink-muted flex items-center justify-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-terracotta-400" />
+              <span>1-Click Demo Sign-in</span>
             </div>
-          )}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickFill('resident@society.com', 'Resident@123', 'resident')}
+                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-line bg-paper-card hover:bg-paper-hover hover:border-terracotta-300 transition-all text-left group"
+              >
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-ink group-hover:text-terracotta-500">
+                  <User className="w-3.5 h-3.5 text-terracotta-400" />
+                  <span>Resident Demo</span>
+                </div>
+                <span className="text-[10px] text-ink-muted mt-0.5 font-mono">resident@society.com</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickFill('admin@society.com', 'Admin@123', 'admin')}
+                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-line bg-paper-card hover:bg-paper-hover hover:border-olive-400 transition-all text-left group"
+              >
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-ink group-hover:text-olive-600">
+                  <Shield className="w-3.5 h-3.5 text-olive-500" />
+                  <span>Admin Demo</span>
+                </div>
+                <span className="text-[10px] text-ink-muted mt-0.5 font-mono">admin@society.com</span>
+              </button>
+            </div>
+          </div>
 
           {/* Link to Register */}
           <div className="text-center text-xs text-ink-secondary pt-2 space-y-2">
@@ -247,15 +253,13 @@ export default function Login() {
               </Link>
             </div>
 
-            {showDemo && (
-              <button
-                type="button"
-                className="text-[11px] text-ink-muted hover:text-ink underline block mx-auto"
-                onClick={handleResetSession}
-              >
-                Clear Session
-              </button>
-            )}
+            <button
+              type="button"
+              className="text-[11px] text-ink-muted hover:text-ink underline block mx-auto pt-1"
+              onClick={handleResetSession}
+            >
+              Clear Session Cache
+            </button>
           </div>
         </div>
       </div>
