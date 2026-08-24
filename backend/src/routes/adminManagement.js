@@ -131,10 +131,17 @@ router.post('/force-seed-db', async (req, res) => {
     const { seedFromDataJson } = require('../db/syncDataJson');
     await seedFromDataJson(true);
     const countRes = await pool.query('SELECT COUNT(*) as c FROM complaints');
-    res.json({ message: 'DB seeded successfully from data.json', complaintsCount: parseInt(countRes.rows[0].c, 10) });
+    const noticesRes = await pool.query('SELECT COUNT(*) as c FROM notices');
+    const usersRes = await pool.query('SELECT COUNT(*) as c FROM users');
+    res.json({
+      message: 'DB seeded successfully from data.json',
+      complaintsCount: parseInt(countRes.rows[0].c, 10),
+      noticesCount: parseInt(noticesRes.rows[0].c, 10),
+      usersCount: parseInt(usersRes.rows[0].c, 10),
+    });
   } catch (err) {
     console.error('Force seed failed:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 

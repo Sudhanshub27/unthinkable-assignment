@@ -80,19 +80,23 @@ async function seedFromDataJson(force = false) {
     console.error('[DATA_JSON_SEED] Count check warning:', e.message);
   }
 
-  // Pure purge to avoid partial foreign key or conflict mismatches
+  // Pure purge using PostgreSQL TRUNCATE CASCADE or SQLite DELETE
   try {
-    try { await pool.query('PRAGMA foreign_keys = OFF'); } catch (e) {}
-    await pool.query('DELETE FROM complaint_history');
-    await pool.query('DELETE FROM notifications');
-    await pool.query('DELETE FROM email_logs');
-    await pool.query('DELETE FROM complaints');
-    await pool.query('DELETE FROM notices');
-    await pool.query('DELETE FROM users');
-    await pool.query('DELETE FROM settings');
-    try { await pool.query('PRAGMA foreign_keys = ON'); } catch (e) {}
-  } catch (purgeErr) {
-    console.warn('[SEED_PURGE_WARN]', purgeErr.message);
+    await pool.query('TRUNCATE TABLE complaint_history, notifications, email_logs, complaints, notices, users, settings RESTART IDENTITY CASCADE');
+  } catch (pgTruncErr) {
+    try {
+      try { await pool.query('PRAGMA foreign_keys = OFF'); } catch (e) {}
+      await pool.query('DELETE FROM complaint_history');
+      await pool.query('DELETE FROM notifications');
+      await pool.query('DELETE FROM email_logs');
+      await pool.query('DELETE FROM complaints');
+      await pool.query('DELETE FROM notices');
+      await pool.query('DELETE FROM users');
+      await pool.query('DELETE FROM settings');
+      try { await pool.query('PRAGMA foreign_keys = ON'); } catch (e) {}
+    } catch (sqliteErr) {
+      console.warn('[SEED_PURGE_WARN]', sqliteErr.message);
+    }
   }
 
   // 1. Users
@@ -157,7 +161,7 @@ async function seedFromDataJson(force = false) {
         await pool.query(
           `INSERT INTO notices (id, title, body, is_important, posted_by, created_at)
            VALUES ($1, $2, $3, $4, $5, $6)`,
-          [n.id, n.title, n.body, n.is_important ? true : false, n.posted_by, n.created_at]
+          [n.id, n.title, n.body, n.is_important ? true : false, n.posted_by || 1, n.created_at]
         );
       } catch (err) {
         console.error(`[SEED_NOTICE_ERR] #${n.id}:`, err.message);
