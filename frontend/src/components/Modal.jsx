@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export default function Modal({ isOpen, onClose, title, children, maxWidth = '680px' }) {
@@ -18,22 +19,22 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = '68
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
       onClick={onClose}
     >
       <div
-        className="bg-paper-card rounded-2xl shadow-card w-full max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto"
+        className="bg-paper-card rounded-3xl shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto animate-modal-card"
         style={{ maxWidth }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
-        <div className="px-6 py-4 border-b border-line flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-line flex items-center justify-between bg-paper-card">
           <h3 className="font-display text-lg font-bold text-ink">{title}</h3>
           <button
-            className="p-1 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-lg transition-colors"
+            className="p-1.5 text-ink-muted hover:text-ink hover:bg-paper-hover rounded-xl transition-colors cursor-pointer"
             onClick={onClose}
             aria-label="Close modal"
           >
@@ -42,6 +43,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = '68
         </div>
         <div className="p-6 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

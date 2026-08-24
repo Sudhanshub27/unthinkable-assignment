@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Lock, RotateCcw, ChevronDown, History, AlignLeft, Image as ImageIcon, User, Calendar } from 'lucide-react';
 import Timeline from './Timeline';
 import { StatusBadge, PriorityBadge, OverdueBadge } from './Badges';
@@ -105,13 +106,13 @@ export default function ComplaintDetailModal({
 
   const photoFullUrl = getPhotoUrl(complaint.photo_url);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-modal-backdrop"
       onClick={onClose}
     >
       <div
-        className="bg-paper-card rounded-2xl shadow-card w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto"
+        className="bg-paper-card rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative border border-line my-auto animate-modal-card"
         role="dialog"
         aria-modal="true"
         aria-labelledby="complaint-modal-title"
@@ -435,6 +436,7 @@ export default function ComplaintDetailModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

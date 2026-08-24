@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db/pool');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { autoMigrate } = require('../db/autoMigrate');
+const { sendEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -31,6 +32,23 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Failed to fetch email logs, serving empty array fallback:', err);
     res.json({ logs: [] });
+  }
+});
+
+// POST /api/email-logs/test (admin only)
+router.post('/test', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const testResult = await sendEmail({
+      to: 'resident@society.com',
+      recipientName: 'John Resident (Demo)',
+      subject: '[Angan Society] Test Audit Email Dispatch',
+      text: 'This is an automated test dispatch from the Administrative Audit Console to verify email delivery logs.',
+      eventType: 'Test Notification',
+    });
+    res.json({ message: 'Test email log generated successfully', result: testResult });
+  } catch (err) {
+    console.error('Failed to trigger test email:', err);
+    res.status(500).json({ error: 'Failed to dispatch test email log' });
   }
 });
 

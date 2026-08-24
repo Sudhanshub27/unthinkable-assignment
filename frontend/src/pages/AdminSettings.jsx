@@ -22,6 +22,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
+import ConfirmModal from '../components/ConfirmModal';
+
 export default function AdminSettings() {
   const { addToast } = useToast();
   const { fetchSettings } = useSettings();
@@ -38,6 +40,7 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [error, setError] = useState('');
 
   async function loadSettings() {
@@ -93,14 +96,12 @@ export default function AdminSettings() {
     }
   }
 
-  async function handleResetData() {
-    if (!window.confirm('Are you sure you want to empty all operational data (complaints, history, notices, notifications, email logs)?')) {
-      return;
-    }
+  async function handleConfirmResetData() {
     setResetting(true);
     try {
       const res = await client.post('/settings/reset-data');
       addToast(res.data.message || 'Operational data emptied successfully!', 'success');
+      setShowResetModal(false);
     } catch (err) {
       console.error(err);
       addToast(err.response?.data?.error || 'Failed to empty operational data.', 'error');
@@ -343,12 +344,12 @@ export default function AdminSettings() {
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="text-clay-600 hover:bg-clay-500/10 border-clay-500/20"
+                className="text-clay-600 hover:bg-clay-500/10 border-clay-500/20 cursor-pointer font-medium"
                 isLoading={resetting}
-                onClick={handleResetData}
+                onClick={() => setShowResetModal(true)}
                 icon={<RefreshCw className="w-3.5 h-3.5" />}
               >
-                {resetting ? 'Resetting...' : 'Empty Operational Data'}
+                Empty Operational Data
               </Button>
             </div>
           </div>
@@ -371,6 +372,19 @@ export default function AdminSettings() {
           </div>
         </form>
       )}
+
+      {/* Confirmation Modal for Resetting Operational Data */}
+      <ConfirmModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onConfirm={handleConfirmResetData}
+        title="Empty Operational Data?"
+        message="This will permanently delete all active complaints, resolution timelines, notice board posts, resident notifications, and email logs. This action cannot be undone."
+        confirmText="Empty All Data"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={resetting}
+      />
     </div>
   );
 }

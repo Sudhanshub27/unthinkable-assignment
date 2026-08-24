@@ -15,6 +15,8 @@ import {
   X,
 } from 'lucide-react';
 
+import { getUserInitials } from '../utils/formatters';
+
 export default function Topbar() {
   const { user, logout } = useAuth();
   const { settings } = useSettings();
@@ -122,10 +124,10 @@ export default function Topbar() {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-9 h-9 rounded-full bg-terracotta-400 text-white flex items-center justify-center font-semibold text-sm shadow-sm hover:opacity-90 transition-opacity focus:outline-none"
+            className="w-9 h-9 rounded-full bg-gradient-to-br from-terracotta-500 to-clay-600 text-white flex items-center justify-center font-sans font-bold text-xs shadow-sm hover:opacity-95 transition-opacity focus:outline-none tracking-wider select-none"
             aria-label="User profile menu"
           >
-            {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            {getUserInitials(user.name)}
           </button>
 
           {dropdownOpen && (

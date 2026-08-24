@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import PageHeader from '../components/PageHeader';
-import { formatFlatNumber } from '../utils/formatters';
+import { formatFlatNumber, getUserInitials } from '../utils/formatters';
 import { User, Mail, Building, Shield, Lock, Phone } from 'lucide-react';
 
 export default function Profile() {
@@ -29,8 +29,8 @@ export default function Profile() {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Profile Avatar Card */}
         <div className="bg-paper-card rounded-xl border border-line shadow-card p-6 flex items-center gap-5">
-          <div className="w-16 h-16 rounded-full bg-terracotta-400 text-white text-2xl font-display font-bold flex items-center justify-center shadow-soft shrink-0">
-            {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-terracotta-500 to-clay-600 text-white text-xl font-sans font-bold flex items-center justify-center shadow-md ring-2 ring-paper-card shrink-0 select-none tracking-wider">
+            {getUserInitials(user.name)}
           </div>
 
           <div className="space-y-1">

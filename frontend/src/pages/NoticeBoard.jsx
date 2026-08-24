@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader';
 import NoticeCard from '../components/NoticeCard';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '../components/UIComponents';
 import { SkeletonCard } from '../components/Skeletons';
 import { Plus, Pin } from 'lucide-react';
@@ -25,6 +26,10 @@ export default function NoticeBoard() {
   const [isImportant, setIsImportant] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+
+  // Delete Notice State
+  const [noticeToDelete, setNoticeToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   async function loadNotices() {
     setLoading(true);
@@ -84,16 +89,23 @@ export default function NoticeBoard() {
     }
   }
 
-  async function handleDeleteNotice(id) {
-    if (!window.confirm('Are you sure you want to delete this notice?')) return;
+  function promptDeleteNotice(id) {
+    setNoticeToDelete(id);
+  }
 
+  async function handleConfirmDeleteNotice() {
+    if (!noticeToDelete) return;
+    setDeleting(true);
     try {
-      await client.delete(`/notices/${id}`);
+      await client.delete(`/notices/${noticeToDelete}`);
       addToast('Notice deleted successfully.', 'success');
+      setNoticeToDelete(null);
       await loadNotices();
     } catch (err) {
       console.error(err);
       addToast('Failed to delete notice.', 'error');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -133,7 +145,7 @@ export default function NoticeBoard() {
             <NoticeCard
               key={n.id}
               notice={n}
-              onDelete={handleDeleteNotice}
+              onDelete={promptDeleteNotice}
               isAdmin={user?.role === 'admin'}
             />
           ))}
@@ -214,6 +226,19 @@ export default function NoticeBoard() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Notice Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(noticeToDelete)}
+        onClose={() => setNoticeToDelete(null)}
+        onConfirm={handleConfirmDeleteNotice}
+        title="Delete Announcement?"
+        message="Are you sure you want to delete this notice? This action will remove it from the notice board for all residents."
+        confirmText="Delete Notice"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={deleting}
+      />
     </div>
   );
 }

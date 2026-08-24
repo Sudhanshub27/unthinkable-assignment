@@ -36,7 +36,7 @@ export function Button({
   const variantClass = variantClasses[variant] || variantClasses.primary;
   const sizeClass = sizeClasses[size] || sizeClasses.md;
   const widthClass = isFullWidth ? 'w-full' : '';
-  const combinedClassName = `inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-terracotta-400/40 disabled:opacity-50 disabled:cursor-not-allowed ${variantClass} ${sizeClass} ${widthClass} ${className}`.trim();
+  const combinedClassName = `inline-flex flex-row items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-terracotta-400/40 disabled:opacity-50 disabled:cursor-not-allowed ${variantClass} ${sizeClass} ${widthClass} ${className}`.trim();
 
   const content = (
     <>
